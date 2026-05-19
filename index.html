@@ -1,4 +1,883 @@
-DORINI ARQUITETURA
-Gestão de Projetos
-Senha de acesso
-Entrar
+bash
+
+cat /mnt/user-data/outputs/dorini-gantt.html
+Saída
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Dorini Arquitetura — Gestão de Projetos</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#1a1a1a}
+body{padding:1.5rem;display:flex;flex-direction:column}
+
+/* LOGIN */
+#login-screen{position:fixed;inset:0;background:#fff;display:flex;align-items:center;justify-content:center;z-index:9999}
+#login-box{display:flex;flex-direction:column;align-items:center;gap:18px;width:300px;max-width:90vw}
+#login-box .lt{font-size:11px;font-weight:600;letter-spacing:.14em;color:#aaa;text-transform:uppercase}
+#login-box .ls{font-size:21px;font-weight:300}
+#login-box input{width:100%;padding:11px 14px;font-size:14px;border:.5px solid #ddd;border-radius:10px;outline:none;background:#fafafa;transition:border-color .15s}
+#login-box input:focus{border-color:#1a1a1a;background:#fff}
+#login-box input.err{border-color:#E24B4A}
+#login-box button{width:100%;padding:11px;background:#1a1a1a;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer}
+#login-box button:hover{opacity:.85}
+#login-box .lerr{font-size:12px;color:#E24B4A;min-height:15px;text-align:center}
+
+/* APP */
+#app{width:100%;flex:1;display:flex;flex-direction:column;min-height:0}
+.toolbar{display:flex;align-items:center;gap:6px;margin-bottom:1rem;flex-wrap:wrap;flex-shrink:0}
+#studio-name{font-size:11px;font-weight:600;letter-spacing:.12em;color:#aaa;text-transform:uppercase}
+#range-label{font-size:12px;color:#666}
+.btn{font-size:12px;padding:5px 10px;border:.5px solid #ccc;border-radius:8px;background:transparent;color:#1a1a1a;cursor:pointer;line-height:1.4;white-space:nowrap}
+.btn:hover{background:#f5f5f5}
+.btn.active,.btn-primary{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+.btn-primary:hover,.btn.active:hover{opacity:.85}
+
+/* GANTT LAYOUT */
+.gantt-outer{border:.5px solid #e0e0e0;border-radius:12px;overflow:hidden;display:flex;flex-direction:column;flex:1;min-height:0}
+.gantt-header-row{display:flex;border-bottom:.5px solid #e0e0e0;flex-shrink:0}
+.fixed-head{flex-shrink:0;background:#f9f9f7;border-right:.5px solid #d0d0d0}
+.scroll-head-wrap{flex:1;overflow:hidden;min-width:0}
+.scroll-head{overflow:hidden}
+.gantt-body-area{display:flex;flex:1;min-height:0}
+.fixed-body{flex-shrink:0;border-right:.5px solid #d0d0d0;overflow:hidden}
+.scroll-body-wrap{flex:1;overflow:auto;min-width:0;-webkit-overflow-scrolling:touch}
+.scroll-body{position:relative}
+
+/* TABLES */
+.fixed-head table,.fixed-body table,.scroll-head table,.scroll-body table{border-collapse:collapse;table-layout:fixed}
+thead th{font-size:11px;font-weight:500;color:#888;padding:6px 8px;background:#f9f9f7;text-align:left;white-space:nowrap;overflow:hidden}
+thead th.c{text-align:center}
+.gh{border-right:.5px solid #e0e0e0}
+tbody tr{border-bottom:.5px solid #ebebeb}
+tbody tr:last-child{border-bottom:none}
+.pr:hover td,.sr td{background:#f9f9f7}
+td{padding:4px 8px;vertical-align:middle;font-size:12px;overflow:hidden;height:36px}
+
+/* NAMES */
+.name-cell{display:flex;align-items:center;gap:4px}
+.tog{background:none;border:none;cursor:pointer;color:#999;padding:0;font-size:11px;width:16px;text-align:center;flex-shrink:0}
+.nm{font-weight:500;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.nm:hover{color:#185FA5}
+.ow{font-size:10px;color:#aaa;flex-shrink:0;margin-left:2px;white-space:nowrap}
+.sn{font-size:12px;color:#888;padding-left:22px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;display:block}
+.sn:hover{color:#1a1a1a}
+.asb{font-size:11px;padding:2px 7px;border:.5px dashed #ccc;border-radius:8px;background:transparent;color:#aaa;cursor:pointer;margin-left:22px}
+.asb:hover{background:#fff;color:#1a1a1a}
+
+/* STATUS */
+.sb{font-size:10px;padding:2px 6px;border-radius:20px;white-space:nowrap;display:inline-block}
+.s-ok{background:#EAF3DE;color:#3B6D11}
+.s-prog{background:#E6F1FB;color:#185FA5}
+.s-wait{background:#F1EFE8;color:#5F5E5A}
+.s-late{background:#FCEBEB;color:#A32D2D}
+
+/* BARS */
+.bar-cell{position:relative;padding:0;overflow:hidden}
+.bar-inner{position:relative;height:36px;overflow:hidden}
+.bar{position:absolute;top:50%;transform:translateY(-50%);height:18px;border-radius:4px;cursor:grab;user-select:none;display:flex;align-items:center;padding:0 6px;font-size:11px;font-weight:500;white-space:nowrap;z-index:2}
+.bar:active{cursor:grabbing;opacity:.8}
+.hl,.hr{position:absolute;top:0;bottom:0;width:6px;cursor:ew-resize;z-index:3}
+.hl{left:0}.hr{right:0}
+.tl{position:absolute;top:0;bottom:0;width:1.5px;background:#D85A30;pointer-events:none;z-index:4}
+.gl{position:absolute;top:0;bottom:0;width:.5px;background:#ebebeb;pointer-events:none}
+
+/* ARROWS */
+#arrow-svg{position:absolute;top:0;left:0;pointer-events:none;overflow:visible}
+.al{stroke:#bbb;stroke-width:1.5;fill:none;stroke-dasharray:5,3}
+.ah{fill:#bbb}
+
+/* MOBILE */
+@media(max-width:600px){.col-st,.ow{display:none}body{padding:.75rem}}
+
+/* MODAL */
+#modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;z-index:9999}
+.modal{background:#fff;border:.5px solid #ccc;border-radius:12px;padding:1.5rem;width:360px;max-width:92vw;box-shadow:0 8px 32px rgba(0,0,0,.12)}
+.modal h3{font-size:14px;font-weight:600;margin-bottom:1.25rem}
+.field{margin-bottom:12px}
+.field label{font-size:11px;color:#888;display:block;margin-bottom:4px;font-weight:500}
+.field input,.field select{width:100%;padding:8px 10px;font-size:13px;border:.5px solid #ccc;border-radius:8px;background:#fff;color:#1a1a1a;outline:none}
+.field input:focus,.field select:focus{border-color:#1a1a1a}
+.frow{display:flex;gap:10px}.frow .field{flex:1}
+.mact{display:flex;gap:8px;justify-content:flex-end;margin-top:1.25rem}
+.del-btn{margin-right:auto;color:#A32D2D;border:.5px solid #F7C1C1;background:transparent;font-size:12px;padding:6px 12px;border-radius:8px;cursor:pointer}
+.del-btn:hover{background:#FCEBEB}
+.tpl-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;padding:7px 10px;background:#f9f9f7;border-radius:8px;border:.5px solid #ebebeb}
+.tpl-row input[type=number]{width:60px;padding:5px 8px;font-size:12px;border:.5px solid #ccc;border-radius:6px;text-align:center}
+.tpl-dates{font-size:11px;color:#aaa;white-space:nowrap;min-width:90px}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div id="login-box">
+    <div class="lt">DORINI ARQUITETURA</div>
+    <div class="ls">Gestão de Projetos</div>
+    <input id="li" type="password" placeholder="Senha de acesso"/>
+    <button onclick="doLogin()">Entrar</button>
+    <div class="lerr" id="lerr"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none">
+  <div class="toolbar">
+    <div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:80px;overflow:hidden">
+      <span id="studio-name">DORINI ARQUITETURA</span>
+      <span id="range-label"></span>
+    </div>
+    <button class="btn" id="sc-day"   onclick="setScale('day')">Dia</button>
+    <button class="btn" id="sc-week"  onclick="setScale('week')">Semana</button>
+    <button class="btn" id="sc-month" onclick="setScale('month')">Mês</button>
+    <button class="btn" onclick="shiftView(-1)">&#8249;</button>
+    <button class="btn" onclick="goToday()">Hoje</button>
+    <button class="btn" onclick="shiftView(1)">&#8250;</button>
+    <button class="btn btn-primary" onclick="openModal('project',null,null)">+ Projeto</button>
+  </div>
+  <div class="gantt-outer">
+    <div class="gantt-header-row">
+      <div class="fixed-head" id="fh"><table><thead id="fhr"></thead></table></div>
+      <div class="scroll-head-wrap">
+        <div class="scroll-head" id="sh"><table id="ht"><thead id="gh"></thead></table></div>
+      </div>
+    </div>
+    <div class="gantt-body-area">
+      <div class="fixed-body" id="fb"><table id="fbt"><tbody id="fbr"></tbody></table></div>
+      <div class="scroll-body-wrap" id="sbw">
+        <div class="scroll-body" id="sb">
+          <table id="sbt"><tbody id="sbr"></tbody></table>
+          <svg id="arrow-svg"></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div id="modal-overlay" style="display:none">
+  <div class="modal">
+    <h3 id="modal-title"></h3>
+    <div class="field" id="f-tipo-wrap">
+      <label>Tipo de projeto</label>
+      <div style="display:flex;gap:8px;margin-top:2px">
+        <button class="btn active" id="btn-blank" onclick="setTipo('blank')" style="flex:1">Em branco</button>
+        <button class="btn" id="btn-tpl" onclick="setTipo('template')" style="flex:1">Padrão &#9733;</button>
+      </div>
+    </div>
+    <div id="f-standard">
+      <div class="field"><label>Nome</label><input id="f-name" type="text"/></div>
+      <div class="field"><label>Início</label><input id="f-start" type="date" oninput="calcEnd()"/></div>
+      <div class="frow">
+        <div class="field"><label>Duração (dias)</label><input id="f-dur" type="number" min="1" placeholder="30" oninput="calcEnd()"/></div>
+        <div class="field"><label>Término</label><input id="f-end" type="date" oninput="calcDur()"/></div>
+      </div>
+      <div class="field"><label>Status</label>
+        <select id="f-status">
+          <option value="prog">Em andamento</option>
+          <option value="ok">Concluído</option>
+          <option value="wait">Aguardando</option>
+          <option value="late">Atrasado</option>
+        </select>
+      </div>
+      <div class="field" id="f-owner-wrap"><label>Responsável</label><input id="f-owner" type="text"/></div>
+      <div class="field"><label>Predecessora</label><select id="f-pred" onchange="applyPred()"><option value="">— Nenhuma —</option></select></div>
+    </div>
+    <div id="f-template" style="display:none">
+      <div class="field"><label>Nome do Projeto</label><input id="t-name" type="text"/></div>
+      <div class="frow">
+        <div class="field"><label>Responsável</label><input id="t-owner" type="text"/></div>
+        <div class="field"><label>Início</label><input id="t-start" type="date" oninput="calcTemplate()"/></div>
+      </div>
+      <div style="margin:12px 0 6px;font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.08em">Subtarefas</div>
+      <div id="tpl-subs"></div>
+      <p style="font-size:11px;color:#aaa;margin-top:6px">&#8617; Datas calculadas automaticamente pelas predecessoras.</p>
+    </div>
+    <div class="mact">
+      <button class="del-btn" id="btn-del" style="display:none" onclick="deleteItem()">&#10005; Excluir</button>
+      <button class="btn" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveItem()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+// ── CONSTANTS ─────────────────────────────────────────────
+const PWD = '@Gantt26';
+const STORAGE_KEY = 'dorini_gantt_v2';
+const COLORS = {prog:['#B5D4F4','#042C53'],ok:['#C0DD97','#173404'],wait:['#D3D1C7','#2C2C2A'],late:['#F7C1C1','#501313']};
+const SUB_COLORS = {prog:'#378ADD',ok:'#5A9020',wait:'#888780',late:'#E24B4A'};
+const SL = {prog:'Em andamento',ok:'Concluído',wait:'Aguardando',late:'Atrasado'};
+const SC = {prog:'s-prog',ok:'s-ok',wait:'s-wait',late:'s-late'};
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+// ── STATE ─────────────────────────────────────────────────
+let projects=[], collapsed={}, viewStart=null, scale='week';
+let _mode=null, _pid=null, _sid=null, drag=null;
+let _tipo='blank', tplSubs=[];
+
+// ── DOM CACHE ─────────────────────────────────────────────
+const D = id => document.getElementById(id);
+const EL = {};
+['fh','fhr','sh','ht','gh','fb','fbt','fbr','sbw','sb','sbt','sbr','arrow-svg',
+ 'range-label','modal-overlay','modal-title','btn-del','f-name','f-start','f-end',
+ 'f-dur','f-status','f-owner','f-owner-wrap','f-pred','app','li','lerr',
+ 'sc-day','sc-week','sc-month'].forEach(id=>EL[id]=D(id));
+
+// ── UTILS ─────────────────────────────────────────────────
+const toIso = d => new Date(d).toISOString().slice(0,10);
+const daysDiff = (a,b) => Math.round((new Date(b)-new Date(a))/86400000);
+const appW = () => EL['app'].offsetWidth || window.innerWidth || 1200;
+const addDays = (iso, n) => { const d=new Date(iso); d.setDate(d.getDate()+n); return toIso(d); };
+
+// ── SCALE / LAYOUT ────────────────────────────────────────
+function colWidths(){
+  const w=appW();
+  if(w<500) return {name:140,status:0};
+  if(w<700) return {name:160,status:0};
+  return {name:185,status:95};
+}
+function scaleCfg(){
+  const w=appW(), cols=colWidths();
+  const avail=Math.max(w-cols.name-cols.status-2, 200);
+  const mob=w<500;
+  const [du,wu,mu]=[mob?20:30, mob?16:24, 12];
+  return {
+    day:  {ud:1,  px:Math.max(mob?22:28, avail/du), u:du,
+           fmtU:d=>d.getDate()+'',
+           fmtG:d=>d.toLocaleDateString('pt-BR',{month:'short',year:'numeric'}), gb:'month'},
+    week: {ud:7,  px:Math.max(mob?38:52, avail/wu), u:wu,
+           fmtU:d=>d.getDate()+'/'+(d.getMonth()+1+'').padStart(2,'0'),
+           fmtG:d=>d.toLocaleDateString('pt-BR',{month:'short',year:'numeric'}), gb:'month'},
+    month:{ud:30, px:Math.max(mob?52:64, avail/mu), u:mu,
+           fmtU:d=>d.toLocaleDateString('pt-BR',{month:'short'}),
+           fmtG:d=>''+d.getFullYear(), gb:'year'}
+  };
+}
+function getUnits(){
+  const c=scaleCfg()[scale], units=[];
+  let cur=new Date(viewStart);
+  for(let i=0;i<c.u;i++){units.push(new Date(cur));cur.setDate(cur.getDate()+c.ud);}
+  return units;
+}
+function pxFor(date, units){
+  const c=scaleCfg()[scale];
+  return daysDiff(units[0], date)*(c.px/c.ud);
+}
+function buildGroups(units){
+  const c=scaleCfg()[scale], g=[];
+  units.forEach(u=>{
+    const key=c.gb==='month'?u.getFullYear()*100+u.getMonth():u.getFullYear();
+    if(!g.length||g[g.length-1].key!==key) g.push({key, lbl:c.fmtG(u), n:1});
+    else g[g.length-1].n++;
+  });
+  return g;
+}
+
+// ── DATA ──────────────────────────────────────────────────
+function defProjects(){
+  const y=new Date().getFullYear();
+  return [
+    {id:1,name:'Residência Silva',  start:`${y}-01-15`,end:`${y}-05-30`,status:'ok',  owner:'Ana P.',   pred:null,subs:[
+      {id:11,name:'Levantamento',   start:`${y}-01-15`,end:`${y}-02-10`,status:'ok',  pred:null},
+      {id:12,name:'Projeto arq.',   start:`${y}-02-11`,end:`${y}-04-15`,status:'ok',  pred:null},
+      {id:13,name:'Aprovação',      start:`${y}-04-16`,end:`${y}-05-30`,status:'ok',  pred:null}]},
+    {id:2,name:'Comercial Centro', start:`${y}-03-01`,end:`${y}-09-15`,status:'prog',owner:'Carlos M.',pred:null,subs:[
+      {id:21,name:'Estudo prelim.', start:`${y}-03-01`,end:`${y}-04-20`,status:'ok',  pred:null},
+      {id:22,name:'Anteprojeto',    start:`${y}-04-21`,end:`${y}-07-01`,status:'prog',pred:null},
+      {id:23,name:'Proj. executivo',start:`${y}-07-02`,end:`${y}-09-15`,status:'wait',pred:null}]},
+    {id:3,name:'Reforma Cobertura',start:`${y}-04-10`,end:`${y}-07-20`,status:'prog',owner:'Ana P.',   pred:null,subs:[]},
+    {id:4,name:'Condomínio Leste', start:`${y}-06-01`,end:`${y+1}-02-28`,status:'wait',owner:'Rafael S.',pred:null,subs:[
+      {id:41,name:'Viabilidade',    start:`${y}-06-01`,end:`${y}-08-15`,status:'wait',pred:null}]},
+    {id:5,name:'Interiores Apt 42',start:`${y}-02-20`,end:`${y}-04-15`,status:'late',owner:'Julia R.', pred:null,subs:[]}
+  ];
+}
+function load(){
+  try{
+    const d=JSON.parse(localStorage.getItem(STORAGE_KEY)||'');
+    projects=d.projects; collapsed=d.collapsed||{}; scale=d.scale||'week';
+  }catch{ projects=defProjects(); collapsed={}; }
+  if(!viewStart) initView();
+}
+function save(){ localStorage.setItem(STORAGE_KEY,JSON.stringify({projects,collapsed,scale})); }
+function initView(){
+  const all=projects.flatMap(p=>[new Date(p.start),...(p.subs||[]).map(s=>new Date(s.start))]);
+  const m=all.length?new Date(Math.min(...all)):new Date();
+  if(scale==='day'){viewStart=new Date(m);viewStart.setDate(viewStart.getDate()-3);}
+  else if(scale==='week') viewStart=new Date(m.getFullYear(),m.getMonth()-1,1);
+  else viewStart=new Date(m.getFullYear(),0,1);
+}
+function getItem(pid,sid){
+  const p=projects.find(x=>x.id===pid); if(!p) return null;
+  return sid==null?p:(p.subs||[]).find(s=>s.id===sid)||null;
+}
+function getItemByKey(key){
+  if(!key) return null;
+  if(key.startsWith('p_')) return projects.find(x=>x.id===+key.slice(2))||null;
+  const [,pid,sid]=key.split('_');
+  const p=projects.find(x=>x.id===+pid);
+  return p?(p.subs||[]).find(s=>s.id===+sid)||null:null;
+}
+function flatList(excludeKey){
+  const list=[];
+  projects.forEach(p=>{
+    if('p_'+p.id!==excludeKey) list.push({key:'p_'+p.id,label:p.name});
+    (p.subs||[]).forEach(s=>{
+      const k='s_'+p.id+'_'+s.id;
+      if(k!==excludeKey) list.push({key:k,label:p.name+' › '+s.name});
+    });
+  });
+  return list;
+}
+
+// ── PROJECT DATE SYNC ─────────────────────────────────────
+// Project start/end always derives from its subtasks
+function syncProjectDates(pid){
+  const p=projects.find(x=>x.id===pid); if(!p) return;
+  const subs=p.subs||[]; if(!subs.length) return;
+  p.start=subs.reduce((m,s)=>s.start<m?s.start:m, subs[0].start);
+  p.end  =subs.reduce((m,s)=>s.end  >m?s.end  :m, subs[0].end);
+}
+
+// Cascade subtask successors within a project (BFS)
+function cascadeSubSuccessors(pid, movedSid){
+  const p=projects.find(x=>x.id===pid); if(!p) return;
+  const subs=p.subs||[];
+  // Build pred→successors map
+  const map={};
+  subs.forEach(s=>{ if(s.pred){(map[s.pred]=map[s.pred]||[]).push(s);} });
+  const q=['s_'+pid+'_'+movedSid], seen=new Set();
+  while(q.length){
+    const key=q.shift(); if(seen.has(key)){continue;} seen.add(key);
+    (map[key]||[]).forEach(succ=>{
+      const pred=getItemByKey(key); if(!pred) return;
+      const dur=daysDiff(succ.start,succ.end);
+      succ.start=addDays(pred.end,1);
+      succ.end  =addDays(succ.start,dur);
+      q.push('s_'+pid+'_'+succ.id);
+    });
+  }
+}
+
+// Cascade successor projects recursively (DFS via recursion)
+function cascadeProjectSuccessors(movedKey, seen=new Set()){
+  if(seen.has(movedKey)) return; seen.add(movedKey);
+  const pred=getItemByKey(movedKey); if(!pred) return;
+  projects.forEach(proj=>{
+    if(proj.pred!==movedKey) return;
+    const delta=daysDiff(proj.start,addDays(pred.end,1));
+    (proj.subs||[]).forEach(s=>{s.start=addDays(s.start,delta);s.end=addDays(s.end,delta);});
+    if(proj.subs?.length) syncProjectDates(proj.id);
+    else{proj.start=addDays(pred.end,1);proj.end=addDays(proj.start,daysDiff(proj.start,proj.end));}
+    cascadeProjectSuccessors('p_'+proj.id, seen);
+  });
+}
+
+// After any subtask change: cascade subs → sync project → cascade projects
+function afterSubChange(pid, movedSid){
+  cascadeSubSuccessors(pid, movedSid);
+  syncProjectDates(pid);
+  cascadeProjectSuccessors('p_'+pid);
+}
+
+// ── LOGIN ─────────────────────────────────────────────────
+function doLogin(){
+  if(EL['li'].value===PWD){
+    sessionStorage.setItem('da','1');
+    D('login-screen').style.display='none';
+    EL['app'].style.display='flex';
+    load(); updateScaleBtns(); render();
+  }else{
+    EL['lerr'].textContent='Senha incorreta.';
+    EL['li'].classList.add('err'); EL['li'].value='';
+    setTimeout(()=>EL['li'].classList.remove('err'),400);
+  }
+}
+EL['li'].addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
+if(sessionStorage.getItem('da')==='1'){
+  D('login-screen').style.display='none';
+  EL['app'].style.display='flex';
+}
+
+// ── NAVIGATION ────────────────────────────────────────────
+function setScale(s){
+  // Calcula o dia exato que está no centro da tela (considerando scroll)
+  const oldCfg=scaleCfg()[scale];
+  const ppdOld=oldCfg.px/oldCfg.ud;
+  const vpx=EL['sbw'].offsetWidth||300;
+  const scrollLeft=EL['sbw'].scrollLeft||0;
+  const centerDays=(scrollLeft+vpx/2)/ppdOld;
+  const centerDate=new Date(+viewStart+Math.round(centerDays)*864e5);
+
+  scale=s;
+  const newCfg=scaleCfg()[scale];
+  const ppdNew=newCfg.px/newCfg.ud;
+  const newHalfDays=Math.round(vpx/2/ppdNew);
+  viewStart=new Date(+centerDate-newHalfDays*864e5);
+
+  updateScaleBtns(); save(); render();
+
+  // Garante scroll zerado (centerDate já está centrado via viewStart)
+  setTimeout(()=>{ EL['sbw'].scrollLeft=0; EL['sh'].scrollLeft=0; },0);
+}
+function shiftView(dir){ const c=scaleCfg()[scale]; viewStart=new Date(+viewStart+dir*c.ud*864e5); render(); }
+function goToday(){
+  const c=scaleCfg()[scale], vpx=EL['sbw'].offsetWidth||300;
+  const hd=Math.floor(vpx/2/(c.px/c.ud));
+  const today=new Date(); today.setHours(0,0,0,0);
+  viewStart=new Date(today); viewStart.setDate(viewStart.getDate()-hd);
+  render();
+  setTimeout(()=>{
+    const tp=pxFor(today,getUnits());
+    const sc=Math.max(0,tp-vpx/2);
+    EL['sbw'].scrollLeft=sc; EL['sh'].scrollLeft=sc;
+  },50);
+}
+function updateScaleBtns(){
+  ['day','week','month'].forEach(k=>EL['sc-'+k].classList.toggle('active',k===scale));
+}
+
+// ── RENDER ────────────────────────────────────────────────
+function render(){
+  const cfg=scaleCfg()[scale], cols=colWidths();
+  const showSt=cols.status>0, fixedW=cols.name+cols.status;
+  const units=getUnits(), totalPx=units.length*cfg.px;
+  const lastDate=new Date(units[units.length-1]); lastDate.setDate(lastDate.getDate()+cfg.ud-1);
+  const today=new Date(); today.setHours(0,0,0,0);
+  const todayPx=pxFor(today,units);
+  const groups=buildGroups(units);
+
+  EL['range-label'].textContent=
+    units[0].toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'})+' – '+
+    lastDate.toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'});
+
+  EL['fhr'].innerHTML=
+    `<tr><th style="width:${cols.name}px">Projeto / Tarefa</th>${showSt?`<th style="width:${cols.status}px">Status</th>`:''}</tr>`+
+    `<tr><th></th>${showSt?'<th></th>':''}</tr>`;
+
+  EL['gh'].innerHTML=
+    `<tr>${groups.map(g=>`<th class="gh c" colspan="${g.n}">${g.lbl}</th>`).join('')}</tr>`+
+    `<tr>${units.map((u,i)=>{
+      const ng=i<units.length-1&&buildGroups([units[i],units[i+1]]).length>1;
+      return`<th class="c${ng?' gh':''}" style="width:${cfg.px}px">${cfg.fmtU(u)}</th>`;
+    }).join('')}</tr>`;
+  EL['ht'].style.cssText=`min-width:${totalPx}px;width:100%`;
+
+  const todayLine=todayPx>=0&&todayPx<=totalPx?`<div class="tl" style="left:${todayPx}px"></div>`:'';
+  const gridLines=units.map((_,i)=>`<div class="gl" style="left:${i*cfg.px}px"></div>`).join('');
+
+  let fRows='', sRows='';
+
+  function row(isProj,isSub,p,s){
+    const rc=isProj?'pr':'sr';
+    let nc='', stc='';
+    if(isProj){
+      const subs=p.subs||[], open=!collapsed[p.id];
+      nc=`<div class="name-cell">
+        <button class="tog" onclick="toggleCollapse(${p.id})">${subs.length?(open?'&#9660;':'&#9654;'):'&ndash;'}</button>
+        <span class="nm" onclick="openModal('project',${p.id},null)" title="${p.name}">${p.name}</span>
+        ${p.owner?`<span class="ow">${p.owner}</span>`:''}
+      </div>`;
+      stc=`<span class="sb ${SC[p.status]}">${SL[p.status]}</span>`;
+    }else if(isSub){
+      nc=`<span class="sn" onclick="openModal('sub',${p.id},${s.id})" title="${s.name}">${s.name}</span>`;
+      stc=`<span class="sb ${SC[s.status]}">${SL[s.status]}</span>`;
+    }else{
+      nc=`<button class="asb" onclick="openModal('sub',${p.id},null)">+ subtarefa</button>`;
+    }
+    fRows+=`<tr class="${rc}"><td style="width:${cols.name}px;max-width:${cols.name}px">${nc}</td>${showSt?`<td class="col-st" style="width:${cols.status}px">${stc}</td>`:''}</tr>`;
+
+    let bar='';
+    if(isProj){
+      const lx=pxFor(p.start,units), rx=pxFor(new Date(+new Date(p.end)+864e5),units);
+      const w=Math.max(8,rx-lx), vis=new Date(p.end)>=units[0]&&new Date(p.start)<=lastDate;
+      const [bg,fg]=COLORS[p.status]||COLORS.wait;
+      bar=vis?`<div class="bar" data-pid="${p.id}" style="left:${lx}px;width:${w}px;background:${bg};color:${fg}">
+        <div class="hl" data-pid="${p.id}" data-side="l"></div>
+        <span style="pointer-events:none;overflow:hidden;text-overflow:ellipsis">${p.name}</span>
+        <div class="hr" data-pid="${p.id}" data-side="r"></div>
+      </div>`:'';
+    }else if(isSub){
+      const lx=pxFor(s.start,units), rx=pxFor(new Date(+new Date(s.end)+864e5),units);
+      const w=Math.max(6,rx-lx), vis=new Date(s.end)>=units[0]&&new Date(s.start)<=lastDate;
+      const done=s.status==='ok';
+      const bg=done?'#C0DD97':SUB_COLORS[s.status]||SUB_COLORS.wait;
+      const fg=done?'#173404':'#fff';
+      const dur=daysDiff(s.start,s.end)+1;
+      bar=vis?`<div class="bar" data-pid="${p.id}" data-sid="${s.id}" style="left:${lx}px;width:${w}px;background:${bg};color:${fg};height:12px">
+        <div class="hl" data-pid="${p.id}" data-sid="${s.id}" data-side="l"></div>
+        ${done?'<span style="pointer-events:none;font-size:9px;flex-shrink:0">&#10003;</span>':''}
+        ${w>28?`<span style="pointer-events:none;font-size:9px;opacity:.85;flex:1;text-align:center">${dur}d</span>`:''}
+        <div class="hr" data-pid="${p.id}" data-sid="${s.id}" data-side="r"></div>
+      </div>`:'';
+    }
+    sRows+=`<tr class="${rc}"><td class="bar-cell" style="min-width:${totalPx}px;width:100%"><div class="bar-inner">${gridLines}${todayLine}${bar}</div></td></tr>`;
+  }
+
+  projects.forEach(p=>{
+    row(true,false,p,null);
+    if(!collapsed[p.id]){(p.subs||[]).forEach(s=>row(false,true,p,s));row(false,false,p,null);}
+  });
+
+  EL['fbt'].style.width=fixedW+'px';
+  EL['sbt'].style.cssText=`min-width:${totalPx}px;width:100%`;
+  EL['fbr'].innerHTML=fRows; EL['sbr'].innerHTML=sRows;
+  syncHeights(); drawArrows(units,totalPx); bindDrag();
+}
+
+// ── SYNC HEIGHTS ──────────────────────────────────────────
+function syncHeights(){
+  const fr=EL['fbr'].rows, sr=EL['sbr'].rows;
+  for(let i=0;i<Math.min(fr.length,sr.length);i++){
+    const h=Math.max(fr[i].offsetHeight,sr[i].offsetHeight);
+    fr[i].style.height=h+'px'; sr[i].style.height=h+'px';
+  }
+  const fh=EL['fh'].querySelector('table'), sh=EL['ht'];
+  const hh=Math.max(fh.offsetHeight,sh.offsetHeight);
+  fh.style.height=hh+'px'; sh.style.height=hh+'px';
+}
+
+// ── ARROWS ────────────────────────────────────────────────
+function drawArrows(units,totalPx){
+  const svg=EL['arrow-svg'];
+  svg.innerHTML='';
+  svg.setAttribute('width',totalPx);
+  svg.setAttribute('height',EL['sbt'].offsetHeight);
+  if(!projects.some(p=>p.pred||(p.subs||[]).some(s=>s.pred))) return;
+
+  const rowMap={};let ri=0;
+  projects.forEach(p=>{
+    rowMap['p_'+p.id]=ri++;
+    if(!collapsed[p.id]){(p.subs||[]).forEach(s=>{rowMap['s_'+p.id+'_'+s.id]=ri++;});ri++;}
+  });
+  const rows=EL['sbr'].rows;
+  const yPos=[]; let acc=0;
+  for(let i=0;i<rows.length;i++){const h=rows[i].offsetHeight||36;yPos[i]=acc+h/2;acc+=h;}
+
+  const flat=[];
+  projects.forEach(p=>{
+    flat.push({key:'p_'+p.id,item:p});
+    if(!collapsed[p.id])(p.subs||[]).forEach(s=>flat.push({key:'s_'+p.id+'_'+s.id,item:s}));
+  });
+
+  flat.forEach(({key,item})=>{
+    if(!item.pred) return;
+    const pred=getItemByKey(item.pred); if(!pred) return;
+    const fr=rowMap[item.pred],tr=rowMap[key];
+    if(fr==null||tr==null||fr>=rows.length||tr>=rows.length) return;
+    const y1=yPos[fr],y2=yPos[tr]; if(y1==null||y2==null) return;
+    const x1=pxFor(new Date(+new Date(pred.end)+864e5),units);
+    const x2=pxFor(new Date(item.start),units);
+    const d=x2>x1+10
+      ?`M${x1},${y1} H${(x1+x2)/2} V${y2} H${x2}`
+      :`M${x1},${y1} H${x1+14} V${(y1+y2)/2} H${x2-14} V${y2} H${x2}`;
+    const path=document.createElementNS(SVG_NS,'path');
+    path.setAttribute('d',d);path.setAttribute('class','al');svg.appendChild(path);
+    const arr=document.createElementNS(SVG_NS,'polygon');
+    arr.setAttribute('points',`${x2},${y2} ${x2-7},${y2-4} ${x2-7},${y2+4}`);
+    arr.setAttribute('class','ah');svg.appendChild(arr);
+  });
+}
+
+// ── DRAG ──────────────────────────────────────────────────
+function bindDrag(){
+  document.querySelectorAll('.bar').forEach(bar=>{
+    bar.onmousedown=bar.ontouchstart=e=>{
+      const isTouch=e.type==='touchstart';
+      if(!isTouch) e.preventDefault();
+      if(e.target.classList.contains('hl')||e.target.classList.contains('hr')) return;
+      const pid=+bar.dataset.pid, sid=bar.dataset.sid?+bar.dataset.sid:null;
+      const item=getItem(pid,sid); if(!item) return;
+      const subOrig=sid?null:(item.subs||[]).map(s=>({id:s.id,start:s.start,end:s.end}));
+      drag={pid,sid,mode:'move',sx:(isTouch?e.touches[0]:e).clientX,os:item.start,oe:item.end,subOrig};
+    };
+  });
+  document.querySelectorAll('.hl,.hr').forEach(h=>{
+    h.onmousedown=h.ontouchstart=e=>{
+      const isTouch=e.type==='touchstart';
+      if(!isTouch) e.preventDefault();
+      e.stopPropagation();
+      const pid=+h.dataset.pid, sid=h.dataset.sid?+h.dataset.sid:null;
+      const item=getItem(pid,sid); if(!item) return;
+      drag={pid,sid,mode:h.dataset.side,sx:(isTouch?e.touches[0]:e).clientX,os:item.start,oe:item.end};
+    };
+  });
+}
+
+function applyDrag(clientX){
+  if(!drag) return;
+  const c=scaleCfg()[scale];
+  const days=Math.round((clientX-drag.sx)/(c.px/c.ud));
+  const item=getItem(drag.pid,drag.sid); if(!item) return;
+
+  if(drag.mode==='move'){
+    item.start=addDays(drag.os,days); item.end=addDays(drag.oe,days);
+    if(!drag.sid){
+      // Project drag: shift all subtasks by same delta
+      drag.subOrig?.forEach(o=>{
+        const s=(item.subs||[]).find(x=>x.id===o.id); if(!s) return;
+        s.start=addDays(o.start,days); s.end=addDays(o.end,days);
+      });
+      syncProjectDates(drag.pid);
+      cascadeProjectSuccessors('p_'+drag.pid);
+    }else{
+      afterSubChange(drag.pid,drag.sid);
+    }
+  }else if(drag.mode==='l'){
+    const ns=addDays(drag.os,days);
+    if(ns<drag.oe){ item.start=ns; if(drag.sid) afterSubChange(drag.pid,drag.sid); }
+  }else{
+    const ne=addDays(drag.oe,days);
+    if(ne>drag.os){ item.end=ne; if(drag.sid) afterSubChange(drag.pid,drag.sid); }
+  }
+  render();
+}
+
+window.addEventListener('mousemove', e=>{ if(drag) applyDrag(e.clientX); });
+window.addEventListener('mouseup',   ()=>{ if(drag){save();drag=null;} });
+window.addEventListener('touchmove', e=>{ if(drag) applyDrag(e.touches[0].clientX); },{passive:true});
+window.addEventListener('touchend',  ()=>{ if(drag){save();drag=null;} });
+
+// ── HEADER PAN ────────────────────────────────────────────
+(()=>{
+  const head=EL['sh']; let pan=null;
+  head.style.cursor='grab';
+  const start=cx=>{ const c=scaleCfg()[scale]; pan={cx,vs:new Date(viewStart),ppd:c.px/c.ud}; head.style.cursor='grabbing'; };
+  const move=cx=>{ if(!pan) return; viewStart=new Date(+pan.vs+Math.round(-(cx-pan.cx)/pan.ppd)*864e5); render(); };
+  const end=()=>{ if(pan){pan=null;head.style.cursor='grab';} };
+  head.addEventListener('mousedown',e=>{start(e.clientX);e.preventDefault();});
+  window.addEventListener('mousemove',e=>{if(pan)move(e.clientX);});
+  window.addEventListener('mouseup',end);
+  head.addEventListener('touchstart',e=>start(e.touches[0].clientX),{passive:true});
+  window.addEventListener('touchmove',e=>{if(pan)move(e.touches[0].clientX);},{passive:true});
+  window.addEventListener('touchend',end);
+})();
+
+// ── SCROLL SYNC + WHEEL ───────────────────────────────────
+EL['sbw'].addEventListener('scroll',function(){
+  EL['sh'].scrollLeft=this.scrollLeft;
+  EL['fb'].scrollTop=this.scrollTop;
+});
+
+let wheelTimer=null;
+function handleWheel(e, scrollVertical){
+  const ax=Math.abs(e.deltaX), ay=Math.abs(e.deltaY);
+  if(ax>2&&ax>ay){
+    // Trackpad 2-finger horizontal → navigate timeline
+    e.preventDefault();
+    const days=Math.round(e.deltaX/(scaleCfg()[scale].px/scaleCfg()[scale].ud));
+    if(!days) return;
+    const sx=EL['sbw'].scrollLeft;
+    viewStart=new Date(+viewStart+days*864e5);
+    clearTimeout(wheelTimer);
+    wheelTimer=setTimeout(()=>{render();setTimeout(()=>{EL['sbw'].scrollLeft=sx;EL['sh'].scrollLeft=sx;},0);},16);
+  }else if(e.ctrlKey||e.metaKey){
+    // Ctrl/Cmd + scroll → navigate timeline
+    e.preventDefault();
+    const c=scaleCfg()[scale], sx=EL['sbw'].scrollLeft;
+    viewStart=new Date(+viewStart+(e.deltaY>0?c.ud:-c.ud)*864e5);
+    render();
+    setTimeout(()=>{EL['sbw'].scrollLeft=sx;EL['sh'].scrollLeft=sx;},0);
+  }else if(scrollVertical){
+    EL['sbw'].scrollTop+=e.deltaY;
+  }
+}
+EL['sbw'].addEventListener('wheel',e=>handleWheel(e,false),{passive:false});
+EL['fb'].addEventListener('wheel', e=>handleWheel(e,true), {passive:false});
+EL['sh'].addEventListener('wheel', e=>handleWheel(e,false),{passive:false});
+
+// ── COLLAPSE ──────────────────────────────────────────────
+function toggleCollapse(id){ collapsed[id]=!collapsed[id]; save(); render(); }
+
+// ── MODAL HELPERS ─────────────────────────────────────────
+function calcEnd(){
+  const s=EL['f-start'].value, d=parseInt(EL['f-dur'].value);
+  if(s&&d>0) EL['f-end'].value=addDays(s,d-1);
+}
+function calcDur(){
+  const s=EL['f-start'].value, e=EL['f-end'].value;
+  if(s&&e){const d=daysDiff(s,e)+1;if(d>0)EL['f-dur'].value=d;}
+}
+function applyPred(){
+  const pred=getItemByKey(EL['f-pred'].value); if(!pred?.end) return;
+  EL['f-start'].value=addDays(pred.end,1);
+  const dur=parseInt(EL['f-dur'].value);
+  EL['f-end'].value=dur>0?addDays(EL['f-start'].value,dur-1):EL['f-end'].value;
+  if(!dur) calcDur();
+}
+
+// ── TEMPLATE ──────────────────────────────────────────────
+const TPL_DEFAULTS=[
+  {name:'Levantamento e Dados',dur:''},
+  {name:'Estudo Preliminar',dur:''},
+  {name:'Projeto Legal',dur:''},
+  {name:'Anteprojeto',dur:''},
+  {name:'Projeto Executivo',dur:''}
+];
+
+function setTipo(tipo){
+  _tipo=tipo;
+  D('f-standard').style.display=tipo==='blank'?'block':'none';
+  D('f-template').style.display=tipo==='template'?'block':'none';
+  D('btn-blank').classList.toggle('active',tipo==='blank');
+  D('btn-tpl').classList.toggle('active',tipo==='template');
+  if(tipo==='template') renderTplRows();
+}
+function syncTplState(){
+  tplSubs.forEach((s,i)=>{
+    const n=D('tpl-name-'+i), d=D('tpl-dur-'+i);
+    if(n) s.name=n.value;
+    if(d) s.dur=d.value;
+  });
+}
+function addTplSub(){
+  syncTplState(); tplSubs.push({name:'Nova etapa',dur:''});
+  renderTplRows();
+  setTimeout(()=>{const el=D('tpl-name-'+(tplSubs.length-1));if(el){el.focus();el.select();}},50);
+}
+function removeTplSub(i){ syncTplState(); tplSubs.splice(i,1); renderTplRows(); }
+
+function renderTplRows(){
+  const start=D('t-start').value;
+  let acc=start?new Date(start):null;
+  const rows=tplSubs.map((s,i)=>{
+    const dur=parseInt(s.dur)||0;
+    let dateStr='';
+    if(acc&&dur>0){
+      const end=new Date(acc); end.setDate(end.getDate()+dur-1);
+      dateStr=acc.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'})+' – '+end.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
+      acc=new Date(end); acc.setDate(acc.getDate()+1);
+    }
+    const rmBtn=tplSubs.length>1
+      ?`<button onclick="removeTplSub(${i})" style="background:none;border:none;cursor:pointer;color:#ccc;font-size:15px;padding:0 2px" onmouseover="this.style.color='#E24B4A'" onmouseout="this.style.color='#ccc'">&#10005;</button>`
+      :'<span style="width:20px"></span>';
+    return`<div class="tpl-row" id="tpl-row-${i}">
+      <div style="display:flex;flex-direction:column;flex:1;gap:3px;min-width:0">
+        <input id="tpl-name-${i}" type="text" value="${s.name.replace(/"/g,'&quot;')}" oninput="syncTplState()"
+          style="font-size:12px;font-weight:500;border:.5px solid #e0e0e0;border-radius:6px;padding:4px 7px;width:100%"/>
+        <span class="tpl-dates">${dateStr||'&nbsp;'}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+        <input id="tpl-dur-${i}" type="number" min="1" placeholder="dias" value="${s.dur||''}" oninput="syncTplState();calcTemplate()" style="width:58px"/>
+        ${rmBtn}
+      </div>
+    </div>`;
+  }).join('');
+  D('tpl-subs').innerHTML=rows+`<button onclick="addTplSub()" class="btn" style="width:100%;margin-top:6px;border-style:dashed;color:#aaa">+ Adicionar etapa</button>`;
+}
+function calcTemplate(){
+  syncTplState();
+  const start=D('t-start').value; if(!start) return;
+  let acc=new Date(start);
+  tplSubs.forEach((_,i)=>{
+    const dur=parseInt(tplSubs[i].dur)||0;
+    const el=document.querySelector(`#tpl-row-${i} .tpl-dates`); if(!el) return;
+    if(dur>0){
+      const end=new Date(acc); end.setDate(end.getDate()+dur-1);
+      el.textContent=acc.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'})+' – '+end.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
+      acc=new Date(end); acc.setDate(acc.getDate()+1);
+    }else{el.innerHTML='&nbsp;';}
+  });
+}
+function saveTemplate(){
+  syncTplState();
+  const name=D('t-name').value.trim(); if(!name) return;
+  const start=D('t-start').value; if(!start) return;
+  const owner=D('t-owner').value.trim();
+  const pid=Date.now(); const subs=[]; let acc=new Date(start), lastEnd=new Date(start);
+  tplSubs.forEach((s,i)=>{
+    const dur=parseInt(s.dur)||1;
+    const sid=pid+i+1;
+    const subEnd=new Date(acc); subEnd.setDate(subEnd.getDate()+dur-1);
+    subs.push({id:sid,name:s.name||('Etapa '+(i+1)),start:toIso(acc),end:toIso(subEnd),status:'wait',pred:i>0?'s_'+pid+'_'+(pid+i):null});
+    lastEnd=new Date(subEnd); acc=new Date(subEnd); acc.setDate(acc.getDate()+1);
+  });
+  projects.push({id:pid,name,start,end:toIso(lastEnd),status:'wait',owner,pred:null,subs});
+  save(); closeModal(); render();
+}
+
+// ── MODAL ─────────────────────────────────────────────────
+function openModal(mode,pid,sid){
+  _mode=mode; _pid=pid; _sid=sid; _tipo='blank';
+  const isEdit=pid&&(mode==='project'||(mode==='sub'&&sid));
+  const isNew=mode==='project'&&!pid;
+  EL['modal-title'].textContent=isEdit?(mode==='project'?'Editar projeto':'Editar subtarefa'):(mode==='project'?'Novo projeto':'Nova subtarefa');
+  EL['btn-del'].style.display=isEdit?'inline-block':'none';
+  EL['f-owner-wrap'].style.display=mode==='project'?'block':'none';
+  D('f-tipo-wrap').style.display=isNew?'block':'none';
+  D('f-standard').style.display='block';
+  D('f-template').style.display='none';
+  D('btn-blank').classList.add('active'); D('btn-tpl').classList.remove('active');
+  // Init template
+  tplSubs=TPL_DEFAULTS.map(s=>({...s}));
+  D('t-name').value=''; D('t-owner').value=''; D('t-start').value=toIso(new Date());
+  // Fill standard fields
+  const item=isEdit?getItem(pid,sid):null, t=toIso(new Date());
+  EL['f-name'].value=item?.name||'';
+  EL['f-start'].value=item?.start||t;
+  EL['f-end'].value=item?.end||t;
+  EL['f-dur'].value=item?daysDiff(item.start,item.end)+1:'';
+  EL['f-status'].value=item?.status||'wait';
+  EL['f-owner'].value=item?.owner||'';
+  const exKey=mode==='project'?'p_'+pid:(pid&&sid?'s_'+pid+'_'+sid:null);
+  EL['f-pred'].innerHTML='<option value="">— Nenhuma —</option>';
+  flatList(exKey).forEach(fi=>{
+    const o=document.createElement('option');
+    o.value=fi.key; o.textContent=fi.label;
+    if(item?.pred===fi.key) o.selected=true;
+    EL['f-pred'].appendChild(o);
+  });
+  EL['modal-overlay'].style.display='flex';
+  setTimeout(()=>EL['f-name'].focus(),50);
+}
+function closeModal(){ EL['modal-overlay'].style.display='none'; }
+
+function saveItem(){
+  if(_tipo==='template'){ saveTemplate(); return; }
+  const name=EL['f-name'].value.trim(); if(!name) return;
+  const predKey=EL['f-pred'].value||null;
+  let start=EL['f-start'].value, end=EL['f-end'].value;
+  // Enforce predecessor constraint
+  if(predKey){
+    const pred=getItemByKey(predKey);
+    if(pred?.end){
+      const forced=addDays(pred.end,1);
+      if(start!==forced){ end=addDays(forced,daysDiff(start,end)); start=forced; }
+    }
+  }
+  const data={name,start,end,status:EL['f-status'].value,pred:predKey};
+  if(_mode==='project'){
+    if(_pid) Object.assign(projects.find(p=>p.id===_pid),data,{owner:EL['f-owner'].value.trim()});
+    else{data.id=Date.now();data.owner=EL['f-owner'].value.trim();data.subs=[];projects.push(data);}
+  }else{
+    const p=projects.find(x=>x.id===_pid); if(!p) return;
+    if(!p.subs) p.subs=[];
+    if(_sid) Object.assign(p.subs.find(s=>s.id===_sid),data);
+    else{data.id=Date.now();p.subs.push(data);}
+    syncProjectDates(_pid);
+    cascadeProjectSuccessors('p_'+_pid);
+  }
+  save(); closeModal(); render();
+}
+function deleteItem(){
+  if(_mode==='project'&&_pid) projects=projects.filter(p=>p.id!==_pid);
+  else if(_mode==='sub'&&_pid&&_sid){
+    const p=projects.find(x=>x.id===_pid);
+    if(p){p.subs=(p.subs||[]).filter(s=>s.id!==_sid);syncProjectDates(_pid);}
+  }
+  save(); closeModal(); render();
+}
+EL['modal-overlay'].addEventListener('click',e=>{if(e.target===EL['modal-overlay'])closeModal();});
+
+// ── RESIZE ────────────────────────────────────────────────
+let rsz; window.addEventListener('resize',()=>{clearTimeout(rsz);rsz=setTimeout(render,150);});
+
+// ── INIT ──────────────────────────────────────────────────
+if(sessionStorage.getItem('da')==='1'){load();updateScaleBtns();render();}
+</script>
+</body>
+</html>
