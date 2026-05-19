@@ -226,13 +226,15 @@ function toIso(d){return d.toISOString().slice(0,10);}
 function daysFrom(a,b){return Math.round((new Date(b)-new Date(a))/86400000);}
 
 function getColWidths(){
-  const w=document.getElementById('gantt-app').offsetWidth;
+  const appEl2=document.getElementById('gantt-app');
+  const w=appEl2.offsetWidth||document.documentElement.clientWidth||1200;
   if(w<500)return{name:140,status:0};
   if(w<700)return{name:160,status:0};
   return{name:185,status:95};
 }
 function getScaleCfg(){
-  const appW=document.getElementById('gantt-app').offsetWidth;
+  const appEl=document.getElementById('gantt-app');
+  const appW=appEl.offsetWidth||document.documentElement.clientWidth||1200;
   const cols=getColWidths();
   const avail=Math.max(appW-cols.name-cols.status-2,200);
   const mob=appW<500;
@@ -270,13 +272,13 @@ function defProjects(){
   return[
     {id:1,name:'Residência Silva',start:`${y}-01-15`,end:`${y}-05-30`,status:'ok',owner:'Ana P.',pred:null,subs:[
       {id:11,name:'Levantamento',start:`${y}-01-15`,end:`${y}-02-10`,status:'ok',pred:null},
-      {id:12,name:'Projeto arq.',start:`${y}-02-11`,end:`${y}-04-15`,status:'ok',pred:'s_1_11'},
-      {id:13,name:'Aprovação',start:`${y}-04-16`,end:`${y}-05-30`,status:'ok',pred:'s_1_12'}
+      {id:12,name:'Projeto arq.',start:`${y}-02-11`,end:`${y}-04-15`,status:'ok',pred:null},
+      {id:13,name:'Aprovação',start:`${y}-04-16`,end:`${y}-05-30`,status:'ok',pred:null}
     ]},
     {id:2,name:'Comercial Centro',start:`${y}-03-01`,end:`${y}-09-15`,status:'prog',owner:'Carlos M.',pred:null,subs:[
       {id:21,name:'Estudo preliminar',start:`${y}-03-01`,end:`${y}-04-20`,status:'ok',pred:null},
-      {id:22,name:'Anteprojeto',start:`${y}-04-21`,end:`${y}-07-01`,status:'prog',pred:'s_2_21'},
-      {id:23,name:'Proj. executivo',start:`${y}-07-02`,end:`${y}-09-15`,status:'wait',pred:'s_2_22'}
+      {id:22,name:'Anteprojeto',start:`${y}-04-21`,end:`${y}-07-01`,status:'prog',pred:null},
+      {id:23,name:'Proj. executivo',start:`${y}-07-02`,end:`${y}-09-15`,status:'wait',pred:null}
     ]},
     {id:3,name:'Reforma Cobertura',start:`${y}-04-10`,end:`${y}-07-20`,status:'prog',owner:'Ana P.',pred:null,subs:[]},
     {id:4,name:'Condomínio Leste',start:`${y}-06-01`,end:`${y+1}-02-28`,status:'wait',owner:'Rafael S.',pred:null,subs:[
@@ -323,7 +325,7 @@ function getItemByKey(key){
 function setScale(s){scale=s;viewStart=null;setInitView();updateScaleBtns();save();render();}
 function shiftView(dir){
   const c=getScaleCfg()[scale];
-  viewStart=new Date(viewStart.getTime()+dir*c.u*c.ud*0.5*86400000);
+  viewStart=new Date(viewStart.getTime()+dir*c.ud*86400000);
   render();
 }
 function goToday(){
@@ -464,7 +466,13 @@ function drawArrows(units,totalPx){
   if(!svg)return;
   svg.innerHTML='';
   svg.style.width=totalPx+'px';
+  svg.style.height=document.getElementById('scroll-body-table').offsetHeight+'px';
 
+  // Only draw if there are predecessors defined
+  const hasPred=projects.some(p=>p.pred||(p.subs||[]).some(s=>s.pred));
+  if(!hasPred)return;
+
+  // Build key->rowIndex map
   const rowMap={};let ri=0;
   projects.forEach(p=>{
     rowMap['p_'+p.id]=ri++;
@@ -487,10 +495,18 @@ function drawArrows(units,totalPx){
     const fromEl=rows[fromR],toEl=rows[toR];
     if(!fromEl||!toEl)return;
 
-    const x1=pxFor(new Date(pred.end).getTime()+86400000,units);
-    const x2=pxFor(item.start,units);
-    const y1=fromEl.offsetTop+ROW_H/2;
-    const y2=toEl.offsetTop+ROW_H/2;
+    // Use cumulative row heights for reliable y positions
+    let y1=-1,y2=-1,acc=0;
+    for(let i=0;i<rows.length;i++){
+      const rh=rows[i].offsetHeight||ROW_H;
+      if(i===fromR)y1=acc+rh/2;
+      if(i===toR)y2=acc+rh/2;
+      acc+=rh;
+    }
+    if(y1<0||y2<0)return; // rows not visible, skip
+
+    const x1=pxFor(new Date(new Date(pred.end).getTime()+86400000),units);
+    const x2=pxFor(new Date(item.start),units);
     const mid=(x1+x2)/2;
 
     let d;
@@ -580,6 +596,44 @@ window.addEventListener('touchmove',e=>{
   render();
 },{passive:true});
 window.addEventListener('touchend',()=>{if(drag){save();drag=null;}});
+
+
+// ── TIMELINE HEADER DRAG TO PAN ──────────────────────────
+(function(){
+  const head=document.getElementById('scroll-head');
+  const wrap=document.getElementById('scroll-body-wrap');
+  const sHead=document.getElementById('scroll-head');
+  let panDrag=null;
+
+  head.style.cursor='grab';
+  head.style.userSelect='none';
+
+  function startPan(clientX){
+    const cfg=getScaleCfg()[scale];
+    panDrag={startX:clientX, startVS:new Date(viewStart), pxPerDay:cfg.px/cfg.ud};
+    head.style.cursor='grabbing';
+  }
+
+  function movePan(clientX){
+    if(!panDrag)return;
+    const dx=clientX-panDrag.startX; // px moved
+    const daysDelta=Math.round(-dx/panDrag.pxPerDay); // negative = drag right = go back
+    viewStart=new Date(panDrag.startVS.getTime()+daysDelta*86400000);
+    render();
+  }
+
+  function endPan(){
+    if(panDrag){panDrag=null;head.style.cursor='grab';}
+  }
+
+  head.addEventListener('mousedown',e=>{startPan(e.clientX);e.preventDefault();});
+  window.addEventListener('mousemove',e=>{if(panDrag)movePan(e.clientX);});
+  window.addEventListener('mouseup',endPan);
+
+  head.addEventListener('touchstart',e=>{startPan(e.touches[0].clientX);},{passive:true});
+  window.addEventListener('touchmove',e=>{if(panDrag)movePan(e.touches[0].clientX);},{passive:true});
+  window.addEventListener('touchend',endPan);
+})();
 
 // ── SCROLL SYNC ──────────────────────────────────────────
 document.getElementById('scroll-body-wrap').addEventListener('scroll',function(){
