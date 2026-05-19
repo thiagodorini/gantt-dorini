@@ -1,13 +1,8 @@
-bash
-
-cat /mnt/user-data/outputs/dorini-gantt.html
-Saída
-
 <!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<!-- saved from url=(0044)file:///C:/Users/User/Downloads/index_2.html -->
+<html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dorini Arquitetura — Gestão de Projetos</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -117,7 +112,7 @@ td{padding:4px 8px;vertical-align:middle;font-size:12px;overflow:hidden;height:3
   <div id="login-box">
     <div class="lt">DORINI ARQUITETURA</div>
     <div class="ls">Gestão de Projetos</div>
-    <input id="li" type="password" placeholder="Senha de acesso"/>
+    <input id="li" type="password" placeholder="Senha de acesso">
     <button onclick="doLogin()">Entrar</button>
     <div class="lerr" id="lerr"></div>
   </div>
@@ -130,19 +125,19 @@ td{padding:4px 8px;vertical-align:middle;font-size:12px;overflow:hidden;height:3
       <span id="studio-name">DORINI ARQUITETURA</span>
       <span id="range-label"></span>
     </div>
-    <button class="btn" id="sc-day"   onclick="setScale('day')">Dia</button>
-    <button class="btn" id="sc-week"  onclick="setScale('week')">Semana</button>
-    <button class="btn" id="sc-month" onclick="setScale('month')">Mês</button>
-    <button class="btn" onclick="shiftView(-1)">&#8249;</button>
+    <button class="btn" id="sc-day" onclick="setScale(&#39;day&#39;)">Dia</button>
+    <button class="btn" id="sc-week" onclick="setScale(&#39;week&#39;)">Semana</button>
+    <button class="btn" id="sc-month" onclick="setScale(&#39;month&#39;)">Mês</button>
+    <button class="btn" onclick="shiftView(-1)">‹</button>
     <button class="btn" onclick="goToday()">Hoje</button>
-    <button class="btn" onclick="shiftView(1)">&#8250;</button>
-    <button class="btn btn-primary" onclick="openModal('project',null,null)">+ Projeto</button>
+    <button class="btn" onclick="shiftView(1)">›</button>
+    <button class="btn btn-primary" onclick="openModal(&#39;project&#39;,null,null)">+ Projeto</button>
   </div>
   <div class="gantt-outer">
     <div class="gantt-header-row">
       <div class="fixed-head" id="fh"><table><thead id="fhr"></thead></table></div>
       <div class="scroll-head-wrap">
-        <div class="scroll-head" id="sh"><table id="ht"><thead id="gh"></thead></table></div>
+        <div class="scroll-head" id="sh" style="cursor: grab;"><table id="ht"><thead id="gh"></thead></table></div>
       </div>
     </div>
     <div class="gantt-body-area">
@@ -164,16 +159,16 @@ td{padding:4px 8px;vertical-align:middle;font-size:12px;overflow:hidden;height:3
     <div class="field" id="f-tipo-wrap">
       <label>Tipo de projeto</label>
       <div style="display:flex;gap:8px;margin-top:2px">
-        <button class="btn active" id="btn-blank" onclick="setTipo('blank')" style="flex:1">Em branco</button>
-        <button class="btn" id="btn-tpl" onclick="setTipo('template')" style="flex:1">Padrão &#9733;</button>
+        <button class="btn active" id="btn-blank" onclick="setTipo(&#39;blank&#39;)" style="flex:1">Em branco</button>
+        <button class="btn" id="btn-tpl" onclick="setTipo(&#39;template&#39;)" style="flex:1">Padrão ★</button>
       </div>
     </div>
     <div id="f-standard">
-      <div class="field"><label>Nome</label><input id="f-name" type="text"/></div>
-      <div class="field"><label>Início</label><input id="f-start" type="date" oninput="calcEnd()"/></div>
+      <div class="field"><label>Nome</label><input id="f-name" type="text"></div>
+      <div class="field"><label>Início</label><input id="f-start" type="date" oninput="calcEnd()"></div>
       <div class="frow">
-        <div class="field"><label>Duração (dias)</label><input id="f-dur" type="number" min="1" placeholder="30" oninput="calcEnd()"/></div>
-        <div class="field"><label>Término</label><input id="f-end" type="date" oninput="calcDur()"/></div>
+        <div class="field"><label>Duração (dias)</label><input id="f-dur" type="number" min="1" placeholder="30" oninput="calcEnd()"></div>
+        <div class="field"><label>Término</label><input id="f-end" type="date" oninput="calcDur()"></div>
       </div>
       <div class="field"><label>Status</label>
         <select id="f-status">
@@ -183,21 +178,21 @@ td{padding:4px 8px;vertical-align:middle;font-size:12px;overflow:hidden;height:3
           <option value="late">Atrasado</option>
         </select>
       </div>
-      <div class="field" id="f-owner-wrap"><label>Responsável</label><input id="f-owner" type="text"/></div>
+      <div class="field" id="f-owner-wrap"><label>Responsável</label><input id="f-owner" type="text"></div>
       <div class="field"><label>Predecessora</label><select id="f-pred" onchange="applyPred()"><option value="">— Nenhuma —</option></select></div>
     </div>
     <div id="f-template" style="display:none">
-      <div class="field"><label>Nome do Projeto</label><input id="t-name" type="text"/></div>
+      <div class="field"><label>Nome do Projeto</label><input id="t-name" type="text"></div>
       <div class="frow">
-        <div class="field"><label>Responsável</label><input id="t-owner" type="text"/></div>
-        <div class="field"><label>Início</label><input id="t-start" type="date" oninput="calcTemplate()"/></div>
+        <div class="field"><label>Responsável</label><input id="t-owner" type="text"></div>
+        <div class="field"><label>Início</label><input id="t-start" type="date" oninput="calcTemplate()"></div>
       </div>
       <div style="margin:12px 0 6px;font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.08em">Subtarefas</div>
       <div id="tpl-subs"></div>
-      <p style="font-size:11px;color:#aaa;margin-top:6px">&#8617; Datas calculadas automaticamente pelas predecessoras.</p>
+      <p style="font-size:11px;color:#aaa;margin-top:6px">↩ Datas calculadas automaticamente pelas predecessoras.</p>
     </div>
     <div class="mact">
-      <button class="del-btn" id="btn-del" style="display:none" onclick="deleteItem()">&#10005; Excluir</button>
+      <button class="del-btn" id="btn-del" style="display:none" onclick="deleteItem()">✕ Excluir</button>
       <button class="btn" onclick="closeModal()">Cancelar</button>
       <button class="btn btn-primary" onclick="saveItem()">Salvar</button>
     </div>
@@ -879,5 +874,6 @@ let rsz; window.addEventListener('resize',()=>{clearTimeout(rsz);rsz=setTimeout(
 // ── INIT ──────────────────────────────────────────────────
 if(sessionStorage.getItem('da')==='1'){load();updateScaleBtns();render();}
 </script>
-</body>
-</html>
+
+
+</body></html>
