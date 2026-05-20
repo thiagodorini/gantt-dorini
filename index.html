@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0044)file:///C:/Users/User/Downloads/index_1.html -->
+<!-- saved from url=(0044)file:///C:/Users/User/Downloads/index_3.html -->
 <html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -110,7 +110,11 @@ td{padding:4px 8px;vertical-align:middle;font-size:12px;overflow:hidden;height:3
 .mact{display:flex;gap:8px;justify-content:flex-end;margin-top:1.25rem}
 .del-btn{margin-right:auto;color:#A32D2D;border:.5px solid #F7C1C1;background:transparent;font-size:12px;padding:6px 12px;border-radius:8px;cursor:pointer}
 .del-btn:hover{background:#FCEBEB}
-.tpl-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;padding:7px 10px;background:#f9f9f7;border-radius:8px;border:.5px solid #ebebeb}
+.drag-handle{font-size:13px;color:#ccc;cursor:grab;flex-shrink:0;padding:0 2px;line-height:1;user-select:none}
+.drag-handle:hover{color:#999}
+.drag-handle:active{cursor:grabbing}
+tr.drop-above td{border-top:2px solid #185FA5}
+tr.drop-below td{border-bottom:2px solid #185FA5}gap:8px;margin-bottom:6px;padding:7px 10px;background:#f9f9f7;border-radius:8px;border:.5px solid #ebebeb}
 .tpl-row input[type=number]{width:60px;padding:5px 8px;font-size:12px;border:.5px solid #ccc;border-radius:6px;text-align:center}
 .tpl-dates{font-size:11px;color:#aaa;white-space:nowrap;min-width:90px}
 </style>
@@ -155,13 +159,43 @@ td{padding:4px 8px;vertical-align:middle;font-size:12px;overflow:hidden;height:3
     </div>
     <div class="gantt-body-area">
       <div class="fixed-body" id="fb"><table id="fbt" style="width: 280px;"><tbody id="fbr"><tr class="pr" style="height: 37px;"><td style="width:185px;max-width:185px"><div class="name-cell">
+        <span class="drag-handle" data-pid="1779249018352" title="Arrastar para reordenar">↕</span>
+        <button class="tog" onclick="toggleCollapse(1779249018352)">▼</button>
+        <span class="nm" onclick="openModal(&#39;project&#39;,1779249018352,null)" title="291_GS_Fraiburgo">291_GS_Fraiburgo</span>
+        <span class="ow">Thiago</span>
+      </div></td><td class="col-st" style="width:95px"><span class="sb s-wait" style="cursor:pointer" onclick="cycleStatus(&#39;project&#39;,1779249018352,null)" title="Clique para alterar status">Aguardando</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><span class="sn" onclick="openModal(&#39;sub&#39;,1779249018352,1779249018353)" title="Estudo Preliminar">Estudo Preliminar</span></td><td class="col-st" style="width:95px"><span class="sb s-wait" style="cursor:pointer" onclick="cycleStatus(&#39;sub&#39;,1779249018352,1779249018353)" title="Clique para alterar status">Aguardando</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><span class="sn" onclick="openModal(&#39;sub&#39;,1779249018352,1779249018354)" title="Projeto Legal">Projeto Legal</span></td><td class="col-st" style="width:95px"><span class="sb s-wait" style="cursor:pointer" onclick="cycleStatus(&#39;sub&#39;,1779249018352,1779249018354)" title="Clique para alterar status">Aguardando</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><span class="sn" onclick="openModal(&#39;sub&#39;,1779249018352,1779249018355)" title="Anteprojeto">Anteprojeto</span></td><td class="col-st" style="width:95px"><span class="sb s-wait" style="cursor:pointer" onclick="cycleStatus(&#39;sub&#39;,1779249018352,1779249018355)" title="Clique para alterar status">Aguardando</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><span class="sn" onclick="openModal(&#39;sub&#39;,1779249018352,1779249018356)" title="Projeto Executivo">Projeto Executivo</span></td><td class="col-st" style="width:95px"><span class="sb s-wait" style="cursor:pointer" onclick="cycleStatus(&#39;sub&#39;,1779249018352,1779249018356)" title="Clique para alterar status">Aguardando</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><button class="asb" onclick="openModal(&#39;sub&#39;,1779249018352,null)">+ subtarefa</button></td><td class="col-st" style="width:95px"></td></tr><tr class="pr" style="height: 37px;"><td style="width:185px;max-width:185px"><div class="name-cell">
+        <span class="drag-handle" data-pid="1779248239988" title="Arrastar para reordenar">↕</span>
         <button class="tog" onclick="toggleCollapse(1779248239988)">▼</button>
         <span class="nm" onclick="openModal(&#39;project&#39;,1779248239988,null)" title="292_MA_Florianópolis">292_MA_Florianópolis</span>
         <span class="ow">Thiago</span>
       </div></td><td class="col-st" style="width:95px"><span class="sb s-wait" style="cursor:pointer" onclick="cycleStatus(&#39;project&#39;,1779248239988,null)" title="Clique para alterar status">Aguardando</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><span class="sn" onclick="openModal(&#39;sub&#39;,1779248239988,1779248239990)" title="Estudo Preliminar">Estudo Preliminar</span></td><td class="col-st" style="width:95px"><span class="sb s-prog" style="cursor:pointer" onclick="cycleStatus(&#39;sub&#39;,1779248239988,1779248239990)" title="Clique para alterar status">Em andamento</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><span class="sn" onclick="openModal(&#39;sub&#39;,1779248239988,1779248239991)" title="Projeto Legal">Projeto Legal</span></td><td class="col-st" style="width:95px"><span class="sb s-wait" style="cursor:pointer" onclick="cycleStatus(&#39;sub&#39;,1779248239988,1779248239991)" title="Clique para alterar status">Aguardando</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><span class="sn" onclick="openModal(&#39;sub&#39;,1779248239988,1779248239992)" title="Anteprojeto">Anteprojeto</span></td><td class="col-st" style="width:95px"><span class="sb s-wait" style="cursor:pointer" onclick="cycleStatus(&#39;sub&#39;,1779248239988,1779248239992)" title="Clique para alterar status">Aguardando</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><span class="sn" onclick="openModal(&#39;sub&#39;,1779248239988,1779248239993)" title="Projeto Executivo">Projeto Executivo</span></td><td class="col-st" style="width:95px"><span class="sb s-wait" style="cursor:pointer" onclick="cycleStatus(&#39;sub&#39;,1779248239988,1779248239993)" title="Clique para alterar status">Aguardando</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><button class="asb" onclick="openModal(&#39;sub&#39;,1779248239988,null)">+ subtarefa</button></td><td class="col-st" style="width:95px"></td></tr></tbody></table></div>
       <div class="scroll-body-wrap" id="sbw">
         <div class="scroll-body" id="sb">
-          <table id="sbt" style="min-width: 1590px; width: 100%;"><tbody id="sbr"><tr class="pr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:66.25px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:198.75px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:331.25px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:463.75px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:596.25px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:728.75px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:861.25px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:993.75px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1126.25px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1258.75px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1391.25px"></div><div class="gl" style="left:1457.5px"></div><div class="gl" style="left:1523.75px"></div><div class="tl" style="left:463.74999999999994px"></div><div class="bar" data-pid="1779248239988" style="left:340.71428571428567px;width:851.7857142857143px;background:#D3D1C7;color:#2C2C2A">
+          <table id="sbt" style="min-width: 1590px; width: 100%;"><tbody id="sbr"><tr class="pr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:66.25px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:198.75px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:331.25px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:463.75px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:596.25px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:728.75px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:861.25px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:993.75px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1126.25px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1258.75px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1391.25px"></div><div class="gl" style="left:1457.5px"></div><div class="gl" style="left:1523.75px"></div><div class="tl" style="left:463.74999999999994px"></div><div class="bar" data-pid="1779249018352" style="left:331.25px;width:709.8214285714284px;background:#D3D1C7;color:#2C2C2A">
+        <div class="hl" data-pid="1779249018352" data-side="l"></div>
+        <span style="pointer-events:none;overflow:hidden;text-overflow:ellipsis">291_GS_Fraiburgo</span>
+        <div class="hr" data-pid="1779249018352" data-side="r"></div>
+      </div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:66.25px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:198.75px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:331.25px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:463.75px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:596.25px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:728.75px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:861.25px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:993.75px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1126.25px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1258.75px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1391.25px"></div><div class="gl" style="left:1457.5px"></div><div class="gl" style="left:1523.75px"></div><div class="tl" style="left:463.74999999999994px"></div><div class="bar" data-pid="1779249018352" data-sid="1779249018353" style="left:331.25px;width:283.92857142857133px;background:#888780;color:#fff;height:12px">
+        <div class="hl" data-pid="1779249018352" data-sid="1779249018353" data-side="l"></div>
+        
+        <span style="pointer-events:none;font-size:9px;opacity:.85;flex:1;text-align:center">30d</span>
+        <div class="hr" data-pid="1779249018352" data-sid="1779249018353" data-side="r"></div>
+      </div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:66.25px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:198.75px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:331.25px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:463.75px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:596.25px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:728.75px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:861.25px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:993.75px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1126.25px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1258.75px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1391.25px"></div><div class="gl" style="left:1457.5px"></div><div class="gl" style="left:1523.75px"></div><div class="tl" style="left:463.74999999999994px"></div><div class="bar" data-pid="1779249018352" data-sid="1779249018354" style="left:615.1785714285713px;width:141.96428571428578px;background:#888780;color:#fff;height:12px">
+        <div class="hl" data-pid="1779249018352" data-sid="1779249018354" data-side="l"></div>
+        
+        <span style="pointer-events:none;font-size:9px;opacity:.85;flex:1;text-align:center">15d</span>
+        <div class="hr" data-pid="1779249018352" data-sid="1779249018354" data-side="r"></div>
+      </div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:66.25px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:198.75px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:331.25px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:463.75px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:596.25px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:728.75px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:861.25px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:993.75px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1126.25px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1258.75px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1391.25px"></div><div class="gl" style="left:1457.5px"></div><div class="gl" style="left:1523.75px"></div><div class="tl" style="left:463.74999999999994px"></div><div class="bar" data-pid="1779249018352" data-sid="1779249018355" style="left:757.1428571428571px;width:141.96428571428567px;background:#888780;color:#fff;height:12px">
+        <div class="hl" data-pid="1779249018352" data-sid="1779249018355" data-side="l"></div>
+        
+        <span style="pointer-events:none;font-size:9px;opacity:.85;flex:1;text-align:center">15d</span>
+        <div class="hr" data-pid="1779249018352" data-sid="1779249018355" data-side="r"></div>
+      </div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:66.25px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:198.75px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:331.25px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:463.75px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:596.25px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:728.75px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:861.25px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:993.75px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1126.25px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1258.75px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1391.25px"></div><div class="gl" style="left:1457.5px"></div><div class="gl" style="left:1523.75px"></div><div class="tl" style="left:463.74999999999994px"></div><div class="bar" data-pid="1779249018352" data-sid="1779249018356" style="left:899.1071428571428px;width:141.96428571428567px;background:#888780;color:#fff;height:12px">
+        <div class="hl" data-pid="1779249018352" data-sid="1779249018356" data-side="l"></div>
+        
+        <span style="pointer-events:none;font-size:9px;opacity:.85;flex:1;text-align:center">15d</span>
+        <div class="hr" data-pid="1779249018352" data-sid="1779249018356" data-side="r"></div>
+      </div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:66.25px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:198.75px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:331.25px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:463.75px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:596.25px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:728.75px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:861.25px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:993.75px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1126.25px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1258.75px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1391.25px"></div><div class="gl" style="left:1457.5px"></div><div class="gl" style="left:1523.75px"></div><div class="tl" style="left:463.74999999999994px"></div></div></td></tr><tr class="pr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:66.25px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:198.75px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:331.25px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:463.75px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:596.25px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:728.75px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:861.25px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:993.75px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1126.25px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1258.75px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1391.25px"></div><div class="gl" style="left:1457.5px"></div><div class="gl" style="left:1523.75px"></div><div class="tl" style="left:463.74999999999994px"></div><div class="bar" data-pid="1779248239988" style="left:340.71428571428567px;width:851.7857142857143px;background:#D3D1C7;color:#2C2C2A">
         <div class="hl" data-pid="1779248239988" data-side="l"></div>
         <span style="pointer-events:none;overflow:hidden;text-overflow:ellipsis">292_MA_Florianópolis</span>
         <div class="hr" data-pid="1779248239988" data-side="r"></div>
@@ -186,7 +220,7 @@ td{padding:4px 8px;vertical-align:middle;font-size:12px;overflow:hidden;height:3
         <span style="pointer-events:none;font-size:9px;opacity:.85;flex:1;text-align:center">30d</span>
         <div class="hr" data-pid="1779248239988" data-sid="1779248239993" data-side="r"></div>
       </div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:66.25px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:198.75px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:331.25px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:463.75px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:596.25px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:728.75px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:861.25px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:993.75px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1126.25px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1258.75px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1391.25px"></div><div class="gl" style="left:1457.5px"></div><div class="gl" style="left:1523.75px"></div><div class="tl" style="left:463.74999999999994px"></div></div></td></tr></tbody></table>
-          <svg id="arrow-svg" width="1590" height="222"><path d="M624.6428571428571,55.5 H638.6428571428571 V74 H610.6428571428571 V92.5 H624.6428571428571" class="al"></path><polygon points="624.6428571428571,92.5 617.6428571428571,88.5 617.6428571428571,96.5" class="ah"></polygon><path d="M766.6071428571428,92.5 H780.6071428571428 V111 H752.6071428571428 V129.5 H766.6071428571428" class="al"></path><polygon points="766.6071428571428,129.5 759.6071428571428,125.5 759.6071428571428,133.5" class="ah"></polygon><path d="M908.5714285714284,129.5 H922.5714285714284 V148 H894.5714285714284 V166.5 H908.5714285714284" class="al"></path><polygon points="908.5714285714284,166.5 901.5714285714284,162.5 901.5714285714284,170.5" class="ah"></polygon></svg>
+          <svg id="arrow-svg" width="1590" height="444"><path d="M615.1785714285713,55.5 H629.1785714285713 V74 H601.1785714285713 V92.5 H615.1785714285713" class="al"></path><polygon points="615.1785714285713,92.5 608.1785714285713,88.5 608.1785714285713,96.5" class="ah"></polygon><path d="M757.1428571428571,92.5 H771.1428571428571 V111 H743.1428571428571 V129.5 H757.1428571428571" class="al"></path><polygon points="757.1428571428571,129.5 750.1428571428571,125.5 750.1428571428571,133.5" class="ah"></polygon><path d="M899.1071428571428,129.5 H913.1071428571428 V148 H885.1071428571428 V166.5 H899.1071428571428" class="al"></path><polygon points="899.1071428571428,166.5 892.1071428571428,162.5 892.1071428571428,170.5" class="ah"></polygon><path d="M624.6428571428571,277.5 H638.6428571428571 V296 H610.6428571428571 V314.5 H624.6428571428571" class="al"></path><polygon points="624.6428571428571,314.5 617.6428571428571,310.5 617.6428571428571,318.5" class="ah"></polygon><path d="M766.6071428571428,314.5 H780.6071428571428 V333 H752.6071428571428 V351.5 H766.6071428571428" class="al"></path><polygon points="766.6071428571428,351.5 759.6071428571428,347.5 759.6071428571428,355.5" class="ah"></polygon><path d="M908.5714285714284,351.5 H922.5714285714284 V370 H894.5714285714284 V388.5 H908.5714285714284" class="al"></path><polygon points="908.5714285714284,388.5 901.5714285714284,384.5 901.5714285714284,392.5" class="ah"></polygon></svg>
         </div>
       </div>
     </div>
@@ -548,6 +582,7 @@ function render(){
     if(isProj){
       const subs=p.subs||[],open=!collapsed[p.id];
       nc=`<div class="name-cell">
+        <span class="drag-handle" data-pid="${p.id}" title="Arrastar para reordenar">&#8597;</span>
         <button class="tog" onclick="toggleCollapse(${p.id})">${subs.length?(open?'&#9660;':'&#9654;'):'&ndash;'}</button>
         <span class="nm" onclick="openModal('project',${p.id},null)" title="${p.name}">${p.name}</span>
         ${p.owner?`<span class="ow">${p.owner}</span>`:''}
@@ -596,7 +631,7 @@ function render(){
   EL['fbt'].style.width=fixedW+'px';
   EL['sbt'].style.cssText=`min-width:${totalPx}px;width:100%`;
   EL['fbr'].innerHTML=fRows; EL['sbr'].innerHTML=sRows;
-  syncHeights(); drawArrows(units,totalPx); bindDrag();
+  syncHeights(); drawArrows(units,totalPx); bindDrag(); bindReorder();
 }
 
 function syncHeights(){
@@ -846,6 +881,82 @@ function saveTemplate(){
   projects.push({id:pid,name,start,end:toIso(lastEnd),status:'wait',owner,pred:null,subs});
   save(); closeModal(); render();
 }
+
+// ── PROJECT REORDER ───────────────────────────────────────
+let reorder=null;
+
+function bindReorder(){
+  document.querySelectorAll('.drag-handle').forEach(h=>{
+    h.addEventListener('mousedown',e=>{
+      e.preventDefault(); e.stopPropagation();
+      const pid=+h.dataset.pid;
+      reorder={pid, startY:e.clientY};
+      document.body.style.cursor='grabbing';
+    });
+    h.addEventListener('touchstart',e=>{
+      e.stopPropagation();
+      const pid=+h.dataset.pid;
+      reorder={pid, startY:e.touches[0].clientY};
+    },{passive:true});
+  });
+}
+
+function getProjRows(){
+  // Get only project rows (not sub rows) from fixed body
+  return Array.from(EL['fbr'].rows).filter(r=>r.classList.contains('pr'));
+}
+
+function getProjectIndexFromY(clientY){
+  const rows=getProjRows();
+  for(let i=0;i<rows.length;i++){
+    const rect=rows[i].getBoundingClientRect();
+    if(clientY<rect.top+rect.height/2) return i;
+  }
+  return rows.length;
+}
+
+window.addEventListener('mousemove',e=>{
+  if(!reorder) return;
+  const idx=getProjectIndexFromY(e.clientY);
+  // Show drop indicator
+  getProjRows().forEach((r,i)=>{
+    r.classList.remove('drop-above','drop-below');
+    const dragIdx=projects.findIndex(p=>p.id===reorder.pid);
+    if(i===idx&&i!==dragIdx) r.classList.add('drop-above');
+    else if(i===idx-1&&i!==dragIdx) r.classList.add('drop-below');
+  });
+});
+
+window.addEventListener('mouseup',e=>{
+  if(!reorder) return;
+  const dragIdx=projects.findIndex(p=>p.id===reorder.pid);
+  let dropIdx=getProjectIndexFromY(e.clientY);
+  if(dropIdx>dragIdx) dropIdx--;
+  if(dragIdx!==dropIdx&&dropIdx>=0&&dropIdx<projects.length){
+    const [moved]=projects.splice(dragIdx,1);
+    projects.splice(dropIdx,0,moved);
+    save();
+  }
+  reorder=null;
+  document.body.style.cursor='';
+  getProjRows().forEach(r=>r.classList.remove('drop-above','drop-below'));
+  render();
+});
+
+window.addEventListener('touchend',e=>{
+  if(!reorder) return;
+  const touch=e.changedTouches[0];
+  const dragIdx=projects.findIndex(p=>p.id===reorder.pid);
+  let dropIdx=getProjectIndexFromY(touch.clientY);
+  if(dropIdx>dragIdx) dropIdx--;
+  if(dragIdx!==dropIdx&&dropIdx>=0&&dropIdx<projects.length){
+    const [moved]=projects.splice(dragIdx,1);
+    projects.splice(dropIdx,0,moved);
+    save();
+  }
+  reorder=null;
+  render();
+});
 
 // Cicla pelo próximo status ao clicar no badge
 const STATUS_ORDER = ['wait','prog','late','ok'];
