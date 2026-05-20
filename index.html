@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<!-- saved from url=(0044)file:///C:/Users/User/Downloads/index_2.html -->
+<!-- saved from url=(0044)file:///C:/Users/User/Downloads/index_5.html -->
 <html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dorini Arquitetura — Gestão de Projetos</title>
+<title>Archiflow — Dorini Arquitetura</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;background:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#1a1a1a}
@@ -11,7 +11,7 @@ body{padding:1.5rem;display:flex;flex-direction:column}
 
 /* LOGIN */
 #login-screen{position:fixed;inset:0;background:#fff;display:flex;align-items:center;justify-content:center;z-index:9999}
-#login-box{display:flex;flex-direction:column;align-items:center;gap:18px;width:300px;max-width:90vw}
+#login-box{display:flex;flex-direction:column;align-items:center;gap:16px;width:300px;max-width:90vw}
 #login-box .lt{font-size:11px;font-weight:600;letter-spacing:.14em;color:#aaa;text-transform:uppercase}
 #login-box .ls{font-size:21px;font-weight:300}
 #login-box input{width:100%;padding:11px 14px;font-size:14px;border:.5px solid #ddd;border-radius:10px;outline:none;background:#fafafa;transition:border-color .15s}
@@ -30,6 +30,16 @@ body{padding:1.5rem;display:flex;flex-direction:column}
 .btn:hover{background:#f5f5f5}
 .btn.active,.btn-primary{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
 .btn-primary:hover,.btn.active:hover{opacity:.85}
+.btn-logout{font-size:11px;padding:4px 9px;border:.5px solid #e0e0e0;border-radius:8px;background:transparent;color:#aaa;cursor:pointer}
+.btn-logout:hover{color:#E24B4A;border-color:#F7C1C1}
+
+/* SYNC INDICATOR */
+#sync-indicator{font-size:11px;color:#aaa;display:flex;align-items:center;gap:4px}
+#sync-dot{width:6px;height:6px;border-radius:50%;background:#ccc;flex-shrink:0;transition:background .3s}
+#sync-dot.synced{background:#5A9020}
+#sync-dot.syncing{background:#378ADD;animation:pulse .8s infinite}
+#sync-dot.error{background:#E24B4A}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
 /* GANTT LAYOUT */
 .gantt-outer{border:.5px solid #e0e0e0;border-radius:12px;overflow:hidden;display:flex;flex-direction:column;flex:1;min-height:0}
@@ -108,44 +118,76 @@ td{padding:4px 8px;vertical-align:middle;font-size:12px;overflow:hidden;height:3
 <body>
 
 <!-- LOGIN -->
-<div id="login-screen">
+<div id="login-screen" style="display: none;">
   <div id="login-box">
     <div class="lt">DORINI ARQUITETURA</div>
-    <div class="ls">Gestão de Projetos</div>
-    <input id="li" type="password" placeholder="Senha de acesso">
+    <div class="ls">Archiflow</div>
+    <input id="li-email" type="email" placeholder="E-mail">
+    <input id="li-pass" type="password" placeholder="Senha">
     <button onclick="doLogin()">Entrar</button>
     <div class="lerr" id="lerr"></div>
   </div>
 </div>
 
 <!-- APP -->
-<div id="app" style="display:none">
+<div id="app" style="display: flex;">
   <div class="toolbar">
     <div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:80px;overflow:hidden">
       <span id="studio-name">DORINI ARQUITETURA</span>
-      <span id="range-label"></span>
+      <span id="range-label">11 de jan. de 2026 – 09 de fev. de 2026</span>
     </div>
-    <button class="btn" id="sc-day" onclick="setScale(&#39;day&#39;)">Dia</button>
+    <div id="sync-indicator"><div id="sync-dot" class="synced"></div><span id="sync-label">Sincronizado</span></div>
+    <button class="btn active" id="sc-day" onclick="setScale(&#39;day&#39;)">Dia</button>
     <button class="btn" id="sc-week" onclick="setScale(&#39;week&#39;)">Semana</button>
     <button class="btn" id="sc-month" onclick="setScale(&#39;month&#39;)">Mês</button>
     <button class="btn" onclick="shiftView(-1)">‹</button>
     <button class="btn" onclick="goToday()">Hoje</button>
     <button class="btn" onclick="shiftView(1)">›</button>
     <button class="btn btn-primary" onclick="openModal(&#39;project&#39;,null,null)">+ Projeto</button>
+    <button class="btn-logout" onclick="doLogout()" title="Sair">Sair</button>
   </div>
   <div class="gantt-outer">
     <div class="gantt-header-row">
-      <div class="fixed-head" id="fh"><table><thead id="fhr"></thead></table></div>
+      <div class="fixed-head" id="fh"><table style="height: 54px;"><thead id="fhr"><tr><th style="width:185px">Projeto / Tarefa</th><th style="width:95px">Status</th></tr><tr><th></th><th></th></tr></thead></table></div>
       <div class="scroll-head-wrap">
-        <div class="scroll-head" id="sh" style="cursor: grab;"><table id="ht"><thead id="gh"></thead></table></div>
+        <div class="scroll-head" id="sh" style="cursor: grab;"><table id="ht" style="min-width: 1590px; width: 100%; height: 54px;"><thead id="gh"><tr><th class="gh c" colspan="21">jan. de 2026</th><th class="gh c" colspan="9">fev. de 2026</th></tr><tr><th class="c" style="width:53px">11</th><th class="c" style="width:53px">12</th><th class="c" style="width:53px">13</th><th class="c" style="width:53px">14</th><th class="c" style="width:53px">15</th><th class="c" style="width:53px">16</th><th class="c" style="width:53px">17</th><th class="c" style="width:53px">18</th><th class="c" style="width:53px">19</th><th class="c" style="width:53px">20</th><th class="c" style="width:53px">21</th><th class="c" style="width:53px">22</th><th class="c" style="width:53px">23</th><th class="c" style="width:53px">24</th><th class="c" style="width:53px">25</th><th class="c" style="width:53px">26</th><th class="c" style="width:53px">27</th><th class="c" style="width:53px">28</th><th class="c" style="width:53px">29</th><th class="c" style="width:53px">30</th><th class="c gh" style="width:53px">31</th><th class="c" style="width:53px">1</th><th class="c" style="width:53px">2</th><th class="c" style="width:53px">3</th><th class="c" style="width:53px">4</th><th class="c" style="width:53px">5</th><th class="c" style="width:53px">6</th><th class="c" style="width:53px">7</th><th class="c" style="width:53px">8</th><th class="c" style="width:53px">9</th></tr></thead></table></div>
       </div>
     </div>
     <div class="gantt-body-area">
-      <div class="fixed-body" id="fb"><table id="fbt"><tbody id="fbr"></tbody></table></div>
+      <div class="fixed-body" id="fb"><table id="fbt" style="width: 280px;"><tbody id="fbr"><tr class="pr" style="height: 37px;"><td style="width:185px;max-width:185px"><div class="name-cell">
+        <button class="tog" onclick="toggleCollapse(1)">▼</button>
+        <span class="nm" onclick="openModal(&#39;project&#39;,1,null)" title="Residência Silva">Residência Silva</span>
+        <span class="ow">Ana P.</span>
+      </div></td><td class="col-st" style="width:95px"><span class="sb s-ok">Concluído</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><span class="sn" onclick="openModal(&#39;sub&#39;,1,11)" title="Levantamento">Levantamento</span></td><td class="col-st" style="width:95px"><span class="sb s-ok">Concluído</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><span class="sn" onclick="openModal(&#39;sub&#39;,1,12)" title="Projeto arq.">Projeto arq.</span></td><td class="col-st" style="width:95px"><span class="sb s-ok">Concluído</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><span class="sn" onclick="openModal(&#39;sub&#39;,1,13)" title="Aprovação">Aprovação</span></td><td class="col-st" style="width:95px"><span class="sb s-ok">Concluído</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><button class="asb" onclick="openModal(&#39;sub&#39;,1,null)">+ subtarefa</button></td><td class="col-st" style="width:95px"></td></tr><tr class="pr" style="height: 37px;"><td style="width:185px;max-width:185px"><div class="name-cell">
+        <button class="tog" onclick="toggleCollapse(2)">▼</button>
+        <span class="nm" onclick="openModal(&#39;project&#39;,2,null)" title="Comercial Centro">Comercial Centro</span>
+        <span class="ow">Carlos M.</span>
+      </div></td><td class="col-st" style="width:95px"><span class="sb s-prog">Em andamento</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><span class="sn" onclick="openModal(&#39;sub&#39;,2,21)" title="Estudo prelim.">Estudo prelim.</span></td><td class="col-st" style="width:95px"><span class="sb s-ok">Concluído</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><span class="sn" onclick="openModal(&#39;sub&#39;,2,22)" title="Anteprojeto">Anteprojeto</span></td><td class="col-st" style="width:95px"><span class="sb s-prog">Em andamento</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><span class="sn" onclick="openModal(&#39;sub&#39;,2,23)" title="Proj. executivo">Proj. executivo</span></td><td class="col-st" style="width:95px"><span class="sb s-wait">Aguardando</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><button class="asb" onclick="openModal(&#39;sub&#39;,2,null)">+ subtarefa</button></td><td class="col-st" style="width:95px"></td></tr><tr class="pr" style="height: 37px;"><td style="width:185px;max-width:185px"><div class="name-cell">
+        <button class="tog" onclick="toggleCollapse(3)">–</button>
+        <span class="nm" onclick="openModal(&#39;project&#39;,3,null)" title="Reforma Cobertura">Reforma Cobertura</span>
+        <span class="ow">Ana P.</span>
+      </div></td><td class="col-st" style="width:95px"><span class="sb s-prog">Em andamento</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><button class="asb" onclick="openModal(&#39;sub&#39;,3,null)">+ subtarefa</button></td><td class="col-st" style="width:95px"></td></tr><tr class="pr" style="height: 37px;"><td style="width:185px;max-width:185px"><div class="name-cell">
+        <button class="tog" onclick="toggleCollapse(4)">▼</button>
+        <span class="nm" onclick="openModal(&#39;project&#39;,4,null)" title="Condomínio Leste">Condomínio Leste</span>
+        <span class="ow">Rafael S.</span>
+      </div></td><td class="col-st" style="width:95px"><span class="sb s-wait">Aguardando</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><span class="sn" onclick="openModal(&#39;sub&#39;,4,41)" title="Viabilidade">Viabilidade</span></td><td class="col-st" style="width:95px"><span class="sb s-wait">Aguardando</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><button class="asb" onclick="openModal(&#39;sub&#39;,4,null)">+ subtarefa</button></td><td class="col-st" style="width:95px"></td></tr><tr class="pr" style="height: 37px;"><td style="width:185px;max-width:185px"><div class="name-cell">
+        <button class="tog" onclick="toggleCollapse(5)">–</button>
+        <span class="nm" onclick="openModal(&#39;project&#39;,5,null)" title="Interiores Apt 42">Interiores Apt 42</span>
+        <span class="ow">Julia R.</span>
+      </div></td><td class="col-st" style="width:95px"><span class="sb s-late">Atrasado</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><button class="asb" onclick="openModal(&#39;sub&#39;,5,null)">+ subtarefa</button></td><td class="col-st" style="width:95px"></td></tr></tbody></table></div>
       <div class="scroll-body-wrap" id="sbw">
         <div class="scroll-body" id="sb">
-          <table id="sbt"><tbody id="sbr"></tbody></table>
-          <svg id="arrow-svg"></svg>
+          <table id="sbt" style="min-width: 1590px; width: 100%;"><tbody id="sbr"><tr class="pr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:53px"></div><div class="gl" style="left:106px"></div><div class="gl" style="left:159px"></div><div class="gl" style="left:212px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:318px"></div><div class="gl" style="left:371px"></div><div class="gl" style="left:424px"></div><div class="gl" style="left:477px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:583px"></div><div class="gl" style="left:636px"></div><div class="gl" style="left:689px"></div><div class="gl" style="left:742px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:848px"></div><div class="gl" style="left:901px"></div><div class="gl" style="left:954px"></div><div class="gl" style="left:1007px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1113px"></div><div class="gl" style="left:1166px"></div><div class="gl" style="left:1219px"></div><div class="gl" style="left:1272px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1378px"></div><div class="gl" style="left:1431px"></div><div class="gl" style="left:1484px"></div><div class="gl" style="left:1537px"></div><div class="bar" data-pid="1" style="left:159px;width:7208px;background:#C0DD97;color:#173404">
+        <div class="hl" data-pid="1" data-side="l"></div>
+        <span style="pointer-events:none;overflow:hidden;text-overflow:ellipsis">Residência Silva</span>
+        <div class="hr" data-pid="1" data-side="r"></div>
+      </div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:53px"></div><div class="gl" style="left:106px"></div><div class="gl" style="left:159px"></div><div class="gl" style="left:212px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:318px"></div><div class="gl" style="left:371px"></div><div class="gl" style="left:424px"></div><div class="gl" style="left:477px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:583px"></div><div class="gl" style="left:636px"></div><div class="gl" style="left:689px"></div><div class="gl" style="left:742px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:848px"></div><div class="gl" style="left:901px"></div><div class="gl" style="left:954px"></div><div class="gl" style="left:1007px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1113px"></div><div class="gl" style="left:1166px"></div><div class="gl" style="left:1219px"></div><div class="gl" style="left:1272px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1378px"></div><div class="gl" style="left:1431px"></div><div class="gl" style="left:1484px"></div><div class="gl" style="left:1537px"></div><div class="bar" data-pid="1" data-sid="11" style="left:159px;width:1431px;background:#C0DD97;color:#173404;height:12px">
+        <div class="hl" data-pid="1" data-sid="11" data-side="l"></div>
+        <span style="pointer-events:none;font-size:9px;flex-shrink:0">✓</span>
+        <span style="pointer-events:none;font-size:9px;opacity:.85;flex:1;text-align:center">27d</span>
+        <div class="hr" data-pid="1" data-sid="11" data-side="r"></div>
+      </div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:53px"></div><div class="gl" style="left:106px"></div><div class="gl" style="left:159px"></div><div class="gl" style="left:212px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:318px"></div><div class="gl" style="left:371px"></div><div class="gl" style="left:424px"></div><div class="gl" style="left:477px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:583px"></div><div class="gl" style="left:636px"></div><div class="gl" style="left:689px"></div><div class="gl" style="left:742px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:848px"></div><div class="gl" style="left:901px"></div><div class="gl" style="left:954px"></div><div class="gl" style="left:1007px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1113px"></div><div class="gl" style="left:1166px"></div><div class="gl" style="left:1219px"></div><div class="gl" style="left:1272px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1378px"></div><div class="gl" style="left:1431px"></div><div class="gl" style="left:1484px"></div><div class="gl" style="left:1537px"></div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:53px"></div><div class="gl" style="left:106px"></div><div class="gl" style="left:159px"></div><div class="gl" style="left:212px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:318px"></div><div class="gl" style="left:371px"></div><div class="gl" style="left:424px"></div><div class="gl" style="left:477px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:583px"></div><div class="gl" style="left:636px"></div><div class="gl" style="left:689px"></div><div class="gl" style="left:742px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:848px"></div><div class="gl" style="left:901px"></div><div class="gl" style="left:954px"></div><div class="gl" style="left:1007px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1113px"></div><div class="gl" style="left:1166px"></div><div class="gl" style="left:1219px"></div><div class="gl" style="left:1272px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1378px"></div><div class="gl" style="left:1431px"></div><div class="gl" style="left:1484px"></div><div class="gl" style="left:1537px"></div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:53px"></div><div class="gl" style="left:106px"></div><div class="gl" style="left:159px"></div><div class="gl" style="left:212px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:318px"></div><div class="gl" style="left:371px"></div><div class="gl" style="left:424px"></div><div class="gl" style="left:477px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:583px"></div><div class="gl" style="left:636px"></div><div class="gl" style="left:689px"></div><div class="gl" style="left:742px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:848px"></div><div class="gl" style="left:901px"></div><div class="gl" style="left:954px"></div><div class="gl" style="left:1007px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1113px"></div><div class="gl" style="left:1166px"></div><div class="gl" style="left:1219px"></div><div class="gl" style="left:1272px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1378px"></div><div class="gl" style="left:1431px"></div><div class="gl" style="left:1484px"></div><div class="gl" style="left:1537px"></div></div></td></tr><tr class="pr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:53px"></div><div class="gl" style="left:106px"></div><div class="gl" style="left:159px"></div><div class="gl" style="left:212px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:318px"></div><div class="gl" style="left:371px"></div><div class="gl" style="left:424px"></div><div class="gl" style="left:477px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:583px"></div><div class="gl" style="left:636px"></div><div class="gl" style="left:689px"></div><div class="gl" style="left:742px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:848px"></div><div class="gl" style="left:901px"></div><div class="gl" style="left:954px"></div><div class="gl" style="left:1007px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1113px"></div><div class="gl" style="left:1166px"></div><div class="gl" style="left:1219px"></div><div class="gl" style="left:1272px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1378px"></div><div class="gl" style="left:1431px"></div><div class="gl" style="left:1484px"></div><div class="gl" style="left:1537px"></div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:53px"></div><div class="gl" style="left:106px"></div><div class="gl" style="left:159px"></div><div class="gl" style="left:212px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:318px"></div><div class="gl" style="left:371px"></div><div class="gl" style="left:424px"></div><div class="gl" style="left:477px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:583px"></div><div class="gl" style="left:636px"></div><div class="gl" style="left:689px"></div><div class="gl" style="left:742px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:848px"></div><div class="gl" style="left:901px"></div><div class="gl" style="left:954px"></div><div class="gl" style="left:1007px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1113px"></div><div class="gl" style="left:1166px"></div><div class="gl" style="left:1219px"></div><div class="gl" style="left:1272px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1378px"></div><div class="gl" style="left:1431px"></div><div class="gl" style="left:1484px"></div><div class="gl" style="left:1537px"></div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:53px"></div><div class="gl" style="left:106px"></div><div class="gl" style="left:159px"></div><div class="gl" style="left:212px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:318px"></div><div class="gl" style="left:371px"></div><div class="gl" style="left:424px"></div><div class="gl" style="left:477px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:583px"></div><div class="gl" style="left:636px"></div><div class="gl" style="left:689px"></div><div class="gl" style="left:742px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:848px"></div><div class="gl" style="left:901px"></div><div class="gl" style="left:954px"></div><div class="gl" style="left:1007px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1113px"></div><div class="gl" style="left:1166px"></div><div class="gl" style="left:1219px"></div><div class="gl" style="left:1272px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1378px"></div><div class="gl" style="left:1431px"></div><div class="gl" style="left:1484px"></div><div class="gl" style="left:1537px"></div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:53px"></div><div class="gl" style="left:106px"></div><div class="gl" style="left:159px"></div><div class="gl" style="left:212px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:318px"></div><div class="gl" style="left:371px"></div><div class="gl" style="left:424px"></div><div class="gl" style="left:477px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:583px"></div><div class="gl" style="left:636px"></div><div class="gl" style="left:689px"></div><div class="gl" style="left:742px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:848px"></div><div class="gl" style="left:901px"></div><div class="gl" style="left:954px"></div><div class="gl" style="left:1007px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1113px"></div><div class="gl" style="left:1166px"></div><div class="gl" style="left:1219px"></div><div class="gl" style="left:1272px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1378px"></div><div class="gl" style="left:1431px"></div><div class="gl" style="left:1484px"></div><div class="gl" style="left:1537px"></div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:53px"></div><div class="gl" style="left:106px"></div><div class="gl" style="left:159px"></div><div class="gl" style="left:212px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:318px"></div><div class="gl" style="left:371px"></div><div class="gl" style="left:424px"></div><div class="gl" style="left:477px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:583px"></div><div class="gl" style="left:636px"></div><div class="gl" style="left:689px"></div><div class="gl" style="left:742px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:848px"></div><div class="gl" style="left:901px"></div><div class="gl" style="left:954px"></div><div class="gl" style="left:1007px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1113px"></div><div class="gl" style="left:1166px"></div><div class="gl" style="left:1219px"></div><div class="gl" style="left:1272px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1378px"></div><div class="gl" style="left:1431px"></div><div class="gl" style="left:1484px"></div><div class="gl" style="left:1537px"></div></div></td></tr><tr class="pr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:53px"></div><div class="gl" style="left:106px"></div><div class="gl" style="left:159px"></div><div class="gl" style="left:212px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:318px"></div><div class="gl" style="left:371px"></div><div class="gl" style="left:424px"></div><div class="gl" style="left:477px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:583px"></div><div class="gl" style="left:636px"></div><div class="gl" style="left:689px"></div><div class="gl" style="left:742px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:848px"></div><div class="gl" style="left:901px"></div><div class="gl" style="left:954px"></div><div class="gl" style="left:1007px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1113px"></div><div class="gl" style="left:1166px"></div><div class="gl" style="left:1219px"></div><div class="gl" style="left:1272px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1378px"></div><div class="gl" style="left:1431px"></div><div class="gl" style="left:1484px"></div><div class="gl" style="left:1537px"></div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:53px"></div><div class="gl" style="left:106px"></div><div class="gl" style="left:159px"></div><div class="gl" style="left:212px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:318px"></div><div class="gl" style="left:371px"></div><div class="gl" style="left:424px"></div><div class="gl" style="left:477px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:583px"></div><div class="gl" style="left:636px"></div><div class="gl" style="left:689px"></div><div class="gl" style="left:742px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:848px"></div><div class="gl" style="left:901px"></div><div class="gl" style="left:954px"></div><div class="gl" style="left:1007px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1113px"></div><div class="gl" style="left:1166px"></div><div class="gl" style="left:1219px"></div><div class="gl" style="left:1272px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1378px"></div><div class="gl" style="left:1431px"></div><div class="gl" style="left:1484px"></div><div class="gl" style="left:1537px"></div></div></td></tr><tr class="pr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:53px"></div><div class="gl" style="left:106px"></div><div class="gl" style="left:159px"></div><div class="gl" style="left:212px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:318px"></div><div class="gl" style="left:371px"></div><div class="gl" style="left:424px"></div><div class="gl" style="left:477px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:583px"></div><div class="gl" style="left:636px"></div><div class="gl" style="left:689px"></div><div class="gl" style="left:742px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:848px"></div><div class="gl" style="left:901px"></div><div class="gl" style="left:954px"></div><div class="gl" style="left:1007px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1113px"></div><div class="gl" style="left:1166px"></div><div class="gl" style="left:1219px"></div><div class="gl" style="left:1272px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1378px"></div><div class="gl" style="left:1431px"></div><div class="gl" style="left:1484px"></div><div class="gl" style="left:1537px"></div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:53px"></div><div class="gl" style="left:106px"></div><div class="gl" style="left:159px"></div><div class="gl" style="left:212px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:318px"></div><div class="gl" style="left:371px"></div><div class="gl" style="left:424px"></div><div class="gl" style="left:477px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:583px"></div><div class="gl" style="left:636px"></div><div class="gl" style="left:689px"></div><div class="gl" style="left:742px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:848px"></div><div class="gl" style="left:901px"></div><div class="gl" style="left:954px"></div><div class="gl" style="left:1007px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1113px"></div><div class="gl" style="left:1166px"></div><div class="gl" style="left:1219px"></div><div class="gl" style="left:1272px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1378px"></div><div class="gl" style="left:1431px"></div><div class="gl" style="left:1484px"></div><div class="gl" style="left:1537px"></div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:53px"></div><div class="gl" style="left:106px"></div><div class="gl" style="left:159px"></div><div class="gl" style="left:212px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:318px"></div><div class="gl" style="left:371px"></div><div class="gl" style="left:424px"></div><div class="gl" style="left:477px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:583px"></div><div class="gl" style="left:636px"></div><div class="gl" style="left:689px"></div><div class="gl" style="left:742px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:848px"></div><div class="gl" style="left:901px"></div><div class="gl" style="left:954px"></div><div class="gl" style="left:1007px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1113px"></div><div class="gl" style="left:1166px"></div><div class="gl" style="left:1219px"></div><div class="gl" style="left:1272px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1378px"></div><div class="gl" style="left:1431px"></div><div class="gl" style="left:1484px"></div><div class="gl" style="left:1537px"></div></div></td></tr><tr class="pr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:53px"></div><div class="gl" style="left:106px"></div><div class="gl" style="left:159px"></div><div class="gl" style="left:212px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:318px"></div><div class="gl" style="left:371px"></div><div class="gl" style="left:424px"></div><div class="gl" style="left:477px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:583px"></div><div class="gl" style="left:636px"></div><div class="gl" style="left:689px"></div><div class="gl" style="left:742px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:848px"></div><div class="gl" style="left:901px"></div><div class="gl" style="left:954px"></div><div class="gl" style="left:1007px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1113px"></div><div class="gl" style="left:1166px"></div><div class="gl" style="left:1219px"></div><div class="gl" style="left:1272px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1378px"></div><div class="gl" style="left:1431px"></div><div class="gl" style="left:1484px"></div><div class="gl" style="left:1537px"></div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:53px"></div><div class="gl" style="left:106px"></div><div class="gl" style="left:159px"></div><div class="gl" style="left:212px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:318px"></div><div class="gl" style="left:371px"></div><div class="gl" style="left:424px"></div><div class="gl" style="left:477px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:583px"></div><div class="gl" style="left:636px"></div><div class="gl" style="left:689px"></div><div class="gl" style="left:742px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:848px"></div><div class="gl" style="left:901px"></div><div class="gl" style="left:954px"></div><div class="gl" style="left:1007px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1113px"></div><div class="gl" style="left:1166px"></div><div class="gl" style="left:1219px"></div><div class="gl" style="left:1272px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1378px"></div><div class="gl" style="left:1431px"></div><div class="gl" style="left:1484px"></div><div class="gl" style="left:1537px"></div></div></td></tr></tbody></table>
+          <svg id="arrow-svg" width="1590" height="629"></svg>
         </div>
       </div>
     </div>
@@ -199,35 +241,125 @@ td{padding:4px 8px;vertical-align:middle;font-size:12px;overflow:hidden;height:3
   </div>
 </div>
 
+<!-- FIREBASE SDKs -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { getDatabase, ref, onValue, set } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCGOAmZzXmlERj6bFhzQxQE0csmdF0Zy5M",
+  authDomain: "archiflow-83256.firebaseapp.com",
+  databaseURL: "https://archiflow-83256-default-rtdb.firebaseio.com",
+  projectId: "archiflow-83256",
+  storageBucket: "archiflow-83256.firebasestorage.app",
+  messagingSenderId: "844055210781",
+  appId: "1:844055210781:web:d575230df271e481ee8ff4"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+const dataRef = ref(db, 'archiflow');
+
+// Expose to global scope
+window._fbAuth = auth;
+window._fbSignIn = (email, pass) => signInWithEmailAndPassword(auth, email, pass);
+window._fbSignOut = () => signOut(auth);
+window._fbSave = (data) => {
+  setSyncStatus('syncing');
+  set(dataRef, data)
+    .then(()=>setSyncStatus('synced'))
+    .catch(()=>setSyncStatus('error'));
+};
+window._fbListen = (cb) => onValue(dataRef, snap => cb(snap.val()));
+
+onAuthStateChanged(auth, user => {
+  if(user){
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='flex';
+    window._startApp();
+  } else {
+    document.getElementById('login-screen').style.display='flex';
+    document.getElementById('app').style.display='none';
+  }
+});
+</script>
+
 <script>
 'use strict';
-// ── CONSTANTS ─────────────────────────────────────────────
-const PWD = '@Gantt26';
-const STORAGE_KEY = 'dorini_gantt_v2';
 const COLORS = {prog:['#B5D4F4','#042C53'],ok:['#C0DD97','#173404'],wait:['#D3D1C7','#2C2C2A'],late:['#F7C1C1','#501313']};
 const SUB_COLORS = {prog:'#378ADD',ok:'#5A9020',wait:'#888780',late:'#E24B4A'};
 const SL = {prog:'Em andamento',ok:'Concluído',wait:'Aguardando',late:'Atrasado'};
 const SC = {prog:'s-prog',ok:'s-ok',wait:'s-wait',late:'s-late'};
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
-// ── STATE ─────────────────────────────────────────────────
 let projects=[], collapsed={}, viewStart=null, scale='week';
 let _mode=null, _pid=null, _sid=null, drag=null;
 let _tipo='blank', tplSubs=[];
+let _saving=false;
 
-// ── DOM CACHE ─────────────────────────────────────────────
 const D = id => document.getElementById(id);
 const EL = {};
 ['fh','fhr','sh','ht','gh','fb','fbt','fbr','sbw','sb','sbt','sbr','arrow-svg',
  'range-label','modal-overlay','modal-title','btn-del','f-name','f-start','f-end',
- 'f-dur','f-status','f-owner','f-owner-wrap','f-pred','app','li','lerr',
- 'sc-day','sc-week','sc-month'].forEach(id=>EL[id]=D(id));
+ 'f-dur','f-status','f-owner','f-owner-wrap','f-pred','app','li-email','li-pass','lerr',
+ 'sc-day','sc-week','sc-month','sync-dot','sync-label'].forEach(id=>EL[id]=D(id));
 
-// ── UTILS ─────────────────────────────────────────────────
 const toIso = d => new Date(d).toISOString().slice(0,10);
 const daysDiff = (a,b) => Math.round((new Date(b)-new Date(a))/86400000);
 const appW = () => EL['app'].offsetWidth || window.innerWidth || 1200;
-const addDays = (iso, n) => { const d=new Date(iso); d.setDate(d.getDate()+n); return toIso(d); };
+const addDays = (iso,n) => { const d=new Date(iso); d.setDate(d.getDate()+n); return toIso(d); };
+
+// ── SYNC STATUS ───────────────────────────────────────────
+function setSyncStatus(status){
+  const dot=EL['sync-dot'], lbl=EL['sync-label'];
+  dot.className=status;
+  if(status==='syncing') lbl.textContent='Salvando...';
+  else if(status==='synced') lbl.textContent='Sincronizado';
+  else if(status==='error') lbl.textContent='Erro ao salvar';
+  else lbl.textContent='';
+}
+
+// ── LOGIN / LOGOUT ────────────────────────────────────────
+function doLogin(){
+  const email=EL['li-email'].value.trim();
+  const pass=EL['li-pass'].value;
+  EL['lerr'].textContent='';
+  window._fbSignIn(email, pass).catch(err=>{
+    EL['lerr'].textContent='E-mail ou senha incorretos.';
+    EL['li-pass'].classList.add('err');
+    setTimeout(()=>EL['li-pass'].classList.remove('err'),400);
+  });
+}
+function doLogout(){ window._fbSignOut(); }
+EL['li-pass'].addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
+EL['li-email'].addEventListener('keydown',e=>{ if(e.key==='Enter') EL['li-pass'].focus(); });
+
+// ── APP START (called after auth) ─────────────────────────
+window._startApp = function(){
+  window._fbListen(data=>{
+    if(_saving) return; // skip remote update while saving locally
+    if(data){
+      projects=data.projects||[];
+      collapsed=data.collapsed||{};
+      scale=data.scale||'week';
+    } else {
+      projects=defProjects(); collapsed={};
+    }
+    if(!viewStart) initView();
+    updateScaleBtns();
+    render();
+    setSyncStatus('synced');
+  });
+};
+
+// ── SAVE ──────────────────────────────────────────────────
+function save(){
+  _saving=true;
+  window._fbSave({projects,collapsed,scale});
+  setTimeout(()=>{ _saving=false; },1000);
+}
 
 // ── SCALE / LAYOUT ────────────────────────────────────────
 function colWidths(){
@@ -238,36 +370,27 @@ function colWidths(){
 }
 function scaleCfg(){
   const w=appW(), cols=colWidths();
-  const avail=Math.max(w-cols.name-cols.status-2, 200);
+  const avail=Math.max(w-cols.name-cols.status-2,200);
   const mob=w<500;
-  const [du,wu,mu]=[mob?20:30, mob?16:24, 12];
-  return {
-    day:  {ud:1,  px:Math.max(mob?22:28, avail/du), u:du,
-           fmtU:d=>d.getDate()+'',
-           fmtG:d=>d.toLocaleDateString('pt-BR',{month:'short',year:'numeric'}), gb:'month'},
-    week: {ud:7,  px:Math.max(mob?38:52, avail/wu), u:wu,
-           fmtU:d=>d.getDate()+'/'+(d.getMonth()+1+'').padStart(2,'0'),
-           fmtG:d=>d.toLocaleDateString('pt-BR',{month:'short',year:'numeric'}), gb:'month'},
-    month:{ud:30, px:Math.max(mob?52:64, avail/mu), u:mu,
-           fmtU:d=>d.toLocaleDateString('pt-BR',{month:'short'}),
-           fmtG:d=>''+d.getFullYear(), gb:'year'}
+  const [du,wu,mu]=[mob?20:30,mob?16:24,12];
+  return{
+    day:  {ud:1,  px:Math.max(mob?22:28,avail/du),u:du,fmtU:d=>d.getDate()+'',fmtG:d=>d.toLocaleDateString('pt-BR',{month:'short',year:'numeric'}),gb:'month'},
+    week: {ud:7,  px:Math.max(mob?38:52,avail/wu),u:wu,fmtU:d=>d.getDate()+'/'+(d.getMonth()+1+'').padStart(2,'0'),fmtG:d=>d.toLocaleDateString('pt-BR',{month:'short',year:'numeric'}),gb:'month'},
+    month:{ud:30, px:Math.max(mob?52:64,avail/mu),u:mu,fmtU:d=>d.toLocaleDateString('pt-BR',{month:'short'}),fmtG:d=>''+d.getFullYear(),gb:'year'}
   };
 }
 function getUnits(){
-  const c=scaleCfg()[scale], units=[];
+  const c=scaleCfg()[scale],units=[];
   let cur=new Date(viewStart);
   for(let i=0;i<c.u;i++){units.push(new Date(cur));cur.setDate(cur.getDate()+c.ud);}
   return units;
 }
-function pxFor(date, units){
-  const c=scaleCfg()[scale];
-  return daysDiff(units[0], date)*(c.px/c.ud);
-}
+function pxFor(date,units){ const c=scaleCfg()[scale]; return daysDiff(units[0],date)*(c.px/c.ud); }
 function buildGroups(units){
-  const c=scaleCfg()[scale], g=[];
+  const c=scaleCfg()[scale],g=[];
   units.forEach(u=>{
     const key=c.gb==='month'?u.getFullYear()*100+u.getMonth():u.getFullYear();
-    if(!g.length||g[g.length-1].key!==key) g.push({key, lbl:c.fmtG(u), n:1});
+    if(!g.length||g[g.length-1].key!==key) g.push({key,lbl:c.fmtG(u),n:1});
     else g[g.length-1].n++;
   });
   return g;
@@ -276,7 +399,7 @@ function buildGroups(units){
 // ── DATA ──────────────────────────────────────────────────
 function defProjects(){
   const y=new Date().getFullYear();
-  return [
+  return[
     {id:1,name:'Residência Silva',  start:`${y}-01-15`,end:`${y}-05-30`,status:'ok',  owner:'Ana P.',   pred:null,subs:[
       {id:11,name:'Levantamento',   start:`${y}-01-15`,end:`${y}-02-10`,status:'ok',  pred:null},
       {id:12,name:'Projeto arq.',   start:`${y}-02-11`,end:`${y}-04-15`,status:'ok',  pred:null},
@@ -291,14 +414,6 @@ function defProjects(){
     {id:5,name:'Interiores Apt 42',start:`${y}-02-20`,end:`${y}-04-15`,status:'late',owner:'Julia R.', pred:null,subs:[]}
   ];
 }
-function load(){
-  try{
-    const d=JSON.parse(localStorage.getItem(STORAGE_KEY)||'');
-    projects=d.projects; collapsed=d.collapsed||{}; scale=d.scale||'week';
-  }catch{ projects=defProjects(); collapsed={}; }
-  if(!viewStart) initView();
-}
-function save(){ localStorage.setItem(STORAGE_KEY,JSON.stringify({projects,collapsed,scale})); }
 function initView(){
   const all=projects.flatMap(p=>[new Date(p.start),...(p.subs||[]).map(s=>new Date(s.start))]);
   const m=all.length?new Date(Math.min(...all)):new Date();
@@ -313,7 +428,7 @@ function getItem(pid,sid){
 function getItemByKey(key){
   if(!key) return null;
   if(key.startsWith('p_')) return projects.find(x=>x.id===+key.slice(2))||null;
-  const [,pid,sid]=key.split('_');
+  const[,pid,sid]=key.split('_');
   const p=projects.find(x=>x.id===+pid);
   return p?(p.subs||[]).find(s=>s.id===+sid)||null:null;
 }
@@ -330,36 +445,28 @@ function flatList(excludeKey){
 }
 
 // ── PROJECT DATE SYNC ─────────────────────────────────────
-// Project start/end always derives from its subtasks
 function syncProjectDates(pid){
   const p=projects.find(x=>x.id===pid); if(!p) return;
   const subs=p.subs||[]; if(!subs.length) return;
-  p.start=subs.reduce((m,s)=>s.start<m?s.start:m, subs[0].start);
-  p.end  =subs.reduce((m,s)=>s.end  >m?s.end  :m, subs[0].end);
+  p.start=subs.reduce((m,s)=>s.start<m?s.start:m,subs[0].start);
+  p.end  =subs.reduce((m,s)=>s.end  >m?s.end  :m,subs[0].end);
 }
-
-// Cascade subtask successors within a project (BFS)
-function cascadeSubSuccessors(pid, movedSid){
+function cascadeSubSuccessors(pid,movedSid){
   const p=projects.find(x=>x.id===pid); if(!p) return;
-  const subs=p.subs||[];
-  // Build pred→successors map
   const map={};
-  subs.forEach(s=>{ if(s.pred){(map[s.pred]=map[s.pred]||[]).push(s);} });
-  const q=['s_'+pid+'_'+movedSid], seen=new Set();
+  (p.subs||[]).forEach(s=>{ if(s.pred)(map[s.pred]=map[s.pred]||[]).push(s); });
+  const q=['s_'+pid+'_'+movedSid],seen=new Set();
   while(q.length){
-    const key=q.shift(); if(seen.has(key)){continue;} seen.add(key);
+    const key=q.shift(); if(seen.has(key)) continue; seen.add(key);
     (map[key]||[]).forEach(succ=>{
       const pred=getItemByKey(key); if(!pred) return;
       const dur=daysDiff(succ.start,succ.end);
-      succ.start=addDays(pred.end,1);
-      succ.end  =addDays(succ.start,dur);
+      succ.start=addDays(pred.end,1); succ.end=addDays(succ.start,dur);
       q.push('s_'+pid+'_'+succ.id);
     });
   }
 }
-
-// Cascade successor projects recursively (DFS via recursion)
-function cascadeProjectSuccessors(movedKey, seen=new Set()){
+function cascadeProjectSuccessors(movedKey,seen=new Set()){
   if(seen.has(movedKey)) return; seen.add(movedKey);
   const pred=getItemByKey(movedKey); if(!pred) return;
   projects.forEach(proj=>{
@@ -368,68 +475,38 @@ function cascadeProjectSuccessors(movedKey, seen=new Set()){
     (proj.subs||[]).forEach(s=>{s.start=addDays(s.start,delta);s.end=addDays(s.end,delta);});
     if(proj.subs?.length) syncProjectDates(proj.id);
     else{proj.start=addDays(pred.end,1);proj.end=addDays(proj.start,daysDiff(proj.start,proj.end));}
-    cascadeProjectSuccessors('p_'+proj.id, seen);
+    cascadeProjectSuccessors('p_'+proj.id,seen);
   });
 }
-
-// After any subtask change: cascade subs → sync project → cascade projects
-function afterSubChange(pid, movedSid){
-  cascadeSubSuccessors(pid, movedSid);
+function afterSubChange(pid,movedSid){
+  cascadeSubSuccessors(pid,movedSid);
   syncProjectDates(pid);
   cascadeProjectSuccessors('p_'+pid);
 }
 
-// ── LOGIN ─────────────────────────────────────────────────
-function doLogin(){
-  if(EL['li'].value===PWD){
-    sessionStorage.setItem('da','1');
-    D('login-screen').style.display='none';
-    EL['app'].style.display='flex';
-    load(); updateScaleBtns(); render();
-  }else{
-    EL['lerr'].textContent='Senha incorreta.';
-    EL['li'].classList.add('err'); EL['li'].value='';
-    setTimeout(()=>EL['li'].classList.remove('err'),400);
-  }
-}
-EL['li'].addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
-if(sessionStorage.getItem('da')==='1'){
-  D('login-screen').style.display='none';
-  EL['app'].style.display='flex';
-}
-
 // ── NAVIGATION ────────────────────────────────────────────
 function setScale(s){
-  // Calcula o dia exato que está no centro da tela (considerando scroll)
   const oldCfg=scaleCfg()[scale];
-  const ppdOld=oldCfg.px/oldCfg.ud;
   const vpx=EL['sbw'].offsetWidth||300;
-  const scrollLeft=EL['sbw'].scrollLeft||0;
-  const centerDays=(scrollLeft+vpx/2)/ppdOld;
+  const centerDays=(EL['sbw'].scrollLeft+vpx/2)/(oldCfg.px/oldCfg.ud);
   const centerDate=new Date(+viewStart+Math.round(centerDays)*864e5);
-
   scale=s;
   const newCfg=scaleCfg()[scale];
-  const ppdNew=newCfg.px/newCfg.ud;
-  const newHalfDays=Math.round(vpx/2/ppdNew);
-  viewStart=new Date(+centerDate-newHalfDays*864e5);
-
+  viewStart=new Date(+centerDate-Math.round(vpx/2/(newCfg.px/newCfg.ud))*864e5);
   updateScaleBtns(); save(); render();
-
-  // Garante scroll zerado (centerDate já está centrado via viewStart)
   setTimeout(()=>{ EL['sbw'].scrollLeft=0; EL['sh'].scrollLeft=0; },0);
 }
 function shiftView(dir){ const c=scaleCfg()[scale]; viewStart=new Date(+viewStart+dir*c.ud*864e5); render(); }
 function goToday(){
-  const c=scaleCfg()[scale], vpx=EL['sbw'].offsetWidth||300;
+  const c=scaleCfg()[scale],vpx=EL['sbw'].offsetWidth||300;
   const hd=Math.floor(vpx/2/(c.px/c.ud));
   const today=new Date(); today.setHours(0,0,0,0);
   viewStart=new Date(today); viewStart.setDate(viewStart.getDate()-hd);
   render();
   setTimeout(()=>{
     const tp=pxFor(today,getUnits());
-    const sc=Math.max(0,tp-vpx/2);
-    EL['sbw'].scrollLeft=sc; EL['sh'].scrollLeft=sc;
+    EL['sbw'].scrollLeft=Math.max(0,tp-vpx/2);
+    EL['sh'].scrollLeft=Math.max(0,tp-vpx/2);
   },50);
 }
 function updateScaleBtns(){
@@ -438,9 +515,9 @@ function updateScaleBtns(){
 
 // ── RENDER ────────────────────────────────────────────────
 function render(){
-  const cfg=scaleCfg()[scale], cols=colWidths();
-  const showSt=cols.status>0, fixedW=cols.name+cols.status;
-  const units=getUnits(), totalPx=units.length*cfg.px;
+  const cfg=scaleCfg()[scale],cols=colWidths();
+  const showSt=cols.status>0,fixedW=cols.name+cols.status;
+  const units=getUnits(),totalPx=units.length*cfg.px;
   const lastDate=new Date(units[units.length-1]); lastDate.setDate(lastDate.getDate()+cfg.ud-1);
   const today=new Date(); today.setHours(0,0,0,0);
   const todayPx=pxFor(today,units);
@@ -465,13 +542,12 @@ function render(){
   const todayLine=todayPx>=0&&todayPx<=totalPx?`<div class="tl" style="left:${todayPx}px"></div>`:'';
   const gridLines=units.map((_,i)=>`<div class="gl" style="left:${i*cfg.px}px"></div>`).join('');
 
-  let fRows='', sRows='';
-
+  let fRows='',sRows='';
   function row(isProj,isSub,p,s){
     const rc=isProj?'pr':'sr';
-    let nc='', stc='';
+    let nc='',stc='';
     if(isProj){
-      const subs=p.subs||[], open=!collapsed[p.id];
+      const subs=p.subs||[],open=!collapsed[p.id];
       nc=`<div class="name-cell">
         <button class="tog" onclick="toggleCollapse(${p.id})">${subs.length?(open?'&#9660;':'&#9654;'):'&ndash;'}</button>
         <span class="nm" onclick="openModal('project',${p.id},null)" title="${p.name}">${p.name}</span>
@@ -488,17 +564,17 @@ function render(){
 
     let bar='';
     if(isProj){
-      const lx=pxFor(p.start,units), rx=pxFor(new Date(+new Date(p.end)+864e5),units);
-      const w=Math.max(8,rx-lx), vis=new Date(p.end)>=units[0]&&new Date(p.start)<=lastDate;
-      const [bg,fg]=COLORS[p.status]||COLORS.wait;
+      const lx=pxFor(p.start,units),rx=pxFor(new Date(+new Date(p.end)+864e5),units);
+      const w=Math.max(8,rx-lx),vis=new Date(p.end)>=units[0]&&new Date(p.start)<=lastDate;
+      const[bg,fg]=COLORS[p.status]||COLORS.wait;
       bar=vis?`<div class="bar" data-pid="${p.id}" style="left:${lx}px;width:${w}px;background:${bg};color:${fg}">
         <div class="hl" data-pid="${p.id}" data-side="l"></div>
         <span style="pointer-events:none;overflow:hidden;text-overflow:ellipsis">${p.name}</span>
         <div class="hr" data-pid="${p.id}" data-side="r"></div>
       </div>`:'';
     }else if(isSub){
-      const lx=pxFor(s.start,units), rx=pxFor(new Date(+new Date(s.end)+864e5),units);
-      const w=Math.max(6,rx-lx), vis=new Date(s.end)>=units[0]&&new Date(s.start)<=lastDate;
+      const lx=pxFor(s.start,units),rx=pxFor(new Date(+new Date(s.end)+864e5),units);
+      const w=Math.max(6,rx-lx),vis=new Date(s.end)>=units[0]&&new Date(s.start)<=lastDate;
       const done=s.status==='ok';
       const bg=done?'#C0DD97':SUB_COLORS[s.status]||SUB_COLORS.wait;
       const fg=done?'#173404':'#fff';
@@ -524,41 +600,36 @@ function render(){
   syncHeights(); drawArrows(units,totalPx); bindDrag();
 }
 
-// ── SYNC HEIGHTS ──────────────────────────────────────────
 function syncHeights(){
-  const fr=EL['fbr'].rows, sr=EL['sbr'].rows;
+  const fr=EL['fbr'].rows,sr=EL['sbr'].rows;
   for(let i=0;i<Math.min(fr.length,sr.length);i++){
     const h=Math.max(fr[i].offsetHeight,sr[i].offsetHeight);
     fr[i].style.height=h+'px'; sr[i].style.height=h+'px';
   }
-  const fh=EL['fh'].querySelector('table'), sh=EL['ht'];
+  const fh=EL['fh'].querySelector('table'),sh=EL['ht'];
   const hh=Math.max(fh.offsetHeight,sh.offsetHeight);
   fh.style.height=hh+'px'; sh.style.height=hh+'px';
 }
 
-// ── ARROWS ────────────────────────────────────────────────
 function drawArrows(units,totalPx){
   const svg=EL['arrow-svg'];
   svg.innerHTML='';
   svg.setAttribute('width',totalPx);
   svg.setAttribute('height',EL['sbt'].offsetHeight);
   if(!projects.some(p=>p.pred||(p.subs||[]).some(s=>s.pred))) return;
-
   const rowMap={};let ri=0;
   projects.forEach(p=>{
     rowMap['p_'+p.id]=ri++;
     if(!collapsed[p.id]){(p.subs||[]).forEach(s=>{rowMap['s_'+p.id+'_'+s.id]=ri++;});ri++;}
   });
   const rows=EL['sbr'].rows;
-  const yPos=[]; let acc=0;
+  const yPos=[];let acc=0;
   for(let i=0;i<rows.length;i++){const h=rows[i].offsetHeight||36;yPos[i]=acc+h/2;acc+=h;}
-
   const flat=[];
   projects.forEach(p=>{
     flat.push({key:'p_'+p.id,item:p});
     if(!collapsed[p.id])(p.subs||[]).forEach(s=>flat.push({key:'s_'+p.id+'_'+s.id,item:s}));
   });
-
   flat.forEach(({key,item})=>{
     if(!item.pred) return;
     const pred=getItemByKey(item.pred); if(!pred) return;
@@ -567,9 +638,7 @@ function drawArrows(units,totalPx){
     const y1=yPos[fr],y2=yPos[tr]; if(y1==null||y2==null) return;
     const x1=pxFor(new Date(+new Date(pred.end)+864e5),units);
     const x2=pxFor(new Date(item.start),units);
-    const d=x2>x1+10
-      ?`M${x1},${y1} H${(x1+x2)/2} V${y2} H${x2}`
-      :`M${x1},${y1} H${x1+14} V${(y1+y2)/2} H${x2-14} V${y2} H${x2}`;
+    const d=x2>x1+10?`M${x1},${y1} H${(x1+x2)/2} V${y2} H${x2}`:`M${x1},${y1} H${x1+14} V${(y1+y2)/2} H${x2-14} V${y2} H${x2}`;
     const path=document.createElementNS(SVG_NS,'path');
     path.setAttribute('d',d);path.setAttribute('class','al');svg.appendChild(path);
     const arr=document.createElementNS(SVG_NS,'polygon');
@@ -578,14 +647,13 @@ function drawArrows(units,totalPx){
   });
 }
 
-// ── DRAG ──────────────────────────────────────────────────
 function bindDrag(){
   document.querySelectorAll('.bar').forEach(bar=>{
     bar.onmousedown=bar.ontouchstart=e=>{
       const isTouch=e.type==='touchstart';
       if(!isTouch) e.preventDefault();
       if(e.target.classList.contains('hl')||e.target.classList.contains('hr')) return;
-      const pid=+bar.dataset.pid, sid=bar.dataset.sid?+bar.dataset.sid:null;
+      const pid=+bar.dataset.pid,sid=bar.dataset.sid?+bar.dataset.sid:null;
       const item=getItem(pid,sid); if(!item) return;
       const subOrig=sid?null:(item.subs||[]).map(s=>({id:s.id,start:s.start,end:s.end}));
       drag={pid,sid,mode:'move',sx:(isTouch?e.touches[0]:e).clientX,os:item.start,oe:item.end,subOrig};
@@ -596,7 +664,7 @@ function bindDrag(){
       const isTouch=e.type==='touchstart';
       if(!isTouch) e.preventDefault();
       e.stopPropagation();
-      const pid=+h.dataset.pid, sid=h.dataset.sid?+h.dataset.sid:null;
+      const pid=+h.dataset.pid,sid=h.dataset.sid?+h.dataset.sid:null;
       const item=getItem(pid,sid); if(!item) return;
       drag={pid,sid,mode:h.dataset.side,sx:(isTouch?e.touches[0]:e).clientX,os:item.start,oe:item.end};
     };
@@ -608,20 +676,16 @@ function applyDrag(clientX){
   const c=scaleCfg()[scale];
   const days=Math.round((clientX-drag.sx)/(c.px/c.ud));
   const item=getItem(drag.pid,drag.sid); if(!item) return;
-
   if(drag.mode==='move'){
     item.start=addDays(drag.os,days); item.end=addDays(drag.oe,days);
     if(!drag.sid){
-      // Project drag: shift all subtasks by same delta
       drag.subOrig?.forEach(o=>{
         const s=(item.subs||[]).find(x=>x.id===o.id); if(!s) return;
         s.start=addDays(o.start,days); s.end=addDays(o.end,days);
       });
       syncProjectDates(drag.pid);
       cascadeProjectSuccessors('p_'+drag.pid);
-    }else{
-      afterSubChange(drag.pid,drag.sid);
-    }
+    }else{ afterSubChange(drag.pid,drag.sid); }
   }else if(drag.mode==='l'){
     const ns=addDays(drag.os,days);
     if(ns<drag.oe){ item.start=ns; if(drag.sid) afterSubChange(drag.pid,drag.sid); }
@@ -632,12 +696,11 @@ function applyDrag(clientX){
   render();
 }
 
-window.addEventListener('mousemove', e=>{ if(drag) applyDrag(e.clientX); });
-window.addEventListener('mouseup',   ()=>{ if(drag){save();drag=null;} });
-window.addEventListener('touchmove', e=>{ if(drag) applyDrag(e.touches[0].clientX); },{passive:true});
-window.addEventListener('touchend',  ()=>{ if(drag){save();drag=null;} });
+window.addEventListener('mousemove',e=>{ if(drag) applyDrag(e.clientX); });
+window.addEventListener('mouseup',  ()=>{ if(drag){save();drag=null;} });
+window.addEventListener('touchmove',e=>{ if(drag) applyDrag(e.touches[0].clientX); },{passive:true});
+window.addEventListener('touchend', ()=>{ if(drag){save();drag=null;} });
 
-// ── HEADER PAN ────────────────────────────────────────────
 (()=>{
   const head=EL['sh']; let pan=null;
   head.style.cursor='grab';
@@ -652,17 +715,15 @@ window.addEventListener('touchend',  ()=>{ if(drag){save();drag=null;} });
   window.addEventListener('touchend',end);
 })();
 
-// ── SCROLL SYNC + WHEEL ───────────────────────────────────
 EL['sbw'].addEventListener('scroll',function(){
   EL['sh'].scrollLeft=this.scrollLeft;
   EL['fb'].scrollTop=this.scrollTop;
 });
 
 let wheelTimer=null;
-function handleWheel(e, scrollVertical){
-  const ax=Math.abs(e.deltaX), ay=Math.abs(e.deltaY);
+function handleWheel(e,scrollVertical){
+  const ax=Math.abs(e.deltaX),ay=Math.abs(e.deltaY);
   if(ax>2&&ax>ay){
-    // Trackpad 2-finger horizontal → navigate timeline
     e.preventDefault();
     const days=Math.round(e.deltaX/(scaleCfg()[scale].px/scaleCfg()[scale].ud));
     if(!days) return;
@@ -671,30 +732,25 @@ function handleWheel(e, scrollVertical){
     clearTimeout(wheelTimer);
     wheelTimer=setTimeout(()=>{render();setTimeout(()=>{EL['sbw'].scrollLeft=sx;EL['sh'].scrollLeft=sx;},0);},16);
   }else if(e.ctrlKey||e.metaKey){
-    // Ctrl/Cmd + scroll → navigate timeline
     e.preventDefault();
-    const c=scaleCfg()[scale], sx=EL['sbw'].scrollLeft;
+    const c=scaleCfg()[scale],sx=EL['sbw'].scrollLeft;
     viewStart=new Date(+viewStart+(e.deltaY>0?c.ud:-c.ud)*864e5);
     render();
     setTimeout(()=>{EL['sbw'].scrollLeft=sx;EL['sh'].scrollLeft=sx;},0);
-  }else if(scrollVertical){
-    EL['sbw'].scrollTop+=e.deltaY;
-  }
+  }else if(scrollVertical){ EL['sbw'].scrollTop+=e.deltaY; }
 }
 EL['sbw'].addEventListener('wheel',e=>handleWheel(e,false),{passive:false});
 EL['fb'].addEventListener('wheel', e=>handleWheel(e,true), {passive:false});
 EL['sh'].addEventListener('wheel', e=>handleWheel(e,false),{passive:false});
 
-// ── COLLAPSE ──────────────────────────────────────────────
 function toggleCollapse(id){ collapsed[id]=!collapsed[id]; save(); render(); }
 
-// ── MODAL HELPERS ─────────────────────────────────────────
 function calcEnd(){
-  const s=EL['f-start'].value, d=parseInt(EL['f-dur'].value);
+  const s=EL['f-start'].value,d=parseInt(EL['f-dur'].value);
   if(s&&d>0) EL['f-end'].value=addDays(s,d-1);
 }
 function calcDur(){
-  const s=EL['f-start'].value, e=EL['f-end'].value;
+  const s=EL['f-start'].value,e=EL['f-end'].value;
   if(s&&e){const d=daysDiff(s,e)+1;if(d>0)EL['f-dur'].value=d;}
 }
 function applyPred(){
@@ -705,7 +761,6 @@ function applyPred(){
   if(!dur) calcDur();
 }
 
-// ── TEMPLATE ──────────────────────────────────────────────
 const TPL_DEFAULTS=[
   {name:'Levantamento e Dados',dur:''},
   {name:'Estudo Preliminar',dur:''},
@@ -724,9 +779,8 @@ function setTipo(tipo){
 }
 function syncTplState(){
   tplSubs.forEach((s,i)=>{
-    const n=D('tpl-name-'+i), d=D('tpl-dur-'+i);
-    if(n) s.name=n.value;
-    if(d) s.dur=d.value;
+    const n=D('tpl-name-'+i),d=D('tpl-dur-'+i);
+    if(n) s.name=n.value; if(d) s.dur=d.value;
   });
 }
 function addTplSub(){
@@ -735,7 +789,6 @@ function addTplSub(){
   setTimeout(()=>{const el=D('tpl-name-'+(tplSubs.length-1));if(el){el.focus();el.select();}},50);
 }
 function removeTplSub(i){ syncTplState(); tplSubs.splice(i,1); renderTplRows(); }
-
 function renderTplRows(){
   const start=D('t-start').value;
   let acc=start?new Date(start):null;
@@ -775,7 +828,7 @@ function calcTemplate(){
       const end=new Date(acc); end.setDate(end.getDate()+dur-1);
       el.textContent=acc.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'})+' – '+end.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
       acc=new Date(end); acc.setDate(acc.getDate()+1);
-    }else{el.innerHTML='&nbsp;';}
+    }else{ el.innerHTML='&nbsp;'; }
   });
 }
 function saveTemplate(){
@@ -783,7 +836,7 @@ function saveTemplate(){
   const name=D('t-name').value.trim(); if(!name) return;
   const start=D('t-start').value; if(!start) return;
   const owner=D('t-owner').value.trim();
-  const pid=Date.now(); const subs=[]; let acc=new Date(start), lastEnd=new Date(start);
+  const pid=Date.now(); const subs=[]; let acc=new Date(start),lastEnd=new Date(start);
   tplSubs.forEach((s,i)=>{
     const dur=parseInt(s.dur)||1;
     const sid=pid+i+1;
@@ -795,7 +848,6 @@ function saveTemplate(){
   save(); closeModal(); render();
 }
 
-// ── MODAL ─────────────────────────────────────────────────
 function openModal(mode,pid,sid){
   _mode=mode; _pid=pid; _sid=sid; _tipo='blank';
   const isEdit=pid&&(mode==='project'||(mode==='sub'&&sid));
@@ -807,11 +859,9 @@ function openModal(mode,pid,sid){
   D('f-standard').style.display='block';
   D('f-template').style.display='none';
   D('btn-blank').classList.add('active'); D('btn-tpl').classList.remove('active');
-  // Init template
   tplSubs=TPL_DEFAULTS.map(s=>({...s}));
   D('t-name').value=''; D('t-owner').value=''; D('t-start').value=toIso(new Date());
-  // Fill standard fields
-  const item=isEdit?getItem(pid,sid):null, t=toIso(new Date());
+  const item=isEdit?getItem(pid,sid):null,t=toIso(new Date());
   EL['f-name'].value=item?.name||'';
   EL['f-start'].value=item?.start||t;
   EL['f-end'].value=item?.end||t;
@@ -835,8 +885,7 @@ function saveItem(){
   if(_tipo==='template'){ saveTemplate(); return; }
   const name=EL['f-name'].value.trim(); if(!name) return;
   const predKey=EL['f-pred'].value||null;
-  let start=EL['f-start'].value, end=EL['f-end'].value;
-  // Enforce predecessor constraint
+  let start=EL['f-start'].value,end=EL['f-end'].value;
   if(predKey){
     const pred=getItemByKey(predKey);
     if(pred?.end){
@@ -868,11 +917,7 @@ function deleteItem(){
 }
 EL['modal-overlay'].addEventListener('click',e=>{if(e.target===EL['modal-overlay'])closeModal();});
 
-// ── RESIZE ────────────────────────────────────────────────
 let rsz; window.addEventListener('resize',()=>{clearTimeout(rsz);rsz=setTimeout(render,150);});
-
-// ── INIT ──────────────────────────────────────────────────
-if(sessionStorage.getItem('da')==='1'){load();updateScaleBtns();render();}
 </script>
 
 
