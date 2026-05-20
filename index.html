@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0044)file:///C:/Users/User/Downloads/index_3.html -->
+<!-- saved from url=(0044)file:///C:/Users/User/Downloads/index_4.html -->
 <html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -878,11 +878,25 @@ function saveTemplate(){
     subs.push({id:sid,name:s.name||('Etapa '+(i+1)),start:toIso(acc),end:toIso(subEnd),status:'wait',pred:i>0?'s_'+pid+'_'+(pid+i):null});
     lastEnd=new Date(subEnd); acc=new Date(subEnd); acc.setDate(acc.getDate()+1);
   });
-  projects.push({id:pid,name,start,end:toIso(lastEnd),status:'wait',owner,pred:null,subs});
+  insertProjectSorted({id:pid,name,start,end:toIso(lastEnd),status:'wait',owner,pred:null,subs});
   save(); closeModal(); render();
 }
 
-// ── PROJECT REORDER ───────────────────────────────────────
+// Insere projeto na posição correta: numérico → alfabético crescente
+function insertProjectSorted(proj){
+  function sortKey(name){
+    // Extrai número inicial se existir (ex: "01 - Casa" → 1)
+    const m=name.match(/^(\d+)/);
+    return m?[+m[1], name.toLowerCase()]:[Infinity, name.toLowerCase()];
+  }
+  const[n,a]=sortKey(proj.name);
+  let idx=projects.length;
+  for(let i=0;i<projects.length;i++){
+    const[ni,ai]=sortKey(projects[i].name);
+    if(n<ni||(n===ni&&a<ai)){idx=i;break;}
+  }
+  projects.splice(idx,0,proj);
+}
 let reorder=null;
 
 function bindReorder(){
@@ -1015,7 +1029,7 @@ function saveItem(){
   const data={name,start,end,status:EL['f-status'].value,pred:predKey};
   if(_mode==='project'){
     if(_pid) Object.assign(projects.find(p=>p.id===_pid),data,{owner:EL['f-owner'].value.trim()});
-    else{data.id=Date.now();data.owner=EL['f-owner'].value.trim();data.subs=[];projects.push(data);}
+    else{data.id=Date.now();data.owner=EL['f-owner'].value.trim();data.subs=[];insertProjectSorted(data);}
   }else{
     const p=projects.find(x=>x.id===_pid); if(!p) return;
     if(!p.subs) p.subs=[];
