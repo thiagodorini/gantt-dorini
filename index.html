@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0044)file:///C:/Users/User/Downloads/index_7.html -->
+<!-- saved from url=(0044)file:///C:/Users/User/Downloads/index_8.html -->
 <html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -876,15 +876,11 @@ function renderTplRows(){
       ?`<button onclick="removeTplSub(${i})" style="background:none;border:none;cursor:pointer;color:#ccc;font-size:15px;padding:0 2px" onmouseover="this.style.color='#E24B4A'" onmouseout="this.style.color='#ccc'">&#10005;</button>`
       :'<span style="width:20px"></span>';
     return`<div class="tpl-row" id="tpl-row-${i}">
-      <div style="display:flex;flex-direction:column;flex:1;gap:3px;min-width:0">
-        <input id="tpl-name-${i}" type="text" value="${s.name.replace(/"/g,'&quot;')}" oninput="syncTplState()"
-          style="font-size:12px;font-weight:500;border:.5px solid #e0e0e0;border-radius:6px;padding:4px 7px;width:100%"/>
-        <span class="tpl-dates">${dateStr||'&nbsp;'}</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
-        <input id="tpl-dur-${i}" type="number" min="1" placeholder="dias" value="${s.dur||''}" oninput="syncTplState();calcTemplate()" style="width:58px"/>
-        ${rmBtn}
-      </div>
+      <input id="tpl-name-${i}" type="text" value="${s.name.replace(/"/g,'&quot;')}" oninput="syncTplState()"
+        style="flex:1;min-width:0;font-size:12px;font-weight:500;border:.5px solid #e0e0e0;border-radius:6px;padding:4px 7px"/>
+      <input id="tpl-dur-${i}" type="number" min="1" placeholder="dias" value="${s.dur||''}" oninput="syncTplState();calcTemplate()" style="width:56px;flex-shrink:0"/>
+      <span class="tpl-dates" style="min-width:100px;flex-shrink:0">${dateStr||'&nbsp;'}</span>
+      ${rmBtn}
     </div>`;
   }).join('');
   D('tpl-subs').innerHTML=rows+`<button onclick="addTplSub()" class="btn" style="width:100%;margin-top:6px;border-style:dashed;color:#aaa">+ Adicionar etapa</button>`;
