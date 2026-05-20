@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0045)file:///C:/Users/User/Downloads/index_16.html -->
+<!-- saved from url=(0045)file:///C:/Users/User/Downloads/index_11.html -->
 <html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -33,7 +33,7 @@ body{padding:1.5rem;display:flex;flex-direction:column}
 .btn-logout{font-size:11px;padding:4px 9px;border:.5px solid #e0e0e0;border-radius:8px;background:transparent;color:#aaa;cursor:pointer}
 .btn-logout:hover{color:#E24B4A;border-color:#F7C1C1}
 
-/* SYNC INDICATOR */
+/* SYNC */
 #sync-indicator{font-size:11px;color:#aaa;display:flex;align-items:center;gap:4px}
 #sync-dot{width:6px;height:6px;border-radius:50%;background:#ccc;flex-shrink:0;transition:background .3s}
 #sync-dot.synced{background:#5A9020}
@@ -44,11 +44,13 @@ body{padding:1.5rem;display:flex;flex-direction:column}
 /* GANTT LAYOUT */
 .gantt-outer{border:.5px solid #e0e0e0;border-radius:12px;overflow:hidden;display:flex;flex-direction:column;flex:1;min-height:0}
 .gantt-header-row{display:flex;border-bottom:.5px solid #e0e0e0;flex-shrink:0}
-.fixed-head{flex-shrink:0;background:#f9f9f7;border-right:.5px solid #d0d0d0}
+.fixed-head{flex-shrink:0;background:#f9f9f7;border-right:.5px solid #d0d0d0;position:relative}
+.col-resizer{position:absolute;top:0;right:-3px;width:6px;height:100%;cursor:col-resize;z-index:10;background:transparent}
+.col-resizer:hover,.col-resizer.dragging{background:rgba(24,95,165,.35);border-radius:3px}
 .scroll-head-wrap{flex:1;overflow:hidden;min-width:0}
 .scroll-head{overflow:hidden}
 .gantt-body-area{display:flex;flex:1;min-height:0}
-.fixed-body{flex-shrink:0;border-right:.5px solid #d0d0d0;overflow:hidden}
+.fixed-body{flex-shrink:0;border-right:.5px solid #d0d0d0;overflow:hidden;position:relative}
 .scroll-body-wrap{flex:1;overflow:auto;min-width:0;-webkit-overflow-scrolling:touch}
 .scroll-body{position:relative}
 
@@ -72,9 +74,20 @@ td{padding:4px 8px;vertical-align:middle;font-size:12px;overflow:hidden;height:3
 .sn:hover{color:#1a1a1a}
 .asb{font-size:11px;padding:2px 7px;border:.5px dashed #ccc;border-radius:8px;background:transparent;color:#aaa;cursor:pointer;margin-left:22px}
 .asb:hover{background:#fff;color:#1a1a1a}
+.drag-handle{font-size:13px;color:#ccc;cursor:grab;flex-shrink:0;padding:0 2px;line-height:1;user-select:none}
+.drag-handle:hover{color:#999}
+.sub-cell{display:flex;align-items:center;gap:4px;padding-left:22px}
+.sub-cell .sn{padding-left:0;flex:1;min-width:0}
+.lock-btn{background:none;border:none;cursor:pointer;padding:2px 4px;line-height:0;color:#ccc;flex-shrink:0;opacity:0;transition:opacity .15s,color .15s;border-radius:4px}
+.sr:hover .lock-btn,.lock-btn.locked{opacity:1}
+.lock-btn.locked{color:#F5A623}
+.lock-btn:hover{color:#1a1a1a;background:#f0f0f0}
+.lock-btn svg{display:block}
+tr.drop-above td{border-top:2px solid #185FA5}
+tr.drop-below td{border-bottom:2px solid #185FA5}
 
 /* STATUS */
-.sb{font-size:10px;padding:2px 6px;border-radius:20px;white-space:nowrap;display:inline-block}
+.sb{font-size:10px;padding:2px 6px;border-radius:20px;white-space:nowrap;display:inline-block;cursor:pointer}
 .s-ok{background:#EAF3DE;color:#3B6D11}
 .s-prog{background:#E6F1FB;color:#185FA5}
 .s-wait{background:#F1EFE8;color:#5F5E5A}
@@ -87,7 +100,7 @@ td{padding:4px 8px;vertical-align:middle;font-size:12px;overflow:hidden;height:3
 .bar:active{cursor:grabbing;opacity:.8}
 .hl,.hr{position:absolute;top:0;bottom:0;width:6px;cursor:ew-resize;z-index:3}
 .hl{left:0}.hr{right:0}
-.tl{position:absolute;top:0;bottom:0;width:1.5px;background:#D85A30;pointer-events:none;z-index:4}
+.tl{position:absolute;top:0;bottom:0;pointer-events:none;z-index:1;background:rgba(216,90,48,.18)}
 .gl{position:absolute;top:0;bottom:0;width:.5px;background:#ebebeb;pointer-events:none}
 
 /* ARROWS */
@@ -100,7 +113,7 @@ td{padding:4px 8px;vertical-align:middle;font-size:12px;overflow:hidden;height:3
 
 /* MODAL */
 #modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;z-index:9999}
-.modal{background:#fff;border:.5px solid #ccc;border-radius:12px;padding:1.5rem;width:440px;max-width:96vw;box-shadow:0 8px 32px rgba(0,0,0,.12)}
+.modal{background:#fff;border:.5px solid #ccc;border-radius:12px;padding:1.5rem;width:440px;max-width:96vw;box-shadow:0 8px 32px rgba(0,0,0,.12);max-height:92vh;overflow-y:auto}
 .modal h3{font-size:14px;font-weight:600;margin-bottom:1.25rem}
 .field{margin-bottom:12px}
 .field label{font-size:11px;color:#888;display:block;margin-bottom:4px;font-weight:500}
@@ -110,14 +123,9 @@ td{padding:4px 8px;vertical-align:middle;font-size:12px;overflow:hidden;height:3
 .mact{display:flex;gap:8px;justify-content:flex-end;margin-top:1.25rem}
 .del-btn{margin-right:auto;color:#A32D2D;border:.5px solid #F7C1C1;background:transparent;font-size:12px;padding:6px 12px;border-radius:8px;cursor:pointer}
 .del-btn:hover{background:#FCEBEB}
-.drag-handle{font-size:13px;color:#ccc;cursor:grab;flex-shrink:0;padding:0 2px;line-height:1;user-select:none}
-.drag-handle:hover{color:#999}
-.drag-handle:active{cursor:grabbing}
-tr.drop-above td{border-top:2px solid #185FA5}
-tr.drop-below td{border-bottom:2px solid #185FA5}
 .tpl-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;padding:7px 10px;background:#f9f9f7;border-radius:8px;border:.5px solid #ebebeb}
-.tpl-row input[type=number]{width:60px;padding:5px 8px;font-size:12px;border:.5px solid #ccc;border-radius:6px;text-align:center}
-.tpl-dates{font-size:11px;color:#aaa;white-space:nowrap;min-width:90px}
+.tpl-row input[type=number]{width:50px;padding:5px 8px;font-size:12px;border:.5px solid #ccc;border-radius:6px;text-align:center;flex-shrink:0}
+.tpl-dates{font-size:11px;color:#aaa;white-space:nowrap;flex-shrink:0}
 </style>
 </head>
 <body>
@@ -127,8 +135,8 @@ tr.drop-below td{border-bottom:2px solid #185FA5}
   <div id="login-box">
     <div class="lt">DORINI ARQUITETURA</div>
     <div class="ls">Archiflow</div>
-    <input id="li-email" type="email" placeholder="E-mail">
-    <input id="li-pass" type="password" placeholder="Senha">
+    <input id="li-email" type="email" placeholder="E-mail" onkeydown="if(event.key===&#39;Enter&#39;)D(&#39;li-pass&#39;).focus()">
+    <input id="li-pass" type="password" placeholder="Senha" onkeydown="if(event.key===&#39;Enter&#39;)doLogin()">
     <button onclick="doLogin()">Entrar</button>
     <div class="lerr" id="lerr"></div>
   </div>
@@ -139,126 +147,220 @@ tr.drop-below td{border-bottom:2px solid #185FA5}
   <div class="toolbar">
     <div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:80px;overflow:hidden">
       <span id="studio-name">DORINI ARQUITETURA</span>
-      <span id="range-label">01 de abr. de 2026 – 15 de set. de 2026</span>
+      <span id="range-label">22 de nov. de 2025 – 16 de nov. de 2026</span>
     </div>
     <div id="sync-indicator"><div id="sync-dot" class="synced"></div><span id="sync-label">Sincronizado</span></div>
     <button class="btn" id="sc-day" onclick="setScale(&#39;day&#39;)">Dia</button>
-    <button class="btn active" id="sc-week" onclick="setScale(&#39;week&#39;)">Semana</button>
-    <button class="btn" id="sc-month" onclick="setScale(&#39;month&#39;)">Mês</button>
+    <button class="btn" id="sc-week" onclick="setScale(&#39;week&#39;)">Semana</button>
+    <button class="btn active" id="sc-month" onclick="setScale(&#39;month&#39;)">Mês</button>
     <button class="btn" onclick="shiftView(-1)">‹</button>
     <button class="btn" onclick="goToday()">Hoje</button>
     <button class="btn" onclick="shiftView(1)">›</button>
     <button class="btn btn-primary" onclick="openModal(&#39;project&#39;,null,null)">+ Projeto</button>
-    <button class="btn-logout" onclick="doLogout()" title="Sair">Sair</button>
+    <button class="btn-logout" onclick="doLogout()">Sair</button>
   </div>
   <div class="gantt-outer">
     <div class="gantt-header-row">
-      <div class="fixed-head" id="fh"><table style="height: 54px;"><thead id="fhr"><tr><th style="width:185px">Projeto / Tarefa</th><th style="width:95px">Status</th></tr><tr><th></th><th></th></tr></thead></table></div>
+      <div class="fixed-head" id="fh"><table style="height: 80px;"><thead id="fhr"><tr><th style="width:185px">Projeto / Tarefa</th><th style="width:95px">Status</th></tr><tr><th></th><th></th></tr></thead></table><div class="col-resizer" id="col-resizer" title="Arraste para redimensionar"></div></div>
       <div class="scroll-head-wrap">
-        <div class="scroll-head" id="sh" style="cursor: grab;"><table id="ht" style="min-width: 1590px; width: 100%; height: 54px;"><thead id="gh"><tr><th class="gh c" colspan="5">abr. de 2026</th><th class="gh c" colspan="4">mai. de 2026</th><th class="gh c" colspan="4">jun. de 2026</th><th class="gh c" colspan="5">jul. de 2026</th><th class="gh c" colspan="4">ago. de 2026</th><th class="gh c" colspan="2">set. de 2026</th></tr><tr><th class="c" style="width:66.25px">1/04</th><th class="c" style="width:66.25px">8/04</th><th class="c" style="width:66.25px">15/04</th><th class="c" style="width:66.25px">22/04</th><th class="c gh" style="width:66.25px">29/04</th><th class="c" style="width:66.25px">6/05</th><th class="c" style="width:66.25px">13/05</th><th class="c" style="width:66.25px">20/05</th><th class="c gh" style="width:66.25px">27/05</th><th class="c" style="width:66.25px">3/06</th><th class="c" style="width:66.25px">10/06</th><th class="c" style="width:66.25px">17/06</th><th class="c gh" style="width:66.25px">24/06</th><th class="c" style="width:66.25px">1/07</th><th class="c" style="width:66.25px">8/07</th><th class="c" style="width:66.25px">15/07</th><th class="c" style="width:66.25px">22/07</th><th class="c gh" style="width:66.25px">29/07</th><th class="c" style="width:66.25px">5/08</th><th class="c" style="width:66.25px">12/08</th><th class="c" style="width:66.25px">19/08</th><th class="c gh" style="width:66.25px">26/08</th><th class="c" style="width:66.25px">2/09</th><th class="c" style="width:66.25px">9/09</th></tr></thead></table></div>
+        <div class="scroll-head" id="sh" style="cursor: grab;"><table id="ht" style="min-width: 1590px; width: 100%; height: 80px;"><thead id="gh"><tr><th class="gh c" colspan="2">2025</th><th class="gh c" colspan="10">2026</th></tr><tr><th class="c" style="width:132.5px;">nov.</th><th class="c gh" style="width:132.5px;">dez.</th><th class="c" style="width:132.5px;">jan.</th><th class="c" style="width:132.5px;">fev.</th><th class="c" style="width:132.5px;">mar.</th><th class="c" style="width:132.5px;">abr.</th><th class="c" style="width:132.5px;;background:rgba(216,90,48,.18)">mai.</th><th class="c" style="width:132.5px;">jun.</th><th class="c" style="width:132.5px;">jul.</th><th class="c" style="width:132.5px;">ago.</th><th class="c" style="width:132.5px;">set.</th><th class="c" style="width:132.5px;">out.</th></tr></thead></table></div>
       </div>
     </div>
     <div class="gantt-body-area">
       <div class="fixed-body" id="fb"><table id="fbt" style="width: 280px;"><tbody id="fbr"><tr class="pr" style="height: 37px;"><td style="width:185px;max-width:185px"><div class="name-cell">
+        <span class="drag-handle" data-pid="1779287166979" title="Arrastar para reordenar">↕</span>
+        <button class="tog" onclick="toggleCollapse(1779287166979)">▼</button>
+        <span class="nm" onclick="openModal(&#39;project&#39;,1779287166979,null)" title="284_ELO_Lages">284_ELO_Lages</span>
+        <span class="ow">Thiago</span>
+      </div></td><td class="col-st" style="width:95px"><span class="sb s-prog" onclick="cycleStatus(&#39;project&#39;,1779287166979,null)" title="Clique para alterar">Em andamento</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><div class="sub-cell">
+        <span class="sn" onclick="openModal(&#39;sub&#39;,1779287166979,1779287193793)" title="Projeto Legal">Projeto Legal</span>
+        <button class="lock-btn" onclick="toggleLock(1779287166979,1779287193793)" title="Travar data de início"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg></button>
+      </div></td><td class="col-st" style="width:95px"><span class="sb s-prog" onclick="cycleStatus(&#39;sub&#39;,1779287166979,1779287193793)" title="Clique para alterar">Em andamento</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><div class="sub-cell">
+        <span class="sn" onclick="openModal(&#39;sub&#39;,1779287166979,1779287199562)" title="Anteprojeto">Anteprojeto</span>
+        <button class="lock-btn" onclick="toggleLock(1779287166979,1779287199562)" title="Travar data de início"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg></button>
+      </div></td><td class="col-st" style="width:95px"><span class="sb s-prog" onclick="cycleStatus(&#39;sub&#39;,1779287166979,1779287199562)" title="Clique para alterar">Em andamento</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><div class="sub-cell">
+        <span class="sn" onclick="openModal(&#39;sub&#39;,1779287166979,1779287205558)" title="Projeto Executivo">Projeto Executivo</span>
+        <button class="lock-btn" onclick="toggleLock(1779287166979,1779287205558)" title="Travar data de início"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg></button>
+      </div></td><td class="col-st" style="width:95px"><span class="sb s-wait" onclick="cycleStatus(&#39;sub&#39;,1779287166979,1779287205558)" title="Clique para alterar">Aguardando</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><button class="asb" onclick="openModal(&#39;sub&#39;,1779287166979,null)">+ subtarefa</button></td><td class="col-st" style="width:95px"></td></tr><tr class="pr" style="height: 37px;"><td style="width:185px;max-width:185px"><div class="name-cell">
         <span class="drag-handle" data-pid="1779249615169" title="Arrastar para reordenar">↕</span>
         <button class="tog" onclick="toggleCollapse(1779249615169)">▼</button>
         <span class="nm" onclick="openModal(&#39;project&#39;,1779249615169,null)" title="286_JH_Lages">286_JH_Lages</span>
         <span class="ow">Thiago</span>
-      </div></td><td class="col-st" style="width:95px"><span class="sb s-wait" style="cursor:pointer" onclick="cycleStatus(&#39;project&#39;,1779249615169,null)" title="Clique para alterar status">Aguardando</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><span class="sn" onclick="openModal(&#39;sub&#39;,1779249615169,1779249615170)" title="Anteprojeto">Anteprojeto</span></td><td class="col-st" style="width:95px"><span class="sb s-wait" style="cursor:pointer" onclick="cycleStatus(&#39;sub&#39;,1779249615169,1779249615170)" title="Clique para alterar status">Aguardando</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><span class="sn" onclick="openModal(&#39;sub&#39;,1779249615169,1779249615171)" title="Projeto Executivo">Projeto Executivo</span></td><td class="col-st" style="width:95px"><span class="sb s-wait" style="cursor:pointer" onclick="cycleStatus(&#39;sub&#39;,1779249615169,1779249615171)" title="Clique para alterar status">Aguardando</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><button class="asb" onclick="openModal(&#39;sub&#39;,1779249615169,null)">+ subtarefa</button></td><td class="col-st" style="width:95px"></td></tr><tr class="pr" style="height: 37px;"><td style="width:185px;max-width:185px"><div class="name-cell">
+      </div></td><td class="col-st" style="width:95px"><span class="sb s-prog" onclick="cycleStatus(&#39;project&#39;,1779249615169,null)" title="Clique para alterar">Em andamento</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><div class="sub-cell">
+        <span class="sn" onclick="openModal(&#39;sub&#39;,1779249615169,1779249615170)" title="Anteprojeto">Anteprojeto</span>
+        <button class="lock-btn" onclick="toggleLock(1779249615169,1779249615170)" title="Travar data de início"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg></button>
+      </div></td><td class="col-st" style="width:95px"><span class="sb s-wait" onclick="cycleStatus(&#39;sub&#39;,1779249615169,1779249615170)" title="Clique para alterar">Aguardando</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><div class="sub-cell">
+        <span class="sn" onclick="openModal(&#39;sub&#39;,1779249615169,1779249615171)" title="Projeto Executivo">Projeto Executivo</span>
+        <button class="lock-btn" onclick="toggleLock(1779249615169,1779249615171)" title="Travar data de início"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg></button>
+      </div></td><td class="col-st" style="width:95px"><span class="sb s-wait" onclick="cycleStatus(&#39;sub&#39;,1779249615169,1779249615171)" title="Clique para alterar">Aguardando</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><button class="asb" onclick="openModal(&#39;sub&#39;,1779249615169,null)">+ subtarefa</button></td><td class="col-st" style="width:95px"></td></tr><tr class="pr" style="height: 37px;"><td style="width:185px;max-width:185px"><div class="name-cell">
         <span class="drag-handle" data-pid="1779249729592" title="Arrastar para reordenar">↕</span>
-        <button class="tog" onclick="toggleCollapse(1779249729592)">–</button>
+        <button class="tog" onclick="toggleCollapse(1779249729592)">▼</button>
         <span class="nm" onclick="openModal(&#39;project&#39;,1779249729592,null)" title="288_TR_Reserva da Pedra">288_TR_Reserva da Pedra</span>
         <span class="ow">Thiago</span>
-      </div></td><td class="col-st" style="width:95px"><span class="sb s-wait" style="cursor:pointer" onclick="cycleStatus(&#39;project&#39;,1779249729592,null)" title="Clique para alterar status">Aguardando</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><button class="asb" onclick="openModal(&#39;sub&#39;,1779249729592,null)">+ subtarefa</button></td><td class="col-st" style="width:95px"></td></tr><tr class="pr" style="height: 37px;"><td style="width:185px;max-width:185px"><div class="name-cell">
+      </div></td><td class="col-st" style="width:95px"><span class="sb s-prog" onclick="cycleStatus(&#39;project&#39;,1779249729592,null)" title="Clique para alterar">Em andamento</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><div class="sub-cell">
+        <span class="sn" onclick="openModal(&#39;sub&#39;,1779249729592,1779287866670)" title="Anteprojeto">Anteprojeto</span>
+        <button class="lock-btn" onclick="toggleLock(1779249729592,1779287866670)" title="Travar data de início"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg></button>
+      </div></td><td class="col-st" style="width:95px"><span class="sb s-prog" onclick="cycleStatus(&#39;sub&#39;,1779249729592,1779287866670)" title="Clique para alterar">Em andamento</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><button class="asb" onclick="openModal(&#39;sub&#39;,1779249729592,null)">+ subtarefa</button></td><td class="col-st" style="width:95px"></td></tr><tr class="pr" style="height: 37px;"><td style="width:185px;max-width:185px"><div class="name-cell">
         <span class="drag-handle" data-pid="1779250012115" title="Arrastar para reordenar">↕</span>
-        <button class="tog" onclick="toggleCollapse(1779250012115)">–</button>
+        <button class="tog" onclick="toggleCollapse(1779250012115)">▼</button>
         <span class="nm" onclick="openModal(&#39;project&#39;,1779250012115,null)" title="289_SD_Florianópolis">289_SD_Florianópolis</span>
         <span class="ow">Thiago</span>
-      </div></td><td class="col-st" style="width:95px"><span class="sb s-wait" style="cursor:pointer" onclick="cycleStatus(&#39;project&#39;,1779250012115,null)" title="Clique para alterar status">Aguardando</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><button class="asb" onclick="openModal(&#39;sub&#39;,1779250012115,null)">+ subtarefa</button></td><td class="col-st" style="width:95px"></td></tr><tr class="pr" style="height: 37px;"><td style="width:185px;max-width:185px"><div class="name-cell">
+      </div></td><td class="col-st" style="width:95px"><span class="sb s-prog" onclick="cycleStatus(&#39;project&#39;,1779250012115,null)" title="Clique para alterar">Em andamento</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><div class="sub-cell">
+        <span class="sn" onclick="openModal(&#39;sub&#39;,1779250012115,1779287568431)" title="Projeto Legal">Projeto Legal</span>
+        <button class="lock-btn locked" onclick="toggleLock(1779250012115,1779287568431)" title="Travada — clique para destravar"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></button>
+      </div></td><td class="col-st" style="width:95px"><span class="sb s-prog" onclick="cycleStatus(&#39;sub&#39;,1779250012115,1779287568431)" title="Clique para alterar">Em andamento</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><button class="asb" onclick="openModal(&#39;sub&#39;,1779250012115,null)">+ subtarefa</button></td><td class="col-st" style="width:95px"></td></tr><tr class="pr" style="height: 37px;"><td style="width:185px;max-width:185px"><div class="name-cell">
         <span class="drag-handle" data-pid="1779249018352" title="Arrastar para reordenar">↕</span>
         <button class="tog" onclick="toggleCollapse(1779249018352)">▼</button>
         <span class="nm" onclick="openModal(&#39;project&#39;,1779249018352,null)" title="291_GS_Fraiburgo">291_GS_Fraiburgo</span>
         <span class="ow">Thiago</span>
-      </div></td><td class="col-st" style="width:95px"><span class="sb s-wait" style="cursor:pointer" onclick="cycleStatus(&#39;project&#39;,1779249018352,null)" title="Clique para alterar status">Aguardando</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><span class="sn" onclick="openModal(&#39;sub&#39;,1779249018352,1779249018353)" title="Estudo Preliminar">Estudo Preliminar</span></td><td class="col-st" style="width:95px"><span class="sb s-wait" style="cursor:pointer" onclick="cycleStatus(&#39;sub&#39;,1779249018352,1779249018353)" title="Clique para alterar status">Aguardando</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><span class="sn" onclick="openModal(&#39;sub&#39;,1779249018352,1779249018354)" title="Projeto Legal">Projeto Legal</span></td><td class="col-st" style="width:95px"><span class="sb s-wait" style="cursor:pointer" onclick="cycleStatus(&#39;sub&#39;,1779249018352,1779249018354)" title="Clique para alterar status">Aguardando</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><span class="sn" onclick="openModal(&#39;sub&#39;,1779249018352,1779249018355)" title="Anteprojeto">Anteprojeto</span></td><td class="col-st" style="width:95px"><span class="sb s-wait" style="cursor:pointer" onclick="cycleStatus(&#39;sub&#39;,1779249018352,1779249018355)" title="Clique para alterar status">Aguardando</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><span class="sn" onclick="openModal(&#39;sub&#39;,1779249018352,1779249018356)" title="Projeto Executivo">Projeto Executivo</span></td><td class="col-st" style="width:95px"><span class="sb s-wait" style="cursor:pointer" onclick="cycleStatus(&#39;sub&#39;,1779249018352,1779249018356)" title="Clique para alterar status">Aguardando</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><button class="asb" onclick="openModal(&#39;sub&#39;,1779249018352,null)">+ subtarefa</button></td><td class="col-st" style="width:95px"></td></tr><tr class="pr" style="height: 37px;"><td style="width:185px;max-width:185px"><div class="name-cell">
+      </div></td><td class="col-st" style="width:95px"><span class="sb s-prog" onclick="cycleStatus(&#39;project&#39;,1779249018352,null)" title="Clique para alterar">Em andamento</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><div class="sub-cell">
+        <span class="sn" onclick="openModal(&#39;sub&#39;,1779249018352,1779249018353)" title="Estudo Preliminar">Estudo Preliminar</span>
+        <button class="lock-btn locked" onclick="toggleLock(1779249018352,1779249018353)" title="Travada — clique para destravar"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></button>
+      </div></td><td class="col-st" style="width:95px"><span class="sb s-wait" onclick="cycleStatus(&#39;sub&#39;,1779249018352,1779249018353)" title="Clique para alterar">Aguardando</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><div class="sub-cell">
+        <span class="sn" onclick="openModal(&#39;sub&#39;,1779249018352,1779249018354)" title="Projeto Legal">Projeto Legal</span>
+        <button class="lock-btn" onclick="toggleLock(1779249018352,1779249018354)" title="Travar data de início"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg></button>
+      </div></td><td class="col-st" style="width:95px"><span class="sb s-wait" onclick="cycleStatus(&#39;sub&#39;,1779249018352,1779249018354)" title="Clique para alterar">Aguardando</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><div class="sub-cell">
+        <span class="sn" onclick="openModal(&#39;sub&#39;,1779249018352,1779249018355)" title="Anteprojeto">Anteprojeto</span>
+        <button class="lock-btn" onclick="toggleLock(1779249018352,1779249018355)" title="Travar data de início"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg></button>
+      </div></td><td class="col-st" style="width:95px"><span class="sb s-wait" onclick="cycleStatus(&#39;sub&#39;,1779249018352,1779249018355)" title="Clique para alterar">Aguardando</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><div class="sub-cell">
+        <span class="sn" onclick="openModal(&#39;sub&#39;,1779249018352,1779249018356)" title="Projeto Executivo">Projeto Executivo</span>
+        <button class="lock-btn" onclick="toggleLock(1779249018352,1779249018356)" title="Travar data de início"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg></button>
+      </div></td><td class="col-st" style="width:95px"><span class="sb s-wait" onclick="cycleStatus(&#39;sub&#39;,1779249018352,1779249018356)" title="Clique para alterar">Aguardando</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><button class="asb" onclick="openModal(&#39;sub&#39;,1779249018352,null)">+ subtarefa</button></td><td class="col-st" style="width:95px"></td></tr><tr class="pr" style="height: 37px;"><td style="width:185px;max-width:185px"><div class="name-cell">
         <span class="drag-handle" data-pid="1779248239988" title="Arrastar para reordenar">↕</span>
         <button class="tog" onclick="toggleCollapse(1779248239988)">▼</button>
         <span class="nm" onclick="openModal(&#39;project&#39;,1779248239988,null)" title="292_MA_Florianópolis">292_MA_Florianópolis</span>
         <span class="ow">Thiago</span>
-      </div></td><td class="col-st" style="width:95px"><span class="sb s-wait" style="cursor:pointer" onclick="cycleStatus(&#39;project&#39;,1779248239988,null)" title="Clique para alterar status">Aguardando</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><span class="sn" onclick="openModal(&#39;sub&#39;,1779248239988,1779248239990)" title="Estudo Preliminar">Estudo Preliminar</span></td><td class="col-st" style="width:95px"><span class="sb s-prog" style="cursor:pointer" onclick="cycleStatus(&#39;sub&#39;,1779248239988,1779248239990)" title="Clique para alterar status">Em andamento</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><span class="sn" onclick="openModal(&#39;sub&#39;,1779248239988,1779248239991)" title="Projeto Legal">Projeto Legal</span></td><td class="col-st" style="width:95px"><span class="sb s-wait" style="cursor:pointer" onclick="cycleStatus(&#39;sub&#39;,1779248239988,1779248239991)" title="Clique para alterar status">Aguardando</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><span class="sn" onclick="openModal(&#39;sub&#39;,1779248239988,1779248239992)" title="Anteprojeto">Anteprojeto</span></td><td class="col-st" style="width:95px"><span class="sb s-wait" style="cursor:pointer" onclick="cycleStatus(&#39;sub&#39;,1779248239988,1779248239992)" title="Clique para alterar status">Aguardando</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><span class="sn" onclick="openModal(&#39;sub&#39;,1779248239988,1779248239993)" title="Projeto Executivo">Projeto Executivo</span></td><td class="col-st" style="width:95px"><span class="sb s-wait" style="cursor:pointer" onclick="cycleStatus(&#39;sub&#39;,1779248239988,1779248239993)" title="Clique para alterar status">Aguardando</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><button class="asb" onclick="openModal(&#39;sub&#39;,1779248239988,null)">+ subtarefa</button></td><td class="col-st" style="width:95px"></td></tr></tbody></table></div>
+      </div></td><td class="col-st" style="width:95px"><span class="sb s-prog" onclick="cycleStatus(&#39;project&#39;,1779248239988,null)" title="Clique para alterar">Em andamento</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><div class="sub-cell">
+        <span class="sn" onclick="openModal(&#39;sub&#39;,1779248239988,1779248239990)" title="Estudo Preliminar">Estudo Preliminar</span>
+        <button class="lock-btn locked" onclick="toggleLock(1779248239988,1779248239990)" title="Travada — clique para destravar"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></button>
+      </div></td><td class="col-st" style="width:95px"><span class="sb s-prog" onclick="cycleStatus(&#39;sub&#39;,1779248239988,1779248239990)" title="Clique para alterar">Em andamento</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><div class="sub-cell">
+        <span class="sn" onclick="openModal(&#39;sub&#39;,1779248239988,1779248239991)" title="Projeto Legal">Projeto Legal</span>
+        <button class="lock-btn" onclick="toggleLock(1779248239988,1779248239991)" title="Travar data de início"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg></button>
+      </div></td><td class="col-st" style="width:95px"><span class="sb s-wait" onclick="cycleStatus(&#39;sub&#39;,1779248239988,1779248239991)" title="Clique para alterar">Aguardando</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><div class="sub-cell">
+        <span class="sn" onclick="openModal(&#39;sub&#39;,1779248239988,1779248239992)" title="Anteprojeto">Anteprojeto</span>
+        <button class="lock-btn" onclick="toggleLock(1779248239988,1779248239992)" title="Travar data de início"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg></button>
+      </div></td><td class="col-st" style="width:95px"><span class="sb s-wait" onclick="cycleStatus(&#39;sub&#39;,1779248239988,1779248239992)" title="Clique para alterar">Aguardando</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><div class="sub-cell">
+        <span class="sn" onclick="openModal(&#39;sub&#39;,1779248239988,1779248239993)" title="Projeto Executivo">Projeto Executivo</span>
+        <button class="lock-btn" onclick="toggleLock(1779248239988,1779248239993)" title="Travar data de início"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg></button>
+      </div></td><td class="col-st" style="width:95px"><span class="sb s-wait" onclick="cycleStatus(&#39;sub&#39;,1779248239988,1779248239993)" title="Clique para alterar">Aguardando</span></td></tr><tr class="sr" style="height: 37px;"><td style="width:185px;max-width:185px"><button class="asb" onclick="openModal(&#39;sub&#39;,1779248239988,null)">+ subtarefa</button></td><td class="col-st" style="width:95px"></td></tr></tbody></table></div>
       <div class="scroll-body-wrap" id="sbw">
         <div class="scroll-body" id="sb">
-          <table id="sbt" style="min-width: 1590px; width: 100%;"><tbody id="sbr"><tr class="pr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:66.25px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:198.75px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:331.25px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:463.75px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:596.25px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:728.75px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:861.25px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:993.75px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1126.25px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1258.75px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1391.25px"></div><div class="gl" style="left:1457.5px"></div><div class="gl" style="left:1523.75px"></div><div class="tl" style="left:463.74999999999994px"></div><div class="bar" data-pid="1779249615169" style="left:1060px;width:236.60714285714266px;background:#D3D1C7;color:#2C2C2A">
-        <div class="hl" data-pid="1779249615169" data-side="l"></div>
+          <table id="sbt" style="min-width: 1590px; width: 100%;"><tbody id="sbr"><tr class="pr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1457.5px"></div><div class="tl" style="left:795px;width:132.5px"></div><div class="bar" data-pid="1779287166979" style="left:-176.66666666666669px;width:1828.5000000000002px;background:#B5D4F4;color:#042C53">
+        <div class="hl" data-pid="1779287166979" data-side="l" style=""></div>
+        <span style="pointer-events:none;overflow:hidden;text-overflow:ellipsis">284_ELO_Lages</span>
+        <div class="hr" data-pid="1779287166979" data-side="r"></div>
+      </div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1457.5px"></div><div class="tl" style="left:795px;width:132.5px"></div><div class="bar" data-pid="1779287166979" data-sid="1779287193793" style="left:-176.66666666666669px;width:1188.0833333333335px;background:#378ADD;color:#fff;height:12px">
+        <div class="hl" data-pid="1779287166979" data-sid="1779287193793" data-side="l"></div>
+        
+        
+        <span style="pointer-events:none;font-size:9px;opacity:.85;flex:1;text-align:center">269d</span>
+        <div class="hr" data-pid="1779287166979" data-sid="1779287193793" data-side="r"></div>
+      </div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1457.5px"></div><div class="tl" style="left:795px;width:132.5px"></div><div class="bar" data-pid="1779287166979" data-sid="1779287199562" style="left:578.5833333333334px;width:242.91666666666663px;background:#378ADD;color:#fff;height:12px">
+        <div class="hl" data-pid="1779287166979" data-sid="1779287199562" data-side="l"></div>
+        
+        
+        <span style="pointer-events:none;font-size:9px;opacity:.85;flex:1;text-align:center">55d</span>
+        <div class="hr" data-pid="1779287166979" data-sid="1779287199562" data-side="r"></div>
+      </div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1457.5px"></div><div class="tl" style="left:795px;width:132.5px"></div><div class="bar" data-pid="1779287166979" data-sid="1779287205558" style="left:821.5px;width:830.3333333333335px;background:#888780;color:#fff;height:12px">
+        <div class="hl" data-pid="1779287166979" data-sid="1779287205558" data-side="l"></div>
+        
+        
+        <span style="pointer-events:none;font-size:9px;opacity:.85;flex:1;text-align:center">188d</span>
+        <div class="hr" data-pid="1779287166979" data-sid="1779287205558" data-side="r"></div>
+      </div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1457.5px"></div><div class="tl" style="left:795px;width:132.5px"></div></div></td></tr><tr class="pr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1457.5px"></div><div class="tl" style="left:795px;width:132.5px"></div><div class="bar" data-pid="1779249615169" style="left:1068.8333333333335px;width:110.41666666666652px;background:#B5D4F4;color:#042C53">
+        <div class="hl" data-pid="1779249615169" data-side="l" style=""></div>
         <span style="pointer-events:none;overflow:hidden;text-overflow:ellipsis">286_JH_Lages</span>
         <div class="hr" data-pid="1779249615169" data-side="r"></div>
-      </div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:66.25px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:198.75px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:331.25px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:463.75px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:596.25px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:728.75px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:861.25px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:993.75px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1126.25px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1258.75px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1391.25px"></div><div class="gl" style="left:1457.5px"></div><div class="gl" style="left:1523.75px"></div><div class="tl" style="left:463.74999999999994px"></div><div class="bar" data-pid="1779249615169" data-sid="1779249615170" style="left:1060px;width:47.32142857142844px;background:#888780;color:#fff;height:12px">
+      </div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1457.5px"></div><div class="tl" style="left:795px;width:132.5px"></div><div class="bar" data-pid="1779249615169" data-sid="1779249615170" style="left:1068.8333333333335px;width:22.083333333333258px;background:#888780;color:#fff;height:12px">
         <div class="hl" data-pid="1779249615169" data-sid="1779249615170" data-side="l"></div>
         
-        <span style="pointer-events:none;font-size:9px;opacity:.85;flex:1;text-align:center">5d</span>
+        
+        
         <div class="hr" data-pid="1779249615169" data-sid="1779249615170" data-side="r"></div>
-      </div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:66.25px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:198.75px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:331.25px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:463.75px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:596.25px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:728.75px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:861.25px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:993.75px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1126.25px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1258.75px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1391.25px"></div><div class="gl" style="left:1457.5px"></div><div class="gl" style="left:1523.75px"></div><div class="tl" style="left:463.74999999999994px"></div><div class="bar" data-pid="1779249615169" data-sid="1779249615171" style="left:1107.3214285714284px;width:189.28571428571422px;background:#888780;color:#fff;height:12px">
+      </div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1457.5px"></div><div class="tl" style="left:795px;width:132.5px"></div><div class="bar" data-pid="1779249615169" data-sid="1779249615171" style="left:1090.9166666666667px;width:88.33333333333326px;background:#888780;color:#fff;height:12px">
         <div class="hl" data-pid="1779249615169" data-sid="1779249615171" data-side="l"></div>
+        
         
         <span style="pointer-events:none;font-size:9px;opacity:.85;flex:1;text-align:center">20d</span>
         <div class="hr" data-pid="1779249615169" data-sid="1779249615171" data-side="r"></div>
-      </div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:66.25px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:198.75px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:331.25px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:463.75px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:596.25px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:728.75px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:861.25px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:993.75px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1126.25px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1258.75px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1391.25px"></div><div class="gl" style="left:1457.5px"></div><div class="gl" style="left:1523.75px"></div><div class="tl" style="left:463.74999999999994px"></div></div></td></tr><tr class="pr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:66.25px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:198.75px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:331.25px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:463.75px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:596.25px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:728.75px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:861.25px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:993.75px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1126.25px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1258.75px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1391.25px"></div><div class="gl" style="left:1457.5px"></div><div class="gl" style="left:1523.75px"></div><div class="tl" style="left:463.74999999999994px"></div><div class="bar" data-pid="1779249729592" style="left:463.74999999999994px;width:9.464285714285722px;background:#D3D1C7;color:#2C2C2A">
-        <div class="hl" data-pid="1779249729592" data-side="l"></div>
+      </div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1457.5px"></div><div class="tl" style="left:795px;width:132.5px"></div></div></td></tr><tr class="pr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1457.5px"></div><div class="tl" style="left:795px;width:132.5px"></div><div class="bar" data-pid="1779249729592" style="left:799.4166666666667px;width:119.25px;background:#B5D4F4;color:#042C53">
+        <div class="hl" data-pid="1779249729592" data-side="l" style=""></div>
         <span style="pointer-events:none;overflow:hidden;text-overflow:ellipsis">288_TR_Reserva da Pedra</span>
         <div class="hr" data-pid="1779249729592" data-side="r"></div>
-      </div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:66.25px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:198.75px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:331.25px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:463.75px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:596.25px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:728.75px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:861.25px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:993.75px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1126.25px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1258.75px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1391.25px"></div><div class="gl" style="left:1457.5px"></div><div class="gl" style="left:1523.75px"></div><div class="tl" style="left:463.74999999999994px"></div></div></td></tr><tr class="pr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:66.25px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:198.75px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:331.25px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:463.75px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:596.25px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:728.75px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:861.25px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:993.75px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1126.25px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1258.75px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1391.25px"></div><div class="gl" style="left:1457.5px"></div><div class="gl" style="left:1523.75px"></div><div class="tl" style="left:463.74999999999994px"></div><div class="bar" data-pid="1779250012115" style="left:463.74999999999994px;width:9.464285714285722px;background:#D3D1C7;color:#2C2C2A">
-        <div class="hl" data-pid="1779250012115" data-side="l"></div>
+      </div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1457.5px"></div><div class="tl" style="left:795px;width:132.5px"></div><div class="bar" data-pid="1779249729592" data-sid="1779287866670" style="left:799.4166666666667px;width:119.25px;background:#378ADD;color:#fff;height:12px">
+        <div class="hl" data-pid="1779249729592" data-sid="1779287866670" data-side="l"></div>
+        
+        
+        <span style="pointer-events:none;font-size:9px;opacity:.85;flex:1;text-align:center">27d</span>
+        <div class="hr" data-pid="1779249729592" data-sid="1779287866670" data-side="r"></div>
+      </div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1457.5px"></div><div class="tl" style="left:795px;width:132.5px"></div></div></td></tr><tr class="pr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1457.5px"></div><div class="tl" style="left:795px;width:132.5px"></div><div class="bar" data-pid="1779250012115" style="left:424px;width:375.41666666666674px;background:#B5D4F4;color:#042C53;cursor:not-allowed">
+        <div class="hl" data-pid="1779250012115" data-side="l" style="cursor:not-allowed"></div>
         <span style="pointer-events:none;overflow:hidden;text-overflow:ellipsis">289_SD_Florianópolis</span>
         <div class="hr" data-pid="1779250012115" data-side="r"></div>
-      </div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:66.25px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:198.75px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:331.25px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:463.75px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:596.25px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:728.75px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:861.25px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:993.75px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1126.25px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1258.75px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1391.25px"></div><div class="gl" style="left:1457.5px"></div><div class="gl" style="left:1523.75px"></div><div class="tl" style="left:463.74999999999994px"></div></div></td></tr><tr class="pr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:66.25px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:198.75px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:331.25px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:463.75px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:596.25px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:728.75px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:861.25px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:993.75px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1126.25px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1258.75px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1391.25px"></div><div class="gl" style="left:1457.5px"></div><div class="gl" style="left:1523.75px"></div><div class="tl" style="left:463.74999999999994px"></div><div class="bar" data-pid="1779249018352" style="left:331.25px;width:709.8214285714284px;background:#D3D1C7;color:#2C2C2A">
-        <div class="hl" data-pid="1779249018352" data-side="l"></div>
+      </div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1457.5px"></div><div class="tl" style="left:795px;width:132.5px"></div><div class="bar" data-pid="1779250012115" data-sid="1779287568431" style="left:424px;width:375.41666666666674px;background:#378ADD;color:#fff;height:12px;cursor:not-allowed">
+        
+        <span style="pointer-events:none;font-size:9px;flex-shrink:0"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></span>
+        
+        <span style="pointer-events:none;font-size:9px;opacity:.85;flex:1;text-align:center">85d</span>
+        
+      </div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1457.5px"></div><div class="tl" style="left:795px;width:132.5px"></div></div></td></tr><tr class="pr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1457.5px"></div><div class="tl" style="left:795px;width:132.5px"></div><div class="bar" data-pid="1779249018352" style="left:728.75px;width:335.66666666666674px;background:#B5D4F4;color:#042C53;cursor:not-allowed">
+        <div class="hl" data-pid="1779249018352" data-side="l" style="cursor:not-allowed"></div>
         <span style="pointer-events:none;overflow:hidden;text-overflow:ellipsis">291_GS_Fraiburgo</span>
         <div class="hr" data-pid="1779249018352" data-side="r"></div>
-      </div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:66.25px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:198.75px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:331.25px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:463.75px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:596.25px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:728.75px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:861.25px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:993.75px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1126.25px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1258.75px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1391.25px"></div><div class="gl" style="left:1457.5px"></div><div class="gl" style="left:1523.75px"></div><div class="tl" style="left:463.74999999999994px"></div><div class="bar" data-pid="1779249018352" data-sid="1779249018353" style="left:331.25px;width:283.92857142857133px;background:#888780;color:#fff;height:12px">
-        <div class="hl" data-pid="1779249018352" data-sid="1779249018353" data-side="l"></div>
+      </div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1457.5px"></div><div class="tl" style="left:795px;width:132.5px"></div><div class="bar" data-pid="1779249018352" data-sid="1779249018353" style="left:724.3333333333334px;width:128.08333333333337px;background:#888780;color:#fff;height:12px;cursor:not-allowed">
         
-        <span style="pointer-events:none;font-size:9px;opacity:.85;flex:1;text-align:center">30d</span>
-        <div class="hr" data-pid="1779249018352" data-sid="1779249018353" data-side="r"></div>
-      </div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:66.25px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:198.75px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:331.25px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:463.75px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:596.25px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:728.75px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:861.25px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:993.75px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1126.25px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1258.75px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1391.25px"></div><div class="gl" style="left:1457.5px"></div><div class="gl" style="left:1523.75px"></div><div class="tl" style="left:463.74999999999994px"></div><div class="bar" data-pid="1779249018352" data-sid="1779249018354" style="left:615.1785714285713px;width:141.96428571428578px;background:#888780;color:#fff;height:12px">
+        <span style="pointer-events:none;font-size:9px;flex-shrink:0"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></span>
+        
+        <span style="pointer-events:none;font-size:9px;opacity:.85;flex:1;text-align:center">29d</span>
+        
+      </div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1457.5px"></div><div class="tl" style="left:795px;width:132.5px"></div><div class="bar" data-pid="1779249018352" data-sid="1779249018354" style="left:861.2500000000001px;width:66.25px;background:#888780;color:#fff;height:12px">
         <div class="hl" data-pid="1779249018352" data-sid="1779249018354" data-side="l"></div>
+        
         
         <span style="pointer-events:none;font-size:9px;opacity:.85;flex:1;text-align:center">15d</span>
         <div class="hr" data-pid="1779249018352" data-sid="1779249018354" data-side="r"></div>
-      </div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:66.25px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:198.75px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:331.25px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:463.75px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:596.25px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:728.75px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:861.25px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:993.75px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1126.25px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1258.75px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1391.25px"></div><div class="gl" style="left:1457.5px"></div><div class="gl" style="left:1523.75px"></div><div class="tl" style="left:463.74999999999994px"></div><div class="bar" data-pid="1779249018352" data-sid="1779249018355" style="left:757.1428571428571px;width:141.96428571428567px;background:#888780;color:#fff;height:12px">
+      </div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1457.5px"></div><div class="tl" style="left:795px;width:132.5px"></div><div class="bar" data-pid="1779249018352" data-sid="1779249018355" style="left:927.5000000000001px;width:66.25px;background:#888780;color:#fff;height:12px">
         <div class="hl" data-pid="1779249018352" data-sid="1779249018355" data-side="l"></div>
+        
         
         <span style="pointer-events:none;font-size:9px;opacity:.85;flex:1;text-align:center">15d</span>
         <div class="hr" data-pid="1779249018352" data-sid="1779249018355" data-side="r"></div>
-      </div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:66.25px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:198.75px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:331.25px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:463.75px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:596.25px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:728.75px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:861.25px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:993.75px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1126.25px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1258.75px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1391.25px"></div><div class="gl" style="left:1457.5px"></div><div class="gl" style="left:1523.75px"></div><div class="tl" style="left:463.74999999999994px"></div><div class="bar" data-pid="1779249018352" data-sid="1779249018356" style="left:899.1071428571428px;width:141.96428571428567px;background:#888780;color:#fff;height:12px">
+      </div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1457.5px"></div><div class="tl" style="left:795px;width:132.5px"></div><div class="bar" data-pid="1779249018352" data-sid="1779249018356" style="left:993.7500000000001px;width:66.24999999999989px;background:#888780;color:#fff;height:12px">
         <div class="hl" data-pid="1779249018352" data-sid="1779249018356" data-side="l"></div>
+        
         
         <span style="pointer-events:none;font-size:9px;opacity:.85;flex:1;text-align:center">15d</span>
         <div class="hr" data-pid="1779249018352" data-sid="1779249018356" data-side="r"></div>
-      </div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:66.25px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:198.75px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:331.25px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:463.75px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:596.25px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:728.75px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:861.25px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:993.75px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1126.25px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1258.75px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1391.25px"></div><div class="gl" style="left:1457.5px"></div><div class="gl" style="left:1523.75px"></div><div class="tl" style="left:463.74999999999994px"></div></div></td></tr><tr class="pr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:66.25px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:198.75px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:331.25px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:463.75px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:596.25px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:728.75px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:861.25px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:993.75px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1126.25px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1258.75px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1391.25px"></div><div class="gl" style="left:1457.5px"></div><div class="gl" style="left:1523.75px"></div><div class="tl" style="left:463.74999999999994px"></div><div class="bar" data-pid="1779248239988" style="left:340.71428571428567px;width:851.7857142857143px;background:#D3D1C7;color:#2C2C2A">
-        <div class="hl" data-pid="1779248239988" data-side="l"></div>
+      </div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1457.5px"></div><div class="tl" style="left:795px;width:132.5px"></div></div></td></tr><tr class="pr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1457.5px"></div><div class="tl" style="left:795px;width:132.5px"></div><div class="bar" data-pid="1779248239988" style="left:733.1666666666667px;width:397.5px;background:#B5D4F4;color:#042C53;cursor:not-allowed">
+        <div class="hl" data-pid="1779248239988" data-side="l" style="cursor:not-allowed"></div>
         <span style="pointer-events:none;overflow:hidden;text-overflow:ellipsis">292_MA_Florianópolis</span>
         <div class="hr" data-pid="1779248239988" data-side="r"></div>
-      </div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:66.25px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:198.75px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:331.25px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:463.75px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:596.25px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:728.75px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:861.25px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:993.75px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1126.25px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1258.75px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1391.25px"></div><div class="gl" style="left:1457.5px"></div><div class="gl" style="left:1523.75px"></div><div class="tl" style="left:463.74999999999994px"></div><div class="bar" data-pid="1779248239988" data-sid="1779248239990" style="left:340.71428571428567px;width:283.92857142857144px;background:#378ADD;color:#fff;height:12px">
-        <div class="hl" data-pid="1779248239988" data-sid="1779248239990" data-side="l"></div>
+      </div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1457.5px"></div><div class="tl" style="left:795px;width:132.5px"></div><div class="bar" data-pid="1779248239988" data-sid="1779248239990" style="left:728.75px;width:132.5000000000001px;background:#378ADD;color:#fff;height:12px;cursor:not-allowed">
+        
+        <span style="pointer-events:none;font-size:9px;flex-shrink:0"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></span>
         
         <span style="pointer-events:none;font-size:9px;opacity:.85;flex:1;text-align:center">30d</span>
-        <div class="hr" data-pid="1779248239988" data-sid="1779248239990" data-side="r"></div>
-      </div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:66.25px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:198.75px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:331.25px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:463.75px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:596.25px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:728.75px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:861.25px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:993.75px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1126.25px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1258.75px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1391.25px"></div><div class="gl" style="left:1457.5px"></div><div class="gl" style="left:1523.75px"></div><div class="tl" style="left:463.74999999999994px"></div><div class="bar" data-pid="1779248239988" data-sid="1779248239991" style="left:624.6428571428571px;width:141.96428571428567px;background:#888780;color:#fff;height:12px">
+        
+      </div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1457.5px"></div><div class="tl" style="left:795px;width:132.5px"></div><div class="bar" data-pid="1779248239988" data-sid="1779248239991" style="left:861.2500000000001px;width:66.25px;background:#888780;color:#fff;height:12px">
         <div class="hl" data-pid="1779248239988" data-sid="1779248239991" data-side="l"></div>
+        
         
         <span style="pointer-events:none;font-size:9px;opacity:.85;flex:1;text-align:center">15d</span>
         <div class="hr" data-pid="1779248239988" data-sid="1779248239991" data-side="r"></div>
-      </div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:66.25px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:198.75px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:331.25px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:463.75px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:596.25px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:728.75px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:861.25px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:993.75px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1126.25px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1258.75px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1391.25px"></div><div class="gl" style="left:1457.5px"></div><div class="gl" style="left:1523.75px"></div><div class="tl" style="left:463.74999999999994px"></div><div class="bar" data-pid="1779248239988" data-sid="1779248239992" style="left:766.6071428571428px;width:141.96428571428567px;background:#888780;color:#fff;height:12px">
+      </div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1457.5px"></div><div class="tl" style="left:795px;width:132.5px"></div><div class="bar" data-pid="1779248239988" data-sid="1779248239992" style="left:927.5000000000001px;width:66.25px;background:#888780;color:#fff;height:12px">
         <div class="hl" data-pid="1779248239988" data-sid="1779248239992" data-side="l"></div>
+        
         
         <span style="pointer-events:none;font-size:9px;opacity:.85;flex:1;text-align:center">15d</span>
         <div class="hr" data-pid="1779248239988" data-sid="1779248239992" data-side="r"></div>
-      </div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:66.25px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:198.75px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:331.25px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:463.75px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:596.25px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:728.75px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:861.25px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:993.75px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1126.25px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1258.75px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1391.25px"></div><div class="gl" style="left:1457.5px"></div><div class="gl" style="left:1523.75px"></div><div class="tl" style="left:463.74999999999994px"></div><div class="bar" data-pid="1779248239988" data-sid="1779248239993" style="left:908.5714285714284px;width:283.92857142857156px;background:#888780;color:#fff;height:12px">
+      </div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1457.5px"></div><div class="tl" style="left:795px;width:132.5px"></div><div class="bar" data-pid="1779248239988" data-sid="1779248239993" style="left:993.7500000000001px;width:132.4999999999999px;background:#888780;color:#fff;height:12px">
         <div class="hl" data-pid="1779248239988" data-sid="1779248239993" data-side="l"></div>
+        
         
         <span style="pointer-events:none;font-size:9px;opacity:.85;flex:1;text-align:center">30d</span>
         <div class="hr" data-pid="1779248239988" data-sid="1779248239993" data-side="r"></div>
-      </div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:66.25px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:198.75px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:331.25px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:463.75px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:596.25px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:728.75px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:861.25px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:993.75px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1126.25px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1258.75px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1391.25px"></div><div class="gl" style="left:1457.5px"></div><div class="gl" style="left:1523.75px"></div><div class="tl" style="left:463.74999999999994px"></div></div></td></tr></tbody></table>
-          <svg id="arrow-svg" width="1590" height="740"><path d="M1107.3214285714284,55.5 H1121.3214285714284 V74 H1093.3214285714284 V92.5 H1107.3214285714284" class="al"></path><polygon points="1107.3214285714284,92.5 1100.3214285714284,88.5 1100.3214285714284,96.5" class="ah"></polygon><path d="M615.1785714285713,351.5 H629.1785714285713 V370 H601.1785714285713 V388.5 H615.1785714285713" class="al"></path><polygon points="615.1785714285713,388.5 608.1785714285713,384.5 608.1785714285713,392.5" class="ah"></polygon><path d="M757.1428571428571,388.5 H771.1428571428571 V407 H743.1428571428571 V425.5 H757.1428571428571" class="al"></path><polygon points="757.1428571428571,425.5 750.1428571428571,421.5 750.1428571428571,429.5" class="ah"></polygon><path d="M899.1071428571428,425.5 H913.1071428571428 V444 H885.1071428571428 V462.5 H899.1071428571428" class="al"></path><polygon points="899.1071428571428,462.5 892.1071428571428,458.5 892.1071428571428,466.5" class="ah"></polygon><path d="M624.6428571428571,573.5 H638.6428571428571 V592 H610.6428571428571 V610.5 H624.6428571428571" class="al"></path><polygon points="624.6428571428571,610.5 617.6428571428571,606.5 617.6428571428571,614.5" class="ah"></polygon><path d="M766.6071428571428,610.5 H780.6071428571428 V629 H752.6071428571428 V647.5 H766.6071428571428" class="al"></path><polygon points="766.6071428571428,647.5 759.6071428571428,643.5 759.6071428571428,651.5" class="ah"></polygon><path d="M908.5714285714284,647.5 H922.5714285714284 V666 H894.5714285714284 V684.5 H908.5714285714284" class="al"></path><polygon points="908.5714285714284,684.5 901.5714285714284,680.5 901.5714285714284,688.5" class="ah"></polygon></svg>
+      </div></div></td></tr><tr class="sr" style="height: 37px;"><td class="bar-cell" style="min-width:1590px;width:100%"><div class="bar-inner"><div class="gl" style="left:0px"></div><div class="gl" style="left:132.5px"></div><div class="gl" style="left:265px"></div><div class="gl" style="left:397.5px"></div><div class="gl" style="left:530px"></div><div class="gl" style="left:662.5px"></div><div class="gl" style="left:795px"></div><div class="gl" style="left:927.5px"></div><div class="gl" style="left:1060px"></div><div class="gl" style="left:1192.5px"></div><div class="gl" style="left:1325px"></div><div class="gl" style="left:1457.5px"></div><div class="tl" style="left:795px;width:132.5px"></div></div></td></tr></tbody></table>
+          <svg id="arrow-svg" width="1590" height="999"><path d="M821.5,92.5 H835.5 V111 H807.5 V129.5 H821.5" class="al"></path><polygon points="821.5,129.5 814.5,125.5 814.5,133.5" class="ah"></polygon><path d="M1090.9166666666667,240.5 H1104.9166666666667 V259 H1076.9166666666667 V277.5 H1090.9166666666667" class="al"></path><polygon points="1090.9166666666667,277.5 1083.9166666666667,273.5 1083.9166666666667,281.5" class="ah"></polygon><path d="M852.4166666666667,610.5 H866.4166666666667 V629 H847.2500000000001 V647.5 H861.2500000000001" class="al"></path><polygon points="861.2500000000001,647.5 854.2500000000001,643.5 854.2500000000001,651.5" class="ah"></polygon><path d="M927.5000000000001,647.5 H941.5000000000001 V666 H913.5000000000001 V684.5 H927.5000000000001" class="al"></path><polygon points="927.5000000000001,684.5 920.5000000000001,680.5 920.5000000000001,688.5" class="ah"></polygon><path d="M993.7500000000001,684.5 H1007.7500000000001 V703 H979.7500000000001 V721.5 H993.7500000000001" class="al"></path><polygon points="993.7500000000001,721.5 986.7500000000001,717.5 986.7500000000001,725.5" class="ah"></polygon><path d="M861.2500000000001,832.5 H875.2500000000001 V851 H847.2500000000001 V869.5 H861.2500000000001" class="al"></path><polygon points="861.2500000000001,869.5 854.2500000000001,865.5 854.2500000000001,873.5" class="ah"></polygon><path d="M927.5000000000001,869.5 H941.5000000000001 V888 H913.5000000000001 V906.5 H927.5000000000001" class="al"></path><polygon points="927.5000000000001,906.5 920.5000000000001,902.5 920.5000000000001,910.5" class="ah"></polygon><path d="M993.7500000000001,906.5 H1007.7500000000001 V925 H979.7500000000001 V943.5 H993.7500000000001" class="al"></path><polygon points="993.7500000000001,943.5 986.7500000000001,939.5 986.7500000000001,947.5" class="ah"></polygon></svg>
         </div>
       </div>
     </div>
@@ -266,22 +368,22 @@ tr.drop-below td{border-bottom:2px solid #185FA5}
 </div>
 
 <!-- MODAL -->
-<div id="modal-overlay" style="display:none">
+<div id="modal-overlay" style="display: none;">
   <div class="modal">
-    <h3 id="modal-title"></h3>
-    <div class="field" id="f-tipo-wrap">
+    <h3 id="modal-title">Novo projeto</h3>
+    <div class="field" id="f-tipo-wrap" style="display: block;">
       <label>Tipo de projeto</label>
       <div style="display:flex;gap:8px;margin-top:2px">
-        <button class="btn active" id="btn-blank" onclick="setTipo(&#39;blank&#39;)" style="flex:1">Em branco</button>
-        <button class="btn" id="btn-tpl" onclick="setTipo(&#39;template&#39;)" style="flex:1">Padrão ★</button>
+        <button class="btn" id="btn-blank" onclick="setTipo(&#39;blank&#39;)" style="flex:1">Em branco</button>
+        <button class="btn active" id="btn-tpl" onclick="setTipo(&#39;template&#39;)" style="flex:1">Padrão ★</button>
       </div>
     </div>
-    <div id="f-standard">
+    <div id="f-standard" style="display: none;">
       <div class="field"><label>Nome</label><input id="f-name" type="text" onkeydown="if(event.key===&#39;Enter&#39;)saveItem()"></div>
-      <div class="field"><label>Início</label><input id="f-start" type="date" oninput="calcEnd()" onkeydown="if(event.key===&#39;Enter&#39;)saveItem()"></div>
+      <div class="field"><label>Início</label><input id="f-start" type="date" oninput="calcEnd()" onkeydown="if(event.key===&#39;Enter&#39;)saveItem()" style="opacity: 1;"></div>
       <div class="frow">
-        <div class="field"><label>Duração (dias)</label><input id="f-dur" type="number" min="1" placeholder="30" oninput="calcEnd()" onkeydown="if(event.key===&#39;Enter&#39;)saveItem()"></div>
-        <div class="field"><label>Término</label><input id="f-end" type="date" oninput="calcDur()" onkeydown="if(event.key===&#39;Enter&#39;)saveItem()"></div>
+        <div class="field"><label>Duração (dias)</label><input id="f-dur" type="number" min="1" placeholder="30" oninput="calcEnd()" onkeydown="if(event.key===&#39;Enter&#39;)saveItem()" style="opacity: 1;"></div>
+        <div class="field"><label>Término</label><input id="f-end" type="date" oninput="calcDur()" onkeydown="if(event.key===&#39;Enter&#39;)saveItem()" style="opacity: 1;"></div>
       </div>
       <div class="field"><label>Status</label>
         <select id="f-status">
@@ -291,18 +393,43 @@ tr.drop-below td{border-bottom:2px solid #185FA5}
           <option value="late">Atrasado</option>
         </select>
       </div>
-      <div class="field" id="f-owner-wrap"><label>Responsável</label><input id="f-owner" type="text" onkeydown="if(event.key===&#39;Enter&#39;)saveItem()"></div>
-      <div class="field"><label>Predecessora</label><select id="f-pred" onchange="applyPred()"><option value="">— Nenhuma —</option></select></div>
+      <div class="field" id="f-owner-wrap" style="display: block;"><label>Responsável</label><input id="f-owner" type="text" onkeydown="if(event.key===&#39;Enter&#39;)saveItem()"></div>
+      <div class="field"><label>Predecessora</label><select id="f-pred" onchange="applyPred()"><option value="">— Nenhuma —</option><option value="p_1779287166979">284_ELO_Lages</option><option value="s_1779287166979_1779287193793">284_ELO_Lages › Projeto Legal</option><option value="s_1779287166979_1779287199562">284_ELO_Lages › Anteprojeto</option><option value="s_1779287166979_1779287205558">284_ELO_Lages › Projeto Executivo</option><option value="p_1779249615169">286_JH_Lages</option><option value="s_1779249615169_1779249615170">286_JH_Lages › Anteprojeto</option><option value="s_1779249615169_1779249615171">286_JH_Lages › Projeto Executivo</option><option value="p_1779249729592">288_TR_Reserva da Pedra</option><option value="s_1779249729592_1779287866670">288_TR_Reserva da Pedra › Anteprojeto</option><option value="p_1779250012115">289_SD_Florianópolis</option><option value="s_1779250012115_1779287568431">289_SD_Florianópolis › Projeto Legal</option><option value="p_1779249018352">291_GS_Fraiburgo</option><option value="s_1779249018352_1779249018353">291_GS_Fraiburgo › Estudo Preliminar</option><option value="s_1779249018352_1779249018354">291_GS_Fraiburgo › Projeto Legal</option><option value="s_1779249018352_1779249018355">291_GS_Fraiburgo › Anteprojeto</option><option value="s_1779249018352_1779249018356">291_GS_Fraiburgo › Projeto Executivo</option><option value="p_1779248239988">292_MA_Florianópolis</option><option value="s_1779248239988_1779248239990">292_MA_Florianópolis › Estudo Preliminar</option><option value="s_1779248239988_1779248239991">292_MA_Florianópolis › Projeto Legal</option><option value="s_1779248239988_1779248239992">292_MA_Florianópolis › Anteprojeto</option><option value="s_1779248239988_1779248239993">292_MA_Florianópolis › Projeto Executivo</option></select></div>
     </div>
-    <div id="f-template" style="display:none">
+    <div id="f-template" style="display: block;">
       <div class="field"><label>Nome do Projeto</label><input id="t-name" type="text" onkeydown="if(event.key===&#39;Enter&#39;)saveItem()"></div>
       <div class="frow">
         <div class="field"><label>Responsável</label><input id="t-owner" type="text" onkeydown="if(event.key===&#39;Enter&#39;)saveItem()"></div>
         <div class="field"><label>Início</label><input id="t-start" type="date" oninput="calcTemplate()" onkeydown="if(event.key===&#39;Enter&#39;)saveItem()"></div>
       </div>
       <div style="margin:12px 0 6px;font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.08em">Subtarefas</div>
-      <div id="tpl-subs"></div>
-      <p style="font-size:11px;color:#aaa;margin-top:6px">↩ Datas calculadas automaticamente pelas predecessoras.</p>
+      <div id="tpl-subs"><div class="tpl-row" id="tpl-row-0">
+      <input id="tpl-name-0" type="text" value="Levantamento e Dados" oninput="syncTplState()" style="flex:1;min-width:0;font-size:12px;font-weight:500;color:#1a1a1a;border:.5px solid transparent;border-radius:6px;padding:3px 6px;background:transparent;outline:none;pointer-events:auto" onfocus="this.style.borderColor=&#39;#ccc&#39;;this.style.background=&#39;#fff&#39;" onblur="this.style.borderColor=&#39;transparent&#39;;this.style.background=&#39;transparent&#39;">
+      <span class="tpl-dates"></span>
+      <input id="tpl-dur-0" type="number" min="1" placeholder="dias" value="" oninput="syncTplState();calcTemplate()">
+      <button onclick="removeTplSub(0)" style="background:none;border:none;cursor:pointer;color:#ccc;font-size:14px;padding:0 2px;flex-shrink:0" onmouseover="this.style.color=&#39;#E24B4A&#39;" onmouseout="this.style.color=&#39;#ccc&#39;">✕</button>
+    </div><div class="tpl-row" id="tpl-row-1">
+      <input id="tpl-name-1" type="text" value="Estudo Preliminar" oninput="syncTplState()" style="flex:1;min-width:0;font-size:12px;font-weight:500;color:#1a1a1a;border:.5px solid transparent;border-radius:6px;padding:3px 6px;background:transparent;outline:none;pointer-events:auto" onfocus="this.style.borderColor=&#39;#ccc&#39;;this.style.background=&#39;#fff&#39;" onblur="this.style.borderColor=&#39;transparent&#39;;this.style.background=&#39;transparent&#39;">
+      <span class="tpl-dates"></span>
+      <input id="tpl-dur-1" type="number" min="1" placeholder="dias" value="" oninput="syncTplState();calcTemplate()">
+      <button onclick="removeTplSub(1)" style="background:none;border:none;cursor:pointer;color:#ccc;font-size:14px;padding:0 2px;flex-shrink:0" onmouseover="this.style.color=&#39;#E24B4A&#39;" onmouseout="this.style.color=&#39;#ccc&#39;">✕</button>
+    </div><div class="tpl-row" id="tpl-row-2">
+      <input id="tpl-name-2" type="text" value="Projeto Legal" oninput="syncTplState()" style="flex:1;min-width:0;font-size:12px;font-weight:500;color:#1a1a1a;border:.5px solid transparent;border-radius:6px;padding:3px 6px;background:transparent;outline:none;pointer-events:auto" onfocus="this.style.borderColor=&#39;#ccc&#39;;this.style.background=&#39;#fff&#39;" onblur="this.style.borderColor=&#39;transparent&#39;;this.style.background=&#39;transparent&#39;">
+      <span class="tpl-dates"></span>
+      <input id="tpl-dur-2" type="number" min="1" placeholder="dias" value="" oninput="syncTplState();calcTemplate()">
+      <button onclick="removeTplSub(2)" style="background:none;border:none;cursor:pointer;color:#ccc;font-size:14px;padding:0 2px;flex-shrink:0" onmouseover="this.style.color=&#39;#E24B4A&#39;" onmouseout="this.style.color=&#39;#ccc&#39;">✕</button>
+    </div><div class="tpl-row" id="tpl-row-3">
+      <input id="tpl-name-3" type="text" value="Anteprojeto" oninput="syncTplState()" style="flex:1;min-width:0;font-size:12px;font-weight:500;color:#1a1a1a;border:.5px solid transparent;border-radius:6px;padding:3px 6px;background:transparent;outline:none;pointer-events:auto" onfocus="this.style.borderColor=&#39;#ccc&#39;;this.style.background=&#39;#fff&#39;" onblur="this.style.borderColor=&#39;transparent&#39;;this.style.background=&#39;transparent&#39;">
+      <span class="tpl-dates"></span>
+      <input id="tpl-dur-3" type="number" min="1" placeholder="dias" value="" oninput="syncTplState();calcTemplate()">
+      <button onclick="removeTplSub(3)" style="background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; cursor: pointer; color: rgb(204, 204, 204); font-size: 14px; padding: 0px 2px; flex-shrink: 0;" onmouseover="this.style.color=&#39;#E24B4A&#39;" onmouseout="this.style.color=&#39;#ccc&#39;">✕</button>
+    </div><div class="tpl-row" id="tpl-row-4">
+      <input id="tpl-name-4" type="text" value="Projeto Executivo" oninput="syncTplState()" style="flex:1;min-width:0;font-size:12px;font-weight:500;color:#1a1a1a;border:.5px solid transparent;border-radius:6px;padding:3px 6px;background:transparent;outline:none;pointer-events:auto" onfocus="this.style.borderColor=&#39;#ccc&#39;;this.style.background=&#39;#fff&#39;" onblur="this.style.borderColor=&#39;transparent&#39;;this.style.background=&#39;transparent&#39;">
+      <span class="tpl-dates"></span>
+      <input id="tpl-dur-4" type="number" min="1" placeholder="dias" value="" oninput="syncTplState();calcTemplate()">
+      <button onclick="removeTplSub(4)" style="background:none;border:none;cursor:pointer;color:#ccc;font-size:14px;padding:0 2px;flex-shrink:0" onmouseover="this.style.color=&#39;#E24B4A&#39;" onmouseout="this.style.color=&#39;#ccc&#39;">✕</button>
+    </div><button onclick="addTplSub()" class="btn" style="width:100%;margin-top:6px;border-style:dashed;color:#aaa">+ Adicionar etapa</button></div>
+      <p style="font-size:11px;color:#aaa;margin-top:6px">↩ Datas calculadas automaticamente.</p>
     </div>
     <div class="mact">
       <button class="del-btn" id="btn-del" style="display:none" onclick="deleteItem()">✕ Excluir</button>
@@ -312,116 +439,100 @@ tr.drop-below td{border-bottom:2px solid #185FA5}
   </div>
 </div>
 
-<!-- FIREBASE SDKs -->
+<!-- FIREBASE -->
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 import { getDatabase, ref, onValue, set } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 
-const firebaseConfig = {
-  apiKey: "AIzaSyCGOAmZzXmlERj6bFhzQxQE0csmdF0Zy5M",
-  authDomain: "archiflow-83256.firebaseapp.com",
-  databaseURL: "https://archiflow-83256-default-rtdb.firebaseio.com",
-  projectId: "archiflow-83256",
-  storageBucket: "archiflow-83256.firebasestorage.app",
-  messagingSenderId: "844055210781",
-  appId: "1:844055210781:web:d575230df271e481ee8ff4"
-};
+const app = initializeApp({
+  apiKey:"AIzaSyCGOAmZzXmlERj6bFhzQxQE0csmdF0Zy5M",
+  authDomain:"archiflow-83256.firebaseapp.com",
+  databaseURL:"https://archiflow-83256-default-rtdb.firebaseio.com",
+  projectId:"archiflow-83256",
+  storageBucket:"archiflow-83256.firebasestorage.app",
+  messagingSenderId:"844055210781",
+  appId:"1:844055210781:web:d575230df271e481ee8ff4"
+});
+const auth=getAuth(app), db=getDatabase(app), dbRef=ref(db,'archiflow');
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getDatabase(app);
-const dataRef = ref(db, 'archiflow');
+window._fbSignIn = (e,p)=>signInWithEmailAndPassword(auth,e,p);
+window._fbSignOut = ()=>signOut(auth);
+window._fbSave = data=>{ setSyncStatus('syncing'); set(dbRef,data).then(()=>setSyncStatus('synced')).catch(()=>setSyncStatus('error')); };
+window._fbListen = cb=>onValue(dbRef,snap=>cb(snap.val()));
 
-// Expose to global scope
-window._fbAuth = auth;
-window._fbSignIn = (email, pass) => signInWithEmailAndPassword(auth, email, pass);
-window._fbSignOut = () => signOut(auth);
-window._fbSave = (data) => {
-  setSyncStatus('syncing');
-  set(dataRef, data)
-    .then(()=>setSyncStatus('synced'))
-    .catch(()=>setSyncStatus('error'));
-};
-window._fbListen = (cb) => onValue(dataRef, snap => cb(snap.val()));
-
-onAuthStateChanged(auth, user => {
-  if(user){
-    document.getElementById('login-screen').style.display='none';
-    document.getElementById('app').style.display='flex';
-    window._startApp();
-  } else {
-    document.getElementById('login-screen').style.display='flex';
-    document.getElementById('app').style.display='none';
-  }
+onAuthStateChanged(auth,user=>{
+  D('login-screen').style.display=user?'none':'flex';
+  EL['app'].style.display=user?'flex':'none';
+  if(user) window._startApp();
 });
 </script>
 
 <script>
 'use strict';
-const COLORS = {prog:['#B5D4F4','#042C53'],ok:['#C0DD97','#173404'],wait:['#D3D1C7','#2C2C2A'],late:['#F7C1C1','#501313']};
-const SUB_COLORS = {prog:'#378ADD',ok:'#5A9020',wait:'#888780',late:'#E24B4A'};
-const SL = {prog:'Em andamento',ok:'Concluído',wait:'Aguardando',late:'Atrasado'};
-const SC = {prog:'s-prog',ok:'s-ok',wait:'s-wait',late:'s-late'};
-const SVG_NS = 'http://www.w3.org/2000/svg';
+// ── CONSTANTS ─────────────────────────────────────────────
+const COLORS={prog:['#B5D4F4','#042C53'],ok:['#C0DD97','#173404'],wait:['#D3D1C7','#2C2C2A'],late:['#F7C1C1','#501313']};
+const SUB_COLORS={prog:'#378ADD',ok:'#5A9020',wait:'#888780',late:'#E24B4A'};
+const SL={prog:'Em andamento',ok:'Concluído',wait:'Aguardando',late:'Atrasado'};
+const SC={prog:'s-prog',ok:'s-ok',wait:'s-wait',late:'s-late'};
+const STATUS_ORDER=['wait','prog','late','ok'];
+const SVG_NS='http://www.w3.org/2000/svg';
+const TPL_DEFAULTS=[
+  {name:'Levantamento e Dados',dur:''},
+  {name:'Estudo Preliminar',dur:''},
+  {name:'Projeto Legal',dur:''},
+  {name:'Anteprojeto',dur:''},
+  {name:'Projeto Executivo',dur:''}
+];
 
+// ── STATE ─────────────────────────────────────────────────
 let projects=[], collapsed={}, viewStart=null, scale='week';
-let _mode=null, _pid=null, _sid=null, drag=null;
-let _tipo='blank', tplSubs=[];
+let _mode=null, _pid=null, _sid=null, _tipo='blank', tplSubs=[];
 let _saving=false;
+let _nameColW=0; // 0 = auto (use colWidths defaults)
 
-const D = id => document.getElementById(id);
-const EL = {};
+// Drag state — shared across bar drag, header pan and project reorder
+let drag=null, pan=null, reorder=null;
+
+// ── DOM CACHE ─────────────────────────────────────────────
+const D=id=>document.getElementById(id);
+const EL={};
 ['fh','fhr','sh','ht','gh','fb','fbt','fbr','sbw','sb','sbt','sbr','arrow-svg',
  'range-label','modal-overlay','modal-title','btn-del','f-name','f-start','f-end',
  'f-dur','f-status','f-owner','f-owner-wrap','f-pred','app','li-email','li-pass','lerr',
  'sc-day','sc-week','sc-month','sync-dot','sync-label'].forEach(id=>EL[id]=D(id));
 
-const toIso = d => new Date(d).toISOString().slice(0,10);
-const daysDiff = (a,b) => Math.round((new Date(b)-new Date(a))/86400000);
-const appW = () => EL['app'].offsetWidth || window.innerWidth || 1200;
-const addDays = (iso,n) => { const d=new Date(iso); d.setDate(d.getDate()+n); return toIso(d); };
+// ── UTILS ─────────────────────────────────────────────────
+const toIso=d=>new Date(d).toISOString().slice(0,10);
+const daysDiff=(a,b)=>Math.round((new Date(b)-new Date(a))/86400000);
+const appW=()=>EL['app'].offsetWidth||window.innerWidth||1200;
+const addDays=(iso,n)=>{const d=new Date(iso);d.setDate(d.getDate()+n);return toIso(d);};
 
 // ── SYNC STATUS ───────────────────────────────────────────
-function setSyncStatus(status){
-  const dot=EL['sync-dot'], lbl=EL['sync-label'];
-  dot.className=status;
-  if(status==='syncing') lbl.textContent='Salvando...';
-  else if(status==='synced') lbl.textContent='Sincronizado';
-  else if(status==='error') lbl.textContent='Erro ao salvar';
-  else lbl.textContent='';
+function setSyncStatus(s){
+  EL['sync-dot'].className=s;
+  EL['sync-label'].textContent={syncing:'Salvando...',synced:'Sincronizado',error:'Erro ao salvar'}[s]||'';
 }
 
-// ── LOGIN / LOGOUT ────────────────────────────────────────
+// ── LOGIN ─────────────────────────────────────────────────
 function doLogin(){
-  const email=EL['li-email'].value.trim();
-  const pass=EL['li-pass'].value;
-  EL['lerr'].textContent='';
-  window._fbSignIn(email, pass).catch(err=>{
-    EL['lerr'].textContent='E-mail ou senha incorretos.';
-    EL['li-pass'].classList.add('err');
-    setTimeout(()=>EL['li-pass'].classList.remove('err'),400);
-  });
+  window._fbSignIn(EL['li-email'].value.trim(), EL['li-pass'].value)
+    .catch(()=>{
+      EL['lerr'].textContent='E-mail ou senha incorretos.';
+      EL['li-pass'].classList.add('err'); EL['li-pass'].value='';
+      setTimeout(()=>EL['li-pass'].classList.remove('err'),400);
+    });
 }
 function doLogout(){ window._fbSignOut(); }
-EL['li-pass'].addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
-EL['li-email'].addEventListener('keydown',e=>{ if(e.key==='Enter') EL['li-pass'].focus(); });
 
-// ── APP START (called after auth) ─────────────────────────
-window._startApp = function(){
+// ── APP START ─────────────────────────────────────────────
+window._startApp=function(){
   window._fbListen(data=>{
-    if(_saving) return; // skip remote update while saving locally
-    if(data){
-      projects=data.projects||[];
-      collapsed=data.collapsed||{};
-      scale=data.scale||'week';
-    } else {
-      projects=defProjects(); collapsed={};
-    }
+    if(_saving) return;
+    if(data){ projects=data.projects||[]; collapsed=data.collapsed||{}; scale=data.scale||'week'; }
+    else { projects=defProjects(); collapsed={}; }
     if(!viewStart) initView();
-    updateScaleBtns();
-    render();
-    setSyncStatus('synced');
+    updateScaleBtns(); render(); setSyncStatus('synced');
   });
 };
 
@@ -432,22 +543,24 @@ function save(){
   setTimeout(()=>{ _saving=false; },1000);
 }
 
-// ── SCALE / LAYOUT ────────────────────────────────────────
+// ── SCALE CONFIG ──────────────────────────────────────────
 function colWidths(){
   const w=appW();
-  if(w<500) return {name:140,status:0};
-  if(w<700) return {name:160,status:0};
-  return {name:185,status:95};
+  let name;
+  if(_nameColW>0) name=_nameColW;
+  else if(w<500) name=140;
+  else if(w<700) name=160;
+  else name=185;
+  return {name, status: w<700?0:95};
 }
 function scaleCfg(){
   const w=appW(), cols=colWidths();
-  const avail=Math.max(w-cols.name-cols.status-2,200);
-  const mob=w<500;
+  const avail=Math.max(w-cols.name-cols.status-2,200), mob=w<500;
   const [du,wu,mu]=[mob?20:30,mob?16:24,12];
   return{
-    day:  {ud:1,  px:Math.max(mob?22:28,avail/du),u:du,fmtU:d=>d.getDate()+'',fmtG:d=>d.toLocaleDateString('pt-BR',{month:'short',year:'numeric'}),gb:'month'},
-    week: {ud:7,  px:Math.max(mob?38:52,avail/wu),u:wu,fmtU:d=>d.getDate()+'/'+(d.getMonth()+1+'').padStart(2,'0'),fmtG:d=>d.toLocaleDateString('pt-BR',{month:'short',year:'numeric'}),gb:'month'},
-    month:{ud:30, px:Math.max(mob?52:64,avail/mu),u:mu,fmtU:d=>d.toLocaleDateString('pt-BR',{month:'short'}),fmtG:d=>''+d.getFullYear(),gb:'year'}
+    day:  {ud:1,  px:Math.max(mob?22:28,avail/du), u:du, fmtU:d=>d.getDate()+'',                              fmtG:d=>d.toLocaleDateString('pt-BR',{month:'short',year:'numeric'}), gb:'month'},
+    week: {ud:7,  px:Math.max(mob?38:52,avail/wu), u:wu, fmtU:d=>d.getDate()+'/'+(d.getMonth()+1+'').padStart(2,'0'), fmtG:d=>d.toLocaleDateString('pt-BR',{month:'short',year:'numeric'}), gb:'month'},
+    month:{ud:30, px:Math.max(mob?52:64,avail/mu), u:mu, fmtU:d=>d.toLocaleDateString('pt-BR',{month:'short'}), fmtG:d=>''+d.getFullYear(), gb:'year'}
   };
 }
 function getUnits(){
@@ -555,29 +668,37 @@ function afterSubChange(pid,movedSid){
   cascadeProjectSuccessors('p_'+pid);
 }
 
+// ── INSERT SORTED ─────────────────────────────────────────
+function insertProjectSorted(proj){
+  const key=n=>{const m=(n||'').match(/^(\d+)/);return m?[+m[1],n.toLowerCase()]:[Infinity,n.toLowerCase()];};
+  const[n,a]=key(proj.name);
+  let idx=projects.length;
+  for(let i=0;i<projects.length;i++){
+    const[ni,ai]=key(projects[i].name);
+    if(n<ni||(n===ni&&a<ai)){idx=i;break;}
+  }
+  projects.splice(idx,0,proj);
+}
+
 // ── NAVIGATION ────────────────────────────────────────────
 function setScale(s){
-  const oldCfg=scaleCfg()[scale];
-  const vpx=EL['sbw'].offsetWidth||300;
-  const centerDays=(EL['sbw'].scrollLeft+vpx/2)/(oldCfg.px/oldCfg.ud);
-  const centerDate=new Date(+viewStart+Math.round(centerDays)*864e5);
+  const old=scaleCfg()[scale], vpx=EL['sbw'].offsetWidth||300;
+  const centerDate=new Date(+viewStart+Math.round((EL['sbw'].scrollLeft+vpx/2)/(old.px/old.ud))*864e5);
   scale=s;
-  const newCfg=scaleCfg()[scale];
-  viewStart=new Date(+centerDate-Math.round(vpx/2/(newCfg.px/newCfg.ud))*864e5);
+  const nc=scaleCfg()[scale];
+  viewStart=new Date(+centerDate-Math.round(vpx/2/(nc.px/nc.ud))*864e5);
   updateScaleBtns(); save(); render();
   setTimeout(()=>{ EL['sbw'].scrollLeft=0; EL['sh'].scrollLeft=0; },0);
 }
 function shiftView(dir){ const c=scaleCfg()[scale]; viewStart=new Date(+viewStart+dir*c.ud*864e5); render(); }
 function goToday(){
-  const c=scaleCfg()[scale],vpx=EL['sbw'].offsetWidth||300;
-  const hd=Math.floor(vpx/2/(c.px/c.ud));
+  const c=scaleCfg()[scale], vpx=EL['sbw'].offsetWidth||300;
   const today=new Date(); today.setHours(0,0,0,0);
-  viewStart=new Date(today); viewStart.setDate(viewStart.getDate()-hd);
+  viewStart=new Date(today); viewStart.setDate(viewStart.getDate()-Math.floor(vpx/2/(c.px/c.ud)));
   render();
   setTimeout(()=>{
-    const tp=pxFor(today,getUnits());
-    EL['sbw'].scrollLeft=Math.max(0,tp-vpx/2);
-    EL['sh'].scrollLeft=Math.max(0,tp-vpx/2);
+    const tp=pxFor(today,getUnits()), sc=Math.max(0,tp-vpx/2);
+    EL['sbw'].scrollLeft=sc; EL['sh'].scrollLeft=sc;
   },50);
 }
 function updateScaleBtns(){
@@ -586,9 +707,9 @@ function updateScaleBtns(){
 
 // ── RENDER ────────────────────────────────────────────────
 function render(){
-  const cfg=scaleCfg()[scale],cols=colWidths();
-  const showSt=cols.status>0,fixedW=cols.name+cols.status;
-  const units=getUnits(),totalPx=units.length*cfg.px;
+  const cfg=scaleCfg()[scale], cols=colWidths();
+  const showSt=cols.status>0, fixedW=cols.name+cols.status;
+  const units=getUnits(), totalPx=units.length*cfg.px;
   const lastDate=new Date(units[units.length-1]); lastDate.setDate(lastDate.getDate()+cfg.ud-1);
   const today=new Date(); today.setHours(0,0,0,0);
   const todayPx=pxFor(today,units);
@@ -598,19 +719,62 @@ function render(){
     units[0].toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'})+' – '+
     lastDate.toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'});
 
+  const WDAYS=['D','S','T','Q','Q','S','S'];
+
   EL['fhr'].innerHTML=
     `<tr><th style="width:${cols.name}px">Projeto / Tarefa</th>${showSt?`<th style="width:${cols.status}px">Status</th>`:''}</tr>`+
+    (scale==='day'?`<tr><th></th>${showSt?'<th></th>':''}</tr>`:'')+
     `<tr><th></th>${showSt?'<th></th>':''}</tr>`;
+
+  const weekdayRow=scale==='day'
+    ?`<tr>${units.map((u,i)=>{
+        const ng=i<units.length-1&&buildGroups([units[i],units[i+1]]).length>1;
+        const isSun=u.getDay()===0, isSat=u.getDay()===6;
+        const wcolor=isSun?'#E24B4A':isSat?'#888':'';
+        const isTodayW=(()=>{const ni=units[i+1]||new Date(+u+864e5);return today>=u&&today<ni;})();
+        return`<th class="c${ng?' gh':''}" style="width:${cfg.px}px;font-size:10px;${wcolor?'color:'+wcolor:''}${isTodayW?';background:rgba(216,90,48,.18)':''}">${WDAYS[u.getDay()]}</th>`;
+      }).join('')}</tr>`
+    :'';
 
   EL['gh'].innerHTML=
     `<tr>${groups.map(g=>`<th class="gh c" colspan="${g.n}">${g.lbl}</th>`).join('')}</tr>`+
+    weekdayRow+
     `<tr>${units.map((u,i)=>{
       const ng=i<units.length-1&&buildGroups([units[i],units[i+1]]).length>1;
-      return`<th class="c${ng?' gh':''}" style="width:${cfg.px}px">${cfg.fmtU(u)}</th>`;
+      const isSun=scale==='day'&&u.getDay()===0, isSat=scale==='day'&&u.getDay()===6;
+      const wcolor=isSun?'color:#E24B4A':isSat?'color:#888':'';
+      const isToday=(()=>{
+        if(scale==='month') return u.getFullYear()===today.getFullYear()&&u.getMonth()===today.getMonth();
+        if(scale==='week') return today>=u&&today<new Date(+u+7*864e5);
+        return toIso(u)===toIso(today);
+      })();
+      return`<th class="c${ng?' gh':''}" style="width:${cfg.px}px;${wcolor}${isToday?';background:rgba(216,90,48,.18)':''}">${cfg.fmtU(u)}</th>`;
     }).join('')}</tr>`;
   EL['ht'].style.cssText=`min-width:${totalPx}px;width:100%`;
 
-  const todayLine=todayPx>=0&&todayPx<=totalPx?`<div class="tl" style="left:${todayPx}px"></div>`:'';
+  // Hoje: coluna inteira destacada em todas as escalas
+  const c2=scaleCfg()[scale];
+  // Snap: encontra a unidade correta que contém hoje
+  function findTodayUnit(units){
+    if(scale==='month'){
+      // Compara por mês e ano
+      return units.findIndex(u=>u.getFullYear()===today.getFullYear()&&u.getMonth()===today.getMonth());
+    }else if(scale==='week'){
+      // Encontra a semana cujo intervalo [u, u+7d) contém hoje
+      return units.findIndex((u,i)=>{
+        const next=new Date(+u+7*864e5);
+        return today>=u&&today<next;
+      });
+    }else{
+      // Dia: compara data exata
+      return units.findIndex(u=>toIso(u)===toIso(today));
+    }
+  }
+  const todayUnitIdx=findTodayUnit(units);
+  const todaySnapPx=todayUnitIdx>=0?todayUnitIdx*c2.px:-1;
+  const todayLine=todaySnapPx>=0&&todaySnapPx<=totalPx
+    ?`<div class="tl" style="left:${todaySnapPx}px;width:${c2.px}px"></div>`
+    :'';
   const gridLines=units.map((_,i)=>`<div class="gl" style="left:${i*cfg.px}px"></div>`).join('');
 
   let fRows='',sRows='';
@@ -625,10 +789,14 @@ function render(){
         <span class="nm" onclick="openModal('project',${p.id},null)" title="${p.name}">${p.name}</span>
         ${p.owner?`<span class="ow">${p.owner}</span>`:''}
       </div>`;
-      stc=`<span class="sb ${SC[p.status]}" style="cursor:pointer" onclick="cycleStatus('project',${p.id},null)" title="Clique para alterar status">${SL[p.status]}</span>`;
+      stc=`<span class="sb ${SC[p.status]}" onclick="cycleStatus('project',${p.id},null)" title="Clique para alterar">${SL[p.status]}</span>`;
     }else if(isSub){
-      nc=`<span class="sn" onclick="openModal('sub',${p.id},${s.id})" title="${s.name}">${s.name}</span>`;
-      stc=`<span class="sb ${SC[s.status]}" style="cursor:pointer" onclick="cycleStatus('sub',${p.id},${s.id})" title="Clique para alterar status">${SL[s.status]}</span>`;
+      const subLocked=!!s.locked;
+      nc=`<div class="sub-cell">
+        <span class="sn" onclick="openModal('sub',${p.id},${s.id})" title="${s.name}">${s.name}</span>
+        <button class="lock-btn${subLocked?' locked':''}" onclick="toggleLock(${p.id},${s.id})" title="${subLocked?'Travada — clique para destravar':'Travar data de início'}">${lockIcon(subLocked)}</button>
+      </div>`;
+            stc=`<span class="sb ${SC[s.status]}" onclick="cycleStatus('sub',${p.id},${s.id})" title="Clique para alterar">${SL[s.status]}</span>`;
     }else{
       nc=`<button class="asb" onclick="openModal('sub',${p.id},null)">+ subtarefa</button>`;
     }
@@ -639,8 +807,9 @@ function render(){
       const lx=pxFor(p.start,units),rx=pxFor(new Date(+new Date(p.end)+864e5),units);
       const w=Math.max(8,rx-lx),vis=new Date(p.end)>=units[0]&&new Date(p.start)<=lastDate;
       const[bg,fg]=COLORS[p.status]||COLORS.wait;
-      bar=vis?`<div class="bar" data-pid="${p.id}" style="left:${lx}px;width:${w}px;background:${bg};color:${fg}">
-        <div class="hl" data-pid="${p.id}" data-side="l"></div>
+      const hasLockedSubs=(p.subs||[]).some(s=>s.locked);
+      bar=vis?`<div class="bar" data-pid="${p.id}" style="left:${lx}px;width:${w}px;background:${bg};color:${fg}${hasLockedSubs?';cursor:not-allowed':''}">
+        <div class="hl" data-pid="${p.id}" data-side="l" style="${hasLockedSubs?'cursor:not-allowed':''}"></div>
         <span style="pointer-events:none;overflow:hidden;text-overflow:ellipsis">${p.name}</span>
         <div class="hr" data-pid="${p.id}" data-side="r"></div>
       </div>`:'';
@@ -651,11 +820,13 @@ function render(){
       const bg=done?'#C0DD97':SUB_COLORS[s.status]||SUB_COLORS.wait;
       const fg=done?'#173404':'#fff';
       const dur=daysDiff(s.start,s.end)+1;
-      bar=vis?`<div class="bar" data-pid="${p.id}" data-sid="${s.id}" style="left:${lx}px;width:${w}px;background:${bg};color:${fg};height:12px">
-        <div class="hl" data-pid="${p.id}" data-sid="${s.id}" data-side="l"></div>
+      const sLocked=!!s.locked;
+      bar=vis?`<div class="bar" data-pid="${p.id}" data-sid="${s.id}" style="left:${lx}px;width:${w}px;background:${bg};color:${fg};height:12px${sLocked?';cursor:not-allowed':''}">
+        ${sLocked?'':`<div class="hl" data-pid="${p.id}" data-sid="${s.id}" data-side="l"></div>`}
+        ${sLocked?`<span style="pointer-events:none;font-size:9px;flex-shrink:0">${lockIcon(true)}</span>`:''}
         ${done?'<span style="pointer-events:none;font-size:9px;flex-shrink:0">&#10003;</span>':''}
         ${w>28?`<span style="pointer-events:none;font-size:9px;opacity:.85;flex:1;text-align:center">${dur}d</span>`:''}
-        <div class="hr" data-pid="${p.id}" data-sid="${s.id}" data-side="r"></div>
+        ${sLocked?'':`<div class="hr" data-pid="${p.id}" data-sid="${s.id}" data-side="r"></div>`}
       </div>`:'';
     }
     sRows+=`<tr class="${rc}"><td class="bar-cell" style="min-width:${totalPx}px;width:100%"><div class="bar-inner">${gridLines}${todayLine}${bar}</div></td></tr>`;
@@ -669,9 +840,10 @@ function render(){
   EL['fbt'].style.width=fixedW+'px';
   EL['sbt'].style.cssText=`min-width:${totalPx}px;width:100%`;
   EL['fbr'].innerHTML=fRows; EL['sbr'].innerHTML=sRows;
-  syncHeights(); drawArrows(units,totalPx); bindDrag(); bindReorder();
+  syncHeights(); drawArrows(units,totalPx); bindBarDrag(); bindReorder();
 }
 
+// ── SYNC HEIGHTS ──────────────────────────────────────────
 function syncHeights(){
   const fr=EL['fbr'].rows,sr=EL['sbr'].rows;
   for(let i=0;i<Math.min(fr.length,sr.length);i++){
@@ -683,6 +855,7 @@ function syncHeights(){
   fh.style.height=hh+'px'; sh.style.height=hh+'px';
 }
 
+// ── ARROWS ────────────────────────────────────────────────
 function drawArrows(units,totalPx){
   const svg=EL['arrow-svg'];
   svg.innerHTML='';
@@ -719,7 +892,8 @@ function drawArrows(units,totalPx){
   });
 }
 
-function bindDrag(){
+// ── BAR DRAG ──────────────────────────────────────────────
+function bindBarDrag(){
   document.querySelectorAll('.bar').forEach(bar=>{
     bar.onmousedown=bar.ontouchstart=e=>{
       const isTouch=e.type==='touchstart';
@@ -727,6 +901,7 @@ function bindDrag(){
       if(e.target.classList.contains('hl')||e.target.classList.contains('hr')) return;
       const pid=+bar.dataset.pid,sid=bar.dataset.sid?+bar.dataset.sid:null;
       const item=getItem(pid,sid); if(!item) return;
+      if(sid&&item.locked) return; // subtarefa travada — ignora drag
       const subOrig=sid?null:(item.subs||[]).map(s=>({id:s.id,start:s.start,end:s.end}));
       drag={pid,sid,mode:'move',sx:(isTouch?e.touches[0]:e).clientX,os:item.start,oe:item.end,subOrig};
     };
@@ -742,23 +917,49 @@ function bindDrag(){
     };
   });
 }
+// ── LOCK ICONS ────────────────────────────────────────────
+function lockIcon(locked){
+  if(locked) return "<svg width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='11' width='18' height='11' rx='2'/><path d='M7 11V7a5 5 0 0 1 10 0v4'/></svg>";
+  return "<svg width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='11' width='18' height='11' rx='2'/><path d='M7 11V7a5 5 0 0 1 9.9-1'/></svg>";
+}
 
-function applyDrag(clientX){
+// ── LOCK START DATE ───────────────────────────────────────
+function toggleLock(pid,sid){
+  const item=getItem(pid,sid==null?null:sid); if(!item) return;
+  item.locked=!item.locked;
+  save(); render();
+}
+
+function applyBarDrag(cx){
   if(!drag) return;
-  const c=scaleCfg()[scale];
-  const days=Math.round((clientX-drag.sx)/(c.px/c.ud));
+  const c=scaleCfg()[scale], days=Math.round((cx-drag.sx)/(c.px/c.ud));
   const item=getItem(drag.pid,drag.sid); if(!item) return;
+  // Bloqueia qualquer movimento se subtarefa travada
+  if(drag.sid&&item.locked) return;
   if(drag.mode==='move'){
+    // Se projeto tem subtarefa travada, bloqueia movimento do projeto
+    if(!drag.sid){
+      const p=projects.find(x=>x.id===drag.pid);
+      const hasLockedSub=(p?.subs||[]).some(s=>s.locked);
+      if(hasLockedSub) return;
+    }
     item.start=addDays(drag.os,days); item.end=addDays(drag.oe,days);
     if(!drag.sid){
       drag.subOrig?.forEach(o=>{
         const s=(item.subs||[]).find(x=>x.id===o.id); if(!s) return;
         s.start=addDays(o.start,days); s.end=addDays(o.end,days);
       });
-      syncProjectDates(drag.pid);
-      cascadeProjectSuccessors('p_'+drag.pid);
+      syncProjectDates(drag.pid); cascadeProjectSuccessors('p_'+drag.pid);
     }else{ afterSubChange(drag.pid,drag.sid); }
   }else if(drag.mode==='l'){
+    // Bloqueia redimensionamento pelo lado esquerdo se travado
+    if(!drag.sid){
+      const p=projects.find(x=>x.id===drag.pid);
+      if((p?.subs||[]).some(s=>s.locked)) return;
+    } else {
+      const item=getItem(drag.pid,drag.sid);
+      if(item?.locked) return;
+    }
     const ns=addDays(drag.os,days);
     if(ns<drag.oe){ item.start=ns; if(drag.sid) afterSubChange(drag.pid,drag.sid); }
   }else{
@@ -768,32 +969,81 @@ function applyDrag(clientX){
   render();
 }
 
-window.addEventListener('mousemove',e=>{ if(drag) applyDrag(e.clientX); });
-window.addEventListener('mouseup',  ()=>{ if(drag){save();drag=null;} });
-window.addEventListener('touchmove',e=>{ if(drag) applyDrag(e.touches[0].clientX); },{passive:true});
-window.addEventListener('touchend', ()=>{ if(drag){save();drag=null;} });
+// ── HEADER PAN ────────────────────────────────────────────
+EL['sh'].style.cursor='grab';
+EL['sh'].addEventListener('mousedown',e=>{ const c=scaleCfg()[scale]; pan={cx:e.clientX,vs:new Date(viewStart),ppd:c.px/c.ud}; EL['sh'].style.cursor='grabbing'; e.preventDefault(); });
+EL['sh'].addEventListener('touchstart',e=>{ const c=scaleCfg()[scale]; pan={cx:e.touches[0].clientX,vs:new Date(viewStart),ppd:c.px/c.ud}; },{passive:true});
+function applyPan(cx){
+  if(!pan) return;
+  viewStart=new Date(+pan.vs+Math.round(-(cx-pan.cx)/pan.ppd)*864e5);
+  render();
+}
 
-(()=>{
-  const head=EL['sh']; let pan=null;
-  head.style.cursor='grab';
-  const start=cx=>{ const c=scaleCfg()[scale]; pan={cx,vs:new Date(viewStart),ppd:c.px/c.ud}; head.style.cursor='grabbing'; };
-  const move=cx=>{ if(!pan) return; viewStart=new Date(+pan.vs+Math.round(-(cx-pan.cx)/pan.ppd)*864e5); render(); };
-  const end=()=>{ if(pan){pan=null;head.style.cursor='grab';} };
-  head.addEventListener('mousedown',e=>{start(e.clientX);e.preventDefault();});
-  window.addEventListener('mousemove',e=>{if(pan)move(e.clientX);});
-  window.addEventListener('mouseup',end);
-  head.addEventListener('touchstart',e=>start(e.touches[0].clientX),{passive:true});
-  window.addEventListener('touchmove',e=>{if(pan)move(e.touches[0].clientX);},{passive:true});
-  window.addEventListener('touchend',end);
-})();
+// ── PROJECT REORDER ───────────────────────────────────────
+function bindReorder(){
+  document.querySelectorAll('.drag-handle').forEach(h=>{
+    h.onmousedown=e=>{ e.preventDefault(); e.stopPropagation(); reorder={pid:+h.dataset.pid}; document.body.style.cursor='grabbing'; };
+    h.ontouchstart=e=>{ e.stopPropagation(); reorder={pid:+h.dataset.pid}; };
+  });
+}
+function getProjRows(){ return Array.from(EL['fbr'].rows).filter(r=>r.classList.contains('pr')); }
+function getProjDropIdx(cy){
+  const rows=getProjRows();
+  for(let i=0;i<rows.length;i++){ const r=rows[i].getBoundingClientRect(); if(cy<r.top+r.height/2) return i; }
+  return rows.length;
+}
+function applyReorder(cy){
+  const rows=getProjRows(), dragIdx=projects.findIndex(p=>p.id===reorder.pid);
+  const dropIdx=getProjDropIdx(cy);
+  rows.forEach((r,i)=>{
+    r.classList.remove('drop-above','drop-below');
+    if(i===dropIdx&&i!==dragIdx) r.classList.add('drop-above');
+    else if(i===dropIdx-1&&i!==dragIdx) r.classList.add('drop-below');
+  });
+}
+function finishReorder(cy){
+  const dragIdx=projects.findIndex(p=>p.id===reorder.pid);
+  let dropIdx=getProjDropIdx(cy);
+  if(dropIdx>dragIdx) dropIdx--;
+  if(dragIdx!==dropIdx&&dropIdx>=0&&dropIdx<projects.length){
+    const[moved]=projects.splice(dragIdx,1);
+    projects.splice(dropIdx,0,moved);
+    save();
+  }
+  reorder=null; document.body.style.cursor='';
+  getProjRows().forEach(r=>r.classList.remove('drop-above','drop-below'));
+  render();
+}
 
+// ── GLOBAL EVENT LISTENERS (registered once) ──────────────
+window.addEventListener('mousemove',e=>{
+  if(drag) applyBarDrag(e.clientX);
+  if(pan)  applyPan(e.clientX);
+  if(reorder) applyReorder(e.clientY);
+});
+window.addEventListener('mouseup',e=>{
+  if(drag){ save(); drag=null; }
+  if(pan) { pan=null; EL['sh'].style.cursor='grab'; }
+  if(reorder) finishReorder(e.clientY);
+});
+window.addEventListener('touchmove',e=>{
+  if(drag) applyBarDrag(e.touches[0].clientX);
+  if(pan)  applyPan(e.touches[0].clientX);
+  if(reorder) applyReorder(e.touches[0].clientY);
+},{passive:true});
+window.addEventListener('touchend',e=>{
+  if(drag){ save(); drag=null; }
+  if(pan) { pan=null; }
+  if(reorder) finishReorder(e.changedTouches[0].clientY);
+});
+
+// ── SCROLL SYNC + WHEEL ───────────────────────────────────
 EL['sbw'].addEventListener('scroll',function(){
   EL['sh'].scrollLeft=this.scrollLeft;
   EL['fb'].scrollTop=this.scrollTop;
 });
-
 let wheelTimer=null;
-function handleWheel(e,scrollVertical){
+function handleWheel(e,scrollV){
   const ax=Math.abs(e.deltaX),ay=Math.abs(e.deltaY);
   if(ax>2&&ax>ay){
     e.preventDefault();
@@ -807,16 +1057,24 @@ function handleWheel(e,scrollVertical){
     e.preventDefault();
     const c=scaleCfg()[scale],sx=EL['sbw'].scrollLeft;
     viewStart=new Date(+viewStart+(e.deltaY>0?c.ud:-c.ud)*864e5);
-    render();
-    setTimeout(()=>{EL['sbw'].scrollLeft=sx;EL['sh'].scrollLeft=sx;},0);
-  }else if(scrollVertical){ EL['sbw'].scrollTop+=e.deltaY; }
+    render(); setTimeout(()=>{EL['sbw'].scrollLeft=sx;EL['sh'].scrollLeft=sx;},0);
+  }else if(scrollV){ EL['sbw'].scrollTop+=e.deltaY; }
 }
 EL['sbw'].addEventListener('wheel',e=>handleWheel(e,false),{passive:false});
 EL['fb'].addEventListener('wheel', e=>handleWheel(e,true), {passive:false});
 EL['sh'].addEventListener('wheel', e=>handleWheel(e,false),{passive:false});
 
+// ── COLLAPSE ──────────────────────────────────────────────
 function toggleCollapse(id){ collapsed[id]=!collapsed[id]; save(); render(); }
 
+// ── CYCLE STATUS ──────────────────────────────────────────
+function cycleStatus(mode,pid,sid){
+  const item=getItem(pid,sid==null?null:sid); if(!item) return;
+  item.status=STATUS_ORDER[(STATUS_ORDER.indexOf(item.status)+1)%STATUS_ORDER.length];
+  save(); render();
+}
+
+// ── MODAL HELPERS ─────────────────────────────────────────
 function calcEnd(){
   const s=EL['f-start'].value,d=parseInt(EL['f-dur'].value);
   if(s&&d>0) EL['f-end'].value=addDays(s,d-1);
@@ -833,21 +1091,14 @@ function applyPred(){
   if(!dur) calcDur();
 }
 
-const TPL_DEFAULTS=[
-  {name:'Levantamento e Dados',dur:''},
-  {name:'Estudo Preliminar',dur:''},
-  {name:'Projeto Legal',dur:''},
-  {name:'Anteprojeto',dur:''},
-  {name:'Projeto Executivo',dur:''}
-];
-
-function setTipo(tipo){
-  _tipo=tipo;
-  D('f-standard').style.display=tipo==='blank'?'block':'none';
-  D('f-template').style.display=tipo==='template'?'block':'none';
-  D('btn-blank').classList.toggle('active',tipo==='blank');
-  D('btn-tpl').classList.toggle('active',tipo==='template');
-  if(tipo==='template') renderTplRows();
+// ── TEMPLATE ──────────────────────────────────────────────
+function setTipo(t){
+  _tipo=t;
+  D('f-standard').style.display=t==='blank'?'block':'none';
+  D('f-template').style.display=t==='template'?'block':'none';
+  D('btn-blank').classList.toggle('active',t==='blank');
+  D('btn-tpl').classList.toggle('active',t==='template');
+  if(t==='template') renderTplRows();
 }
 function syncTplState(){
   tplSubs.forEach((s,i)=>{
@@ -873,18 +1124,16 @@ function renderTplRows(){
       acc=new Date(end); acc.setDate(acc.getDate()+1);
     }
     const rmBtn=tplSubs.length>1
-      ?`<button onclick="removeTplSub(${i})" style="background:none;border:none;cursor:pointer;color:#ccc;font-size:15px;padding:0 2px" onmouseover="this.style.color='#E24B4A'" onmouseout="this.style.color='#ccc'">&#10005;</button>`
-      :'<span style="width:20px"></span>';
+      ?`<button onclick="removeTplSub(${i})" style="background:none;border:none;cursor:pointer;color:#ccc;font-size:14px;padding:0 2px;flex-shrink:0" onmouseover="this.style.color='#E24B4A'" onmouseout="this.style.color='#ccc'">&#10005;</button>`
+      :'<span style="width:18px;flex-shrink:0"></span>';
     return`<div class="tpl-row" id="tpl-row-${i}">
       <input id="tpl-name-${i}" type="text" value="${s.name.replace(/"/g,'&quot;')}" oninput="syncTplState()"
         style="flex:1;min-width:0;font-size:12px;font-weight:500;color:#1a1a1a;border:.5px solid transparent;border-radius:6px;padding:3px 6px;background:transparent;outline:none;pointer-events:auto"
         onfocus="this.style.borderColor='#ccc';this.style.background='#fff'"
         onblur="this.style.borderColor='transparent';this.style.background='transparent'"/>
-      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:8px">
-        <span class="tpl-dates">${dateStr||''}</span>
-        <input id="tpl-dur-${i}" type="number" min="1" placeholder="dias" value="${s.dur||''}" oninput="syncTplState();calcTemplate()" style="width:50px;flex-shrink:0"/>
-        ${rmBtn}
-      </div>
+      <span class="tpl-dates">${dateStr||''}</span>
+      <input id="tpl-dur-${i}" type="number" min="1" placeholder="dias" value="${s.dur||''}" oninput="syncTplState();calcTemplate()"/>
+      ${rmBtn}
     </div>`;
   }).join('');
   D('tpl-subs').innerHTML=rows+`<button onclick="addTplSub()" class="btn" style="width:100%;margin-top:6px;border-style:dashed;color:#aaa">+ Adicionar etapa</button>`;
@@ -900,7 +1149,7 @@ function calcTemplate(){
       const end=new Date(acc); end.setDate(end.getDate()+dur-1);
       el.textContent=acc.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'})+' – '+end.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
       acc=new Date(end); acc.setDate(acc.getDate()+1);
-    }else{ el.innerHTML='&nbsp;'; }
+    }else{ el.textContent=''; }
   });
 }
 function saveTemplate(){
@@ -908,10 +1157,9 @@ function saveTemplate(){
   const name=D('t-name').value.trim(); if(!name) return;
   const start=D('t-start').value; if(!start) return;
   const owner=D('t-owner').value.trim();
-  const pid=Date.now(); const subs=[]; let acc=new Date(start),lastEnd=new Date(start);
+  const pid=Date.now(); const subs=[]; let acc=new Date(start), lastEnd=new Date(start);
   tplSubs.forEach((s,i)=>{
-    const dur=parseInt(s.dur)||1;
-    const sid=pid+i+1;
+    const dur=parseInt(s.dur)||1, sid=pid+i+1;
     const subEnd=new Date(acc); subEnd.setDate(subEnd.getDate()+dur-1);
     subs.push({id:sid,name:s.name||('Etapa '+(i+1)),start:toIso(acc),end:toIso(subEnd),status:'wait',pred:i>0?'s_'+pid+'_'+(pid+i):null});
     lastEnd=new Date(subEnd); acc=new Date(subEnd); acc.setDate(acc.getDate()+1);
@@ -920,117 +1168,7 @@ function saveTemplate(){
   save(); closeModal(); render();
 }
 
-function sortProjects(){
-  function sortKey(name){
-    const m=(name||'').match(/^(\d+)/);
-    return m?[+m[1],(name||'').toLowerCase()]:[Infinity,(name||'').toLowerCase()];
-  }
-  projects.sort((a,b)=>{
-    const[an,aa]=sortKey(a.name),[bn,ba]=sortKey(b.name);
-    if(an!==bn) return an-bn;
-    return aa<ba?-1:aa>ba?1:0;
-  });
-}
-
-// Insere projeto na posição correta: numérico → alfabético crescente
-function insertProjectSorted(proj){
-  function sortKey(name){
-    // Extrai número inicial se existir (ex: "01 - Casa" → 1)
-    const m=name.match(/^(\d+)/);
-    return m?[+m[1], name.toLowerCase()]:[Infinity, name.toLowerCase()];
-  }
-  const[n,a]=sortKey(proj.name);
-  let idx=projects.length;
-  for(let i=0;i<projects.length;i++){
-    const[ni,ai]=sortKey(projects[i].name);
-    if(n<ni||(n===ni&&a<ai)){idx=i;break;}
-  }
-  projects.splice(idx,0,proj);
-}
-let reorder=null;
-
-function bindReorder(){
-  document.querySelectorAll('.drag-handle').forEach(h=>{
-    h.addEventListener('mousedown',e=>{
-      e.preventDefault(); e.stopPropagation();
-      const pid=+h.dataset.pid;
-      reorder={pid, startY:e.clientY};
-      document.body.style.cursor='grabbing';
-    });
-    h.addEventListener('touchstart',e=>{
-      e.stopPropagation();
-      const pid=+h.dataset.pid;
-      reorder={pid, startY:e.touches[0].clientY};
-    },{passive:true});
-  });
-}
-
-function getProjRows(){
-  // Get only project rows (not sub rows) from fixed body
-  return Array.from(EL['fbr'].rows).filter(r=>r.classList.contains('pr'));
-}
-
-function getProjectIndexFromY(clientY){
-  const rows=getProjRows();
-  for(let i=0;i<rows.length;i++){
-    const rect=rows[i].getBoundingClientRect();
-    if(clientY<rect.top+rect.height/2) return i;
-  }
-  return rows.length;
-}
-
-window.addEventListener('mousemove',e=>{
-  if(!reorder) return;
-  const idx=getProjectIndexFromY(e.clientY);
-  // Show drop indicator
-  getProjRows().forEach((r,i)=>{
-    r.classList.remove('drop-above','drop-below');
-    const dragIdx=projects.findIndex(p=>p.id===reorder.pid);
-    if(i===idx&&i!==dragIdx) r.classList.add('drop-above');
-    else if(i===idx-1&&i!==dragIdx) r.classList.add('drop-below');
-  });
-});
-
-window.addEventListener('mouseup',e=>{
-  if(!reorder) return;
-  const dragIdx=projects.findIndex(p=>p.id===reorder.pid);
-  let dropIdx=getProjectIndexFromY(e.clientY);
-  if(dropIdx>dragIdx) dropIdx--;
-  if(dragIdx!==dropIdx&&dropIdx>=0&&dropIdx<projects.length){
-    const [moved]=projects.splice(dragIdx,1);
-    projects.splice(dropIdx,0,moved);
-    save();
-  }
-  reorder=null;
-  document.body.style.cursor='';
-  getProjRows().forEach(r=>r.classList.remove('drop-above','drop-below'));
-  render();
-});
-
-window.addEventListener('touchend',e=>{
-  if(!reorder) return;
-  const touch=e.changedTouches[0];
-  const dragIdx=projects.findIndex(p=>p.id===reorder.pid);
-  let dropIdx=getProjectIndexFromY(touch.clientY);
-  if(dropIdx>dragIdx) dropIdx--;
-  if(dragIdx!==dropIdx&&dropIdx>=0&&dropIdx<projects.length){
-    const [moved]=projects.splice(dragIdx,1);
-    projects.splice(dropIdx,0,moved);
-    save();
-  }
-  reorder=null;
-  render();
-});
-
-// Cicla pelo próximo status ao clicar no badge
-const STATUS_ORDER = ['wait','prog','late','ok'];
-function cycleStatus(mode, pid, sid){
-  const item = getItem(pid, sid==null?null:sid); if(!item) return;
-  const cur = STATUS_ORDER.indexOf(item.status);
-  item.status = STATUS_ORDER[(cur+1) % STATUS_ORDER.length];
-  save(); render();
-}
-
+// ── MODAL ─────────────────────────────────────────────────
 function openModal(mode,pid,sid){
   _mode=mode; _pid=pid; _sid=sid; _tipo='blank';
   const isEdit=pid&&(mode==='project'||(mode==='sub'&&sid));
@@ -1039,12 +1177,11 @@ function openModal(mode,pid,sid){
   EL['btn-del'].style.display=isEdit?'inline-block':'none';
   EL['f-owner-wrap'].style.display=mode==='project'?'block':'none';
   D('f-tipo-wrap').style.display=isNew?'block':'none';
-  D('f-standard').style.display='block';
-  D('f-template').style.display='none';
+  D('f-standard').style.display='block'; D('f-template').style.display='none';
   D('btn-blank').classList.add('active'); D('btn-tpl').classList.remove('active');
   tplSubs=TPL_DEFAULTS.map(s=>({...s}));
   D('t-name').value=''; D('t-owner').value=''; D('t-start').value=toIso(new Date());
-  const item=isEdit?getItem(pid,sid):null,t=toIso(new Date());
+  const item=isEdit?getItem(pid,sid):null, t=toIso(new Date());
   EL['f-name'].value=item?.name||'';
   EL['f-start'].value=item?.start||t;
   EL['f-end'].value=item?.end||t;
@@ -1059,34 +1196,35 @@ function openModal(mode,pid,sid){
     if(item?.pred===fi.key) o.selected=true;
     EL['f-pred'].appendChild(o);
   });
+  // Se subtarefa travada, bloqueia edição de datas e duração
+  const isLockedSub=_mode==='sub'&&isEdit&&getItem(_pid,_sid)?.locked;
+  ['f-start','f-end','f-dur'].forEach(id=>{
+    EL[id].disabled=!!isLockedSub;
+    EL[id].style.opacity=isLockedSub?'0.4':'1';
+  });
   EL['modal-overlay'].style.display='flex';
   setTimeout(()=>EL['f-name'].focus(),50);
 }
 function closeModal(){ EL['modal-overlay'].style.display='none'; }
-
 function saveItem(){
   if(_tipo==='template'){ saveTemplate(); return; }
   const name=EL['f-name'].value.trim(); if(!name) return;
   const predKey=EL['f-pred'].value||null;
-  let start=EL['f-start'].value,end=EL['f-end'].value;
+  let start=EL['f-start'].value, end=EL['f-end'].value;
   if(predKey){
     const pred=getItemByKey(predKey);
-    if(pred?.end){
-      const forced=addDays(pred.end,1);
-      if(start!==forced){ end=addDays(forced,daysDiff(start,end)); start=forced; }
-    }
+    if(pred?.end){ const f=addDays(pred.end,1); if(start!==f){ end=addDays(f,daysDiff(start,end)); start=f; } }
   }
   const data={name,start,end,status:EL['f-status'].value,pred:predKey};
   if(_mode==='project'){
     if(_pid) Object.assign(projects.find(p=>p.id===_pid),data,{owner:EL['f-owner'].value.trim()});
-    else{data.id=Date.now();data.owner=EL['f-owner'].value.trim();data.subs=[];insertProjectSorted(data);}
+    else{ data.id=Date.now(); data.owner=EL['f-owner'].value.trim(); data.subs=[]; insertProjectSorted(data); }
   }else{
     const p=projects.find(x=>x.id===_pid); if(!p) return;
     if(!p.subs) p.subs=[];
     if(_sid) Object.assign(p.subs.find(s=>s.id===_sid),data);
-    else{data.id=Date.now();p.subs.push(data);}
-    syncProjectDates(_pid);
-    cascadeProjectSuccessors('p_'+_pid);
+    else{ data.id=Date.now(); p.subs.push(data); }
+    syncProjectDates(_pid); cascadeProjectSuccessors('p_'+_pid);
   }
   save(); closeModal(); render();
 }
@@ -1094,13 +1232,38 @@ function deleteItem(){
   if(_mode==='project'&&_pid) projects=projects.filter(p=>p.id!==_pid);
   else if(_mode==='sub'&&_pid&&_sid){
     const p=projects.find(x=>x.id===_pid);
-    if(p){p.subs=(p.subs||[]).filter(s=>s.id!==_sid);syncProjectDates(_pid);}
+    if(p){ p.subs=(p.subs||[]).filter(s=>s.id!==_sid); syncProjectDates(_pid); }
   }
   save(); closeModal(); render();
 }
-EL['modal-overlay'].addEventListener('click',e=>{if(e.target===EL['modal-overlay'])closeModal();});
+EL['modal-overlay'].addEventListener('click',e=>{ if(e.target===EL['modal-overlay']) closeModal(); });
 
-let rsz; window.addEventListener('resize',()=>{clearTimeout(rsz);rsz=setTimeout(render,150);});
+
+// ── COLUMN RESIZER ────────────────────────────────────────
+(()=>{
+  const resizer=D('col-resizer');
+  let rsz=null;
+  resizer.addEventListener('mousedown',e=>{
+    e.preventDefault(); e.stopPropagation();
+    rsz={startX:e.clientX, startW:colWidths().name};
+    resizer.classList.add('dragging');
+    document.body.style.cursor='col-resize';
+  });
+  window.addEventListener('mousemove',e=>{
+    if(!rsz) return;
+    const dx=e.clientX-rsz.startX;
+    _nameColW=Math.max(120, Math.min(400, rsz.startW+dx));
+    render();
+  });
+  window.addEventListener('mouseup',()=>{
+    if(rsz){ rsz=null; resizer.classList.remove('dragging'); document.body.style.cursor=''; }
+  });
+  // Double-click resets to auto
+  resizer.addEventListener('dblclick',()=>{ _nameColW=0; render(); });
+})();
+
+// ── RESIZE ────────────────────────────────────────────────
+let rsz; window.addEventListener('resize',()=>{ clearTimeout(rsz); rsz=setTimeout(render,150); });
 </script>
 
 
