@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0045)file:///C:/Users/User/Downloads/index_10.html -->
+<!-- saved from url=(0045)file:///C:/Users/User/Downloads/index_16.html -->
 <html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -100,7 +100,7 @@ td{padding:4px 8px;vertical-align:middle;font-size:12px;overflow:hidden;height:3
 
 /* MODAL */
 #modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;z-index:9999}
-.modal{background:#fff;border:.5px solid #ccc;border-radius:12px;padding:1.5rem;width:360px;max-width:92vw;box-shadow:0 8px 32px rgba(0,0,0,.12)}
+.modal{background:#fff;border:.5px solid #ccc;border-radius:12px;padding:1.5rem;width:440px;max-width:96vw;box-shadow:0 8px 32px rgba(0,0,0,.12)}
 .modal h3{font-size:14px;font-weight:600;margin-bottom:1.25rem}
 .field{margin-bottom:12px}
 .field label{font-size:11px;color:#888;display:block;margin-bottom:4px;font-weight:500}
@@ -277,11 +277,11 @@ tr.drop-below td{border-bottom:2px solid #185FA5}
       </div>
     </div>
     <div id="f-standard">
-      <div class="field"><label>Nome</label><input id="f-name" type="text"></div>
-      <div class="field"><label>Início</label><input id="f-start" type="date" oninput="calcEnd()"></div>
+      <div class="field"><label>Nome</label><input id="f-name" type="text" onkeydown="if(event.key===&#39;Enter&#39;)saveItem()"></div>
+      <div class="field"><label>Início</label><input id="f-start" type="date" oninput="calcEnd()" onkeydown="if(event.key===&#39;Enter&#39;)saveItem()"></div>
       <div class="frow">
-        <div class="field"><label>Duração (dias)</label><input id="f-dur" type="number" min="1" placeholder="30" oninput="calcEnd()"></div>
-        <div class="field"><label>Término</label><input id="f-end" type="date" oninput="calcDur()"></div>
+        <div class="field"><label>Duração (dias)</label><input id="f-dur" type="number" min="1" placeholder="30" oninput="calcEnd()" onkeydown="if(event.key===&#39;Enter&#39;)saveItem()"></div>
+        <div class="field"><label>Término</label><input id="f-end" type="date" oninput="calcDur()" onkeydown="if(event.key===&#39;Enter&#39;)saveItem()"></div>
       </div>
       <div class="field"><label>Status</label>
         <select id="f-status">
@@ -291,14 +291,14 @@ tr.drop-below td{border-bottom:2px solid #185FA5}
           <option value="late">Atrasado</option>
         </select>
       </div>
-      <div class="field" id="f-owner-wrap"><label>Responsável</label><input id="f-owner" type="text"></div>
+      <div class="field" id="f-owner-wrap"><label>Responsável</label><input id="f-owner" type="text" onkeydown="if(event.key===&#39;Enter&#39;)saveItem()"></div>
       <div class="field"><label>Predecessora</label><select id="f-pred" onchange="applyPred()"><option value="">— Nenhuma —</option></select></div>
     </div>
     <div id="f-template" style="display:none">
-      <div class="field"><label>Nome do Projeto</label><input id="t-name" type="text"></div>
+      <div class="field"><label>Nome do Projeto</label><input id="t-name" type="text" onkeydown="if(event.key===&#39;Enter&#39;)saveItem()"></div>
       <div class="frow">
-        <div class="field"><label>Responsável</label><input id="t-owner" type="text"></div>
-        <div class="field"><label>Início</label><input id="t-start" type="date" oninput="calcTemplate()"></div>
+        <div class="field"><label>Responsável</label><input id="t-owner" type="text" onkeydown="if(event.key===&#39;Enter&#39;)saveItem()"></div>
+        <div class="field"><label>Início</label><input id="t-start" type="date" oninput="calcTemplate()" onkeydown="if(event.key===&#39;Enter&#39;)saveItem()"></div>
       </div>
       <div style="margin:12px 0 6px;font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.08em">Subtarefas</div>
       <div id="tpl-subs"></div>
@@ -876,11 +876,13 @@ function renderTplRows(){
       ?`<button onclick="removeTplSub(${i})" style="background:none;border:none;cursor:pointer;color:#ccc;font-size:15px;padding:0 2px" onmouseover="this.style.color='#E24B4A'" onmouseout="this.style.color='#ccc'">&#10005;</button>`
       :'<span style="width:20px"></span>';
     return`<div class="tpl-row" id="tpl-row-${i}">
-      <span style="flex:1;font-size:12px;font-weight:500;color:#1a1a1a;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.name}</span>
-      <input id="tpl-name-${i}" type="text" value="${s.name.replace(/"/g,'&quot;')}" oninput="syncTplState()" style="display:none"/>
+      <input id="tpl-name-${i}" type="text" value="${s.name.replace(/"/g,'&quot;')}" oninput="syncTplState()"
+        style="flex:1;min-width:0;font-size:12px;font-weight:500;color:#1a1a1a;border:.5px solid transparent;border-radius:6px;padding:3px 6px;background:transparent;outline:none;pointer-events:auto"
+        onfocus="this.style.borderColor='#ccc';this.style.background='#fff'"
+        onblur="this.style.borderColor='transparent';this.style.background='transparent'"/>
       <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:8px">
         <span class="tpl-dates">${dateStr||''}</span>
-        <input id="tpl-dur-${i}" type="number" min="1" placeholder="dias" value="${s.dur||''}" oninput="syncTplState();calcTemplate()" style="width:60px;flex-shrink:0"/>
+        <input id="tpl-dur-${i}" type="number" min="1" placeholder="dias" value="${s.dur||''}" oninput="syncTplState();calcTemplate()" style="width:50px;flex-shrink:0"/>
         ${rmBtn}
       </div>
     </div>`;
