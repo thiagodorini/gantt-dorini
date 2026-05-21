@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0045)file:///C:/Users/User/Downloads/index_27.html -->
+<!-- saved from url=(0045)file:///C:/Users/User/Downloads/index_29.html -->
 <html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -162,7 +162,6 @@ html.dark .s-late{background:#3a1010;color:#f48080}
 /* USERS LIST */
 .u-row{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:.5px solid var(--border4)}
 .u-row:last-child{border-bottom:none}
-.u-email{flex:1;font-size:12px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .u-badge{font-size:10px;padding:2px 6px;border-radius:20px;background:var(--bg3);color:var(--text3);flex-shrink:0}
 .u-btn{font-size:11px;padding:3px 8px;border:.5px solid var(--border3);border-radius:6px;background:transparent;color:var(--text3);cursor:pointer;flex-shrink:0;white-space:nowrap}
 .u-btn:hover{background:var(--bg3);color:var(--text)}
@@ -175,7 +174,6 @@ html.dark .s-late{background:#3a1010;color:#f48080}
 </style>
 </head>
 <body>
-
 
 <!-- LOGIN -->
 <div id="login-screen" style="display:none">
@@ -447,7 +445,7 @@ const authAux = getAuth(appAux);
 
 window._fbSignIn  = (e,p)=>signInWithEmailAndPassword(auth,e,p);
 window._fbSignOut = ()=>signOut(auth);
-window._fbSave    = data=>{ setSyncStatus('syncing'); update(dbRef,data).then(()=>setSyncStatus('synced')).catch(()=>setSyncStatus('error')); };
+window._fbSave    = (data,cb)=>{ setSyncStatus('syncing'); update(dbRef,data).then(()=>{ setSyncStatus('synced'); cb&&cb(); }).catch(()=>setSyncStatus('error')); };
 window._fbListen  = cb=>onValue(dbRef,snap=>cb(snap.val()));
 window._fbCreateUser = async (email,password,name,role)=>{
   let uid;
@@ -483,7 +481,6 @@ window._fbRemoveUser = async uid=>{
   await remove(ref(db,'archiflow/users/'+uid));
 };
 window._fbUpdateUserRole = (uid,role)=>update(ref(db,'archiflow/users/'+uid),{role});
-window._fbResendInvite = email=>sendPasswordResetEmail(auth,email);
 window._fbListenUsers = cb=>onValue(ref(db,'archiflow/users'),snap=>cb(snap.val()||{}));
 
 const ADMIN_EMAIL='thiago@dorini.com.br';
@@ -531,7 +528,7 @@ const TPL_DEFAULTS=[
 let projects=[], collapsed={}, viewStart=null, scale='week';
 let _mode=null, _pid=null, _sid=null, _tipo='blank', tplSubs=[];
 let _saving=false;
-let _nameColW=0;
+let _nameColW=0; // 0 → auto
 let _users={}; // uid → {email, name, role, createdAt}
 let _myRole='equipe'; // role of logged-in user: admin | lider | equipe
 
@@ -546,7 +543,6 @@ function undo(){
   save(); render();
 }
 
-// Drag state — shared across bar drag, header pan and project reorder
 let drag=null, pan=null, reorder=null;
 
 // ── DOM CACHE ─────────────────────────────────────────────
@@ -608,8 +604,7 @@ window._startApp=function(){
   window._fbListen(data=>{
     if(_saving) return;
     if(data){ projects=data.projects||[]; collapsed=data.collapsed||{}; scale=data.scale||'week'; }
-    else { projects=defProjects(); collapsed={}; }
-    scale='week';
+    else { projects=[]; collapsed={}; scale='week'; }
     updateScaleBtns(); render(); setSyncStatus('synced');
     // Centraliza hoje após render (offsetWidth disponível)
     setTimeout(()=>{
@@ -631,8 +626,7 @@ window._startApp=function(){
 // ── SAVE ──────────────────────────────────────────────────
 function save(){
   _saving=true;
-  window._fbSave({projects,collapsed,scale});
-  setTimeout(()=>{ _saving=false; },1000);
+  window._fbSave({projects,collapsed,scale},()=>{ _saving=false; });
 }
 
 // ── SCALE CONFIG ──────────────────────────────────────────
@@ -673,30 +667,7 @@ function buildGroups(units){
 }
 
 // ── DATA ──────────────────────────────────────────────────
-function defProjects(){
-  const y=new Date().getFullYear();
-  return[
-    {id:1,name:'Residência Silva',  start:`${y}-01-15`,end:`${y}-05-30`,status:'ok',  owner:'Ana P.',   pred:null,subs:[
-      {id:11,name:'Levantamento',   start:`${y}-01-15`,end:`${y}-02-10`,status:'ok',  pred:null},
-      {id:12,name:'Projeto arq.',   start:`${y}-02-11`,end:`${y}-04-15`,status:'ok',  pred:null},
-      {id:13,name:'Aprovação',      start:`${y}-04-16`,end:`${y}-05-30`,status:'ok',  pred:null}]},
-    {id:2,name:'Comercial Centro', start:`${y}-03-01`,end:`${y}-09-15`,status:'prog',owner:'Carlos M.',pred:null,subs:[
-      {id:21,name:'Estudo prelim.', start:`${y}-03-01`,end:`${y}-04-20`,status:'ok',  pred:null},
-      {id:22,name:'Anteprojeto',    start:`${y}-04-21`,end:`${y}-07-01`,status:'prog',pred:null},
-      {id:23,name:'Proj. executivo',start:`${y}-07-02`,end:`${y}-09-15`,status:'wait',pred:null}]},
-    {id:3,name:'Reforma Cobertura',start:`${y}-04-10`,end:`${y}-07-20`,status:'prog',owner:'Ana P.',   pred:null,subs:[]},
-    {id:4,name:'Condomínio Leste', start:`${y}-06-01`,end:`${y+1}-02-28`,status:'wait',owner:'Rafael S.',pred:null,subs:[
-      {id:41,name:'Viabilidade',    start:`${y}-06-01`,end:`${y}-08-15`,status:'wait',pred:null}]},
-    {id:5,name:'Interiores Apt 42',start:`${y}-02-20`,end:`${y}-04-15`,status:'late',owner:'Julia R.', pred:null,subs:[]}
-  ];
-}
-function initView(){
-  const all=projects.flatMap(p=>[new Date(p.start),...(p.subs||[]).map(s=>new Date(s.start))]);
-  const m=all.length?new Date(Math.min(...all)):new Date();
-  if(scale==='day'){viewStart=new Date(m);viewStart.setDate(viewStart.getDate()-3);}
-  else if(scale==='week') viewStart=new Date(m.getFullYear(),m.getMonth()-1,1);
-  else viewStart=new Date(m.getFullYear(),0,1);
-}
+
 function getItem(pid,sid){
   const p=projects.find(x=>x.id===pid); if(!p) return null;
   return sid==null?p:(p.subs||[]).find(s=>s.id===sid)||null;
@@ -818,7 +789,7 @@ function render(){
   const units=getUnits(), totalPx=units.length*cfg.px;
   const lastDate=new Date(units[units.length-1]); lastDate.setDate(lastDate.getDate()+cfg.ud-1);
   const today=new Date(); today.setHours(0,0,0,0);
-  const todayIso=[today.getFullYear(),String(today.getMonth()+1).padStart(2,'0'),String(today.getDate()).padStart(2,'0')].join('-');
+  const todayIso=toIso(today);
   const todayPx=pxFor(today,units);
   const groups=buildGroups(units);
 
@@ -1040,14 +1011,11 @@ function applyBarDrag(cx){
   if(!drag) return;
   const c=scaleCfg()[scale], days=Math.round((cx-drag.sx)/(c.px/c.ud));
   const item=getItem(drag.pid,drag.sid); if(!item) return;
-  // Bloqueia qualquer movimento se subtarefa travada
   if(drag.sid&&item.locked) return;
   if(drag.mode==='move'){
-    // Se projeto tem subtarefa travada, bloqueia movimento do projeto
     if(!drag.sid){
       const p=projects.find(x=>x.id===drag.pid);
-      const hasLockedSub=(p?.subs||[]).some(s=>s.locked);
-      if(hasLockedSub) return;
+      if((p?.subs||[]).some(s=>s.locked)) return;
     }
     item.start=addDays(drag.os,days); item.end=addDays(drag.oe,days);
     if(!drag.sid){
@@ -1411,7 +1379,6 @@ function deleteItem(){
 }
 EL['modal-overlay'].addEventListener('click',e=>{ if(e.target===EL['modal-overlay']) closeModal(); });
 
-
 // ── COLUMN RESIZER ────────────────────────────────────────
 (()=>{
   const resizer=D('col-resizer');
@@ -1511,7 +1478,6 @@ function renderUsersList(){
         <span class="u-badge role-${u.role||'equipe'}">${RL[u.role||'equipe']}</span>
         ${isAdmin?`
         <button class="u-btn" onclick="openEditRole('${uid}','${(u.name||'').replace(/'/g,"\\'")}','${u.role||'equipe'}')" title="Editar função">✎</button>
-        <button class="u-btn" onclick="resendInvite('${u.email}')" title="Reenviar convite de acesso">↺ Convite</button>
         <button class="u-btn danger" onclick="removeUser('${uid}','${(u.name||u.email).replace(/'/g,"\\'")}','${u.email}')" title="Remover usuário">✕</button>`:''}
       </div>`).join('');
   }
@@ -1552,12 +1518,6 @@ async function saveUserRole(){
     D('u-edit-section').style.display='none';
     _editUid=null;
   }catch(e){ alert('Erro ao salvar: '+e.message); }
-}
-async function resendInvite(email){
-  try{
-    await window._fbResendInvite(email);
-    alert(`Convite de acesso reenviado para ${email}.`);
-  }catch(e){ alert('Erro ao enviar: '+e.message); }
 }
 async function removeUser(uid,name,email){
   if(!confirm(`Remover o usuário ${name}?\nEle perderá o acesso ao Archiflow.`)) return;
@@ -1604,7 +1564,6 @@ async function createUser(){
 
 // ── RESIZE ────────────────────────────────────────────────
 let rsz; window.addEventListener('resize',()=>{ clearTimeout(rsz); rsz=setTimeout(render,150); });
-</script><div id="bar-tooltip" style="left: 1669px; top: 329px; display: none;"><div class="tt-name">292_MA_Florianópolis</div><div class="tt-info">06 de mai. de 2026 → 03 de ago. de 2026</div><div class="tt-info">90 dias</div><div class="tt-info">Thiago</div><div class="tt-info" style="margin-top:3px"><span class="sb s-prog" style="font-size:10px">Em andamento</span></div></div>
-
+</script><div id="bar-tooltip" style="left: 1000px; top: 527px;"></div>
 
 </body></html>
