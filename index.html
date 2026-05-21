@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<!-- saved from url=(0045)file:///C:/Users/User/Downloads/index_21.html -->
-<html lang="pt-BR" class=""><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<!-- saved from url=(0045)file:///C:/Users/User/Downloads/index_22.html -->
+<html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Archiflow — Dorini Arquitetura</title>
@@ -178,14 +178,14 @@ html.dark .s-late{background:#3a1010;color:#f48080}
 
 
 <!-- LOGIN -->
-<div id="login-screen" style="display: none;">
+<div id="login-screen" style="display:none">
   <div id="login-box">
     <div class="lt">DORINI ARQUITETURA</div>
     <div class="ls">Archiflow</div>
     <input id="li-email" type="email" placeholder="E-mail" onkeydown="if(event.key===&#39;Enter&#39;)D(&#39;li-pass&#39;).focus()">
-    <input id="li-pass" type="password" placeholder="Senha" onkeydown="if(event.key===&#39;Enter&#39;)doLogin()" class="">
+    <input id="li-pass" type="password" placeholder="Senha" onkeydown="if(event.key===&#39;Enter&#39;)doLogin()">
     <button onclick="doLogin()">Entrar</button>
-    <div class="lerr" id="lerr">E-mail ou senha incorretos.</div>
+    <div class="lerr" id="lerr"></div>
   </div>
 </div>
 
@@ -360,7 +360,25 @@ html.dark .s-late{background:#3a1010;color:#f48080}
   <div class="modal" style="width:480px">
     <h3>Usuários</h3>
     <div id="u-list" style="min-height:40px"></div>
-    <div style="margin-top:14px">
+
+    <!-- Edit role inline panel -->
+    <div id="u-edit-section" style="display:none;margin-top:12px;padding:12px;background:var(--bg2);border-radius:8px;border:.5px solid var(--border4)">
+      <div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:8px">Editar função — <span id="u-edit-name" style="color:var(--text)"></span></div>
+      <div class="frow" style="align-items:flex-end;gap:8px">
+        <div class="field" style="flex:1;margin-bottom:0">
+          <label>Função</label>
+          <select id="u-edit-role">
+            <option value="equipe">Equipe — somente visualização</option>
+            <option value="lider">Líder — pode incluir subtarefas</option>
+            <option value="admin">Admin — acesso total</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" onclick="saveUserRole()" style="flex-shrink:0;height:36px">Salvar</button>
+        <button class="btn" onclick="D(&#39;u-edit-section&#39;).style.display=&#39;none&#39;" style="flex-shrink:0;height:36px">✕</button>
+      </div>
+    </div>
+
+    <div id="u-new-btn-wrap" style="margin-top:14px">
       <button class="btn" style="width:100%;border-style:dashed" onclick="toggleCreateUser()">+ Cadastrar novo usuário</button>
     </div>
     <div id="u-create-section">
@@ -372,7 +390,7 @@ html.dark .s-late{background:#3a1010;color:#f48080}
         </div>
         <div class="field">
           <label>E-mail</label>
-          <input id="u-email" type="email" placeholder="nome@exemplo.com" onkeydown="if(event.key===&#39;Enter&#39;)D(&#39;u-pass&#39;).focus()">
+          <input id="u-email" type="email" placeholder="nome@exemplo.com" onkeydown="if(event.key===&#39;Enter&#39;)D(&#39;u-role&#39;).focus()">
         </div>
       </div>
       <div class="frow">
@@ -441,6 +459,7 @@ window._fbCreateUser = async (email,password,name,role)=>{
 };
 window._fbSendPasswordReset = email=>sendPasswordResetEmail(auth,email);
 window._fbRemoveUser = uid=>remove(ref(db,'archiflow/users/'+uid));
+window._fbUpdateUserRole = (uid,role)=>update(ref(db,'archiflow/users/'+uid),{role});
 window._fbListenUsers = cb=>onValue(ref(db,'archiflow/users'),snap=>cb(snap.val()||{}));
 
 const ADMIN_EMAIL='thiago@dorini.com.br';
@@ -1453,21 +1472,23 @@ function renderUsersList(){
   const entries=Object.entries(_users);
   if(!entries.length){
     D('u-list').innerHTML='<p style="font-size:12px;color:var(--text4);padding:8px 0">Nenhum usuário cadastrado ainda.</p>';
-    return;
+  } else {
+    D('u-list').innerHTML=entries.map(([uid,u])=>`
+      <div class="u-row">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;font-weight:500;color:var(--text)">${u.name||'—'}</div>
+          <div style="font-size:11px;color:var(--text4);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${u.email}</div>
+        </div>
+        <span class="u-badge role-${u.role||'equipe'}">${RL[u.role||'equipe']}</span>
+        ${isAdmin?`
+        <button class="u-btn" onclick="openEditRole('${uid}','${(u.name||'').replace(/'/g,"\\'")}','${u.role||'equipe'}')" title="Editar função">✎</button>
+        <button class="u-btn" onclick="resetPassword('${u.email}')" title="Redefinir senha">↺ Senha</button>
+        <button class="u-btn danger" onclick="removeUser('${uid}','${(u.name||u.email).replace(/'/g,"\\'")}','${u.email}')" title="Remover usuário">✕</button>`:''}
+      </div>`).join('');
   }
-  D('u-list').innerHTML=entries.map(([uid,u])=>`
-    <div class="u-row">
-      <div style="flex:1;min-width:0">
-        <div style="font-size:12px;font-weight:500;color:var(--text)">${u.name||'—'}</div>
-        <div style="font-size:11px;color:var(--text4);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${u.email}</div>
-      </div>
-      <span class="u-badge role-${u.role||'equipe'}">${RL[u.role||'equipe']}</span>
-      ${isAdmin?`<button class="u-btn" onclick="resetPassword('${u.email}')" title="Redefinir senha">↺ Senha</button>
-      <button class="u-btn danger" onclick="removeUser('${uid}','${u.name||u.email}')" title="Remover usuário">✕</button>`:''}
-    </div>`).join('');
   // Show/hide create section button based on role
-  const createBtn=D('users-modal-overlay').querySelector('.btn[onclick="toggleCreateUser()"]');
-  if(createBtn) createBtn.style.display=isAdmin?'':'none';
+  const wrap=D('u-new-btn-wrap');
+  if(wrap) wrap.style.display=isAdmin?'':'none';
 }
 function openUsersModal(){
   D('u-name').value=''; D('u-email').value=''; D('u-pass').value=''; D('u-pass2').value=''; if(D('u-role')) D('u-role').value='equipe';
@@ -1480,8 +1501,28 @@ function openUsersModal(){
 function closeUsersModal(){ D('users-modal-overlay').style.display='none'; }
 function toggleCreateUser(){
   const s=D('u-create-section');
-  s.style.display=s.style.display==='none'?'block':'none';
-  if(s.style.display==='block') setTimeout(()=>D('u-email').focus(),50);
+  const open=s.style.display!=='block';
+  s.style.display=open?'block':'none';
+  D('u-edit-section').style.display='none'; // close edit if open
+  if(open) setTimeout(()=>D('u-name').focus(),50);
+}
+let _editUid=null;
+function openEditRole(uid,name,currentRole){
+  _editUid=uid;
+  D('u-edit-name').textContent=name;
+  D('u-edit-role').value=currentRole;
+  D('u-edit-section').style.display='block';
+  D('u-create-section').style.display='none'; // close create if open
+  D('u-edit-section').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+async function saveUserRole(){
+  if(!_editUid) return;
+  const newRole=D('u-edit-role').value;
+  try{
+    await window._fbUpdateUserRole(_editUid,newRole);
+    D('u-edit-section').style.display='none';
+    _editUid=null;
+  }catch(e){ alert('Erro ao salvar: '+e.message); }
 }
 async function resetPassword(email){
   try{
@@ -1489,10 +1530,13 @@ async function resetPassword(email){
     alert(`E-mail de redefinição enviado para ${email}.`);
   }catch(e){ alert('Erro ao enviar e-mail: '+e.message); }
 }
-async function removeUser(uid,email){
-  if(!confirm(`Remover o usuário ${email}?\nEle perderá o acesso ao Archiflow.`)) return;
+async function removeUser(uid,name,email){
+  if(!confirm(`Remover o usuário ${name}?\nEle perderá o acesso ao Archiflow.`)) return;
   try{
     await window._fbRemoveUser(uid);
+    if(D('u-edit-section').style.display!=='none'&&_editUid===uid){
+      D('u-edit-section').style.display='none'; _editUid=null;
+    }
     renderUsersList();
   }catch(e){ alert('Erro ao remover: '+e.message); }
 }
@@ -1530,7 +1574,7 @@ async function createUser(){
 
 // ── RESIZE ────────────────────────────────────────────────
 let rsz; window.addEventListener('resize',()=>{ clearTimeout(rsz); rsz=setTimeout(render,150); });
-</script><div id="bar-tooltip" style="left: 1682px; top: 127px; display: none;"><div class="tt-name">284_ELO_Lages</div><div class="tt-info">12 de out. de 2025 → 29 de nov. de 2026</div><div class="tt-info">414 dias</div><div class="tt-info">Thiago</div><div class="tt-info" style="margin-top:3px"><span class="sb s-prog" style="font-size:10px">Em andamento</span></div></div>
+</script><div id="bar-tooltip" style="left: 1039px; top: 144px; display: none;"><div class="tt-name">284_ELO_Lages</div><div class="tt-info">12 de out. de 2025 → 29 de nov. de 2026</div><div class="tt-info">414 dias</div><div class="tt-info">Thiago</div><div class="tt-info" style="margin-top:3px"><span class="sb s-prog" style="font-size:10px">Em andamento</span></div></div>
 
 
 </body></html>
