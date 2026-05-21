@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0045)file:///C:/Users/User/Downloads/index_25.html -->
+<!-- saved from url=(0045)file:///C:/Users/User/Downloads/index_26.html -->
 <html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -323,10 +323,10 @@ html.dark .s-late{background:#3a1010;color:#f48080}
         </select>
       </div>
       <div class="field" id="f-owner-wrap"><label>Responsável</label>
-        <select id="f-owner"><option value="">— Nenhum —</option><option value="Tête">Tête</option><option value="Matheus Dorini">Matheus Dorini</option><option value="Thiago">Thiago</option></select>
+        <select id="f-owner"><option value="">— Nenhum —</option><option value="Thiago">Thiago</option></select>
       </div>
       <div class="field" id="f-sub-owner-wrap"><label>Responsável</label>
-        <select id="f-sub-owner"><option value="">— Nenhum —</option><option value="Tête">Tête</option><option value="Matheus Dorini">Matheus Dorini</option><option value="Thiago">Thiago</option></select>
+        <select id="f-sub-owner"><option value="">— Nenhum —</option><option value="Thiago">Thiago</option></select>
       </div>
       <div class="field" id="f-prog-wrap">
         <label>Progresso</label>
@@ -340,7 +340,7 @@ html.dark .s-late{background:#3a1010;color:#f48080}
     <div id="f-template" style="display:none">
       <div class="field"><label>Nome do Projeto</label><input id="t-name" type="text" onkeydown="if(event.key===&#39;Enter&#39;)saveItem()"></div>
       <div class="frow">
-        <div class="field"><label>Responsável</label><input id="t-owner" type="text" list="users-datalist" onkeydown="if(event.key===&#39;Enter&#39;)saveItem()"></div><datalist id="users-datalist"><option value="Tête"></option><option value="Matheus Dorini"></option><option value="Thiago"></option></datalist>
+        <div class="field"><label>Responsável</label><input id="t-owner" type="text" list="users-datalist" onkeydown="if(event.key===&#39;Enter&#39;)saveItem()"></div><datalist id="users-datalist"><option value="Thiago"></option></datalist>
         <div class="field"><label>Início</label><input id="t-start" type="date" oninput="calcTemplate()" onkeydown="if(event.key===&#39;Enter&#39;)saveItem()"></div>
       </div>
       <div style="margin:12px 0 6px;font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.08em">Subtarefas</div>
@@ -356,10 +356,21 @@ html.dark .s-late{background:#3a1010;color:#f48080}
 </div>
 
 <!-- USERS MODAL -->
-<div id="users-modal-overlay" style="display:none" onclick="if(event.target===this)closeUsersModal()">
+<div id="users-modal-overlay" style="display: none;" onclick="if(event.target===this)closeUsersModal()">
   <div class="modal" style="width:480px">
     <h3>Usuários</h3>
-    <div id="u-list" style="min-height:40px"></div>
+    <div id="u-list" style="min-height:40px">
+      <div class="u-row">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;font-weight:500;color:var(--text)">Thiago</div>
+          <div style="font-size:11px;color:var(--text4);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">thiago@dorini.com.br</div>
+        </div>
+        <span class="u-badge role-admin">Admin</span>
+        
+        <button class="u-btn" onclick="openEditRole(&#39;PhfI6AE40Xb7fTw6rCTtAYSbYfN2&#39;,&#39;Thiago&#39;,&#39;admin&#39;)" title="Editar função">✎</button>
+        <button class="u-btn" onclick="resetPassword(&#39;thiago@dorini.com.br&#39;)" title="Redefinir senha">↺ Senha</button>
+        <button class="u-btn danger" onclick="removeUser(&#39;PhfI6AE40Xb7fTw6rCTtAYSbYfN2&#39;,&#39;Thiago&#39;,&#39;thiago@dorini.com.br&#39;)" title="Remover usuário">✕</button>
+      </div></div>
 
     <!-- Edit role inline panel -->
     <div id="u-edit-section" style="display:none;margin-top:12px;padding:12px;background:var(--bg2);border-radius:8px;border:.5px solid var(--border4)">
@@ -381,7 +392,7 @@ html.dark .s-late{background:#3a1010;color:#f48080}
     <div id="u-new-btn-wrap" style="margin-top:14px">
       <button class="btn" style="width:100%;border-style:dashed" onclick="toggleCreateUser()">+ Cadastrar novo usuário</button>
     </div>
-    <div id="u-create-section">
+    <div id="u-create-section" style="display: none;">
       <div style="margin-bottom:10px;font-size:12px;font-weight:600;color:var(--text3)">Novo usuário</div>
       <div class="frow">
         <div class="field">
@@ -450,12 +461,30 @@ window._fbSignOut = ()=>signOut(auth);
 window._fbSave    = data=>{ setSyncStatus('syncing'); update(dbRef,data).then(()=>setSyncStatus('synced')).catch(()=>setSyncStatus('error')); };
 window._fbListen  = cb=>onValue(dbRef,snap=>cb(snap.val()));
 window._fbCreateUser = async (email,password,name,role)=>{
-  const cred=await createUserWithEmailAndPassword(authAux,email,password);
-  await set(ref(db,'archiflow/users/'+cred.user.uid),{email,name:name||'',role:role||'equipe',createdAt:Date.now()});
-  await signOut(authAux);
-  // Dispara e-mail de boas-vindas / definição de senha
+  let uid;
+  try{
+    const cred=await createUserWithEmailAndPassword(authAux,email,password);
+    uid=cred.user.uid;
+    await signOut(authAux);
+  }catch(err){
+    if(err.code==='auth/email-already-in-use'){
+      // Auth account exists (previously deleted from DB only).
+      // Sign in with the new password to get the uid, then update password.
+      try{
+        const cred2=await signInWithEmailAndPassword(authAux,email,password);
+        uid=cred2.user.uid;
+        await signOut(authAux);
+      }catch(e2){
+        // Wrong password for existing account — send reset and re-add to DB via uid lookup
+        await sendPasswordResetEmail(auth,email);
+        // We can't get uid without signing in, so surface a clear message
+        throw Object.assign(new Error('exists-reset-sent'),{code:'auth/exists-reset-sent'});
+      }
+    } else { throw err; }
+  }
+  await set(ref(db,'archiflow/users/'+uid),{email,name:name||'',role:role||'equipe',createdAt:Date.now()});
   await sendPasswordResetEmail(auth,email);
-  return cred.user;
+  return uid;
 };
 window._fbSendPasswordReset = email=>sendPasswordResetEmail(auth,email);
 window._fbRemoveUser = uid=>remove(ref(db,'archiflow/users/'+uid));
@@ -1569,6 +1598,7 @@ async function createUser(){
     btn.textContent='Criar usuário'; btn.disabled=false;
     const erros={
       'auth/email-already-in-use':'Este e-mail já está cadastrado.',
+      'auth/exists-reset-sent':'Este e-mail já existia — um link de acesso foi enviado para ele.',
       'auth/invalid-email':'E-mail inválido.',
       'auth/weak-password':'Senha fraca — use pelo menos 6 caracteres.'
     };
@@ -1579,7 +1609,7 @@ async function createUser(){
 
 // ── RESIZE ────────────────────────────────────────────────
 let rsz; window.addEventListener('resize',()=>{ clearTimeout(rsz); rsz=setTimeout(render,150); });
-</script><div id="bar-tooltip"></div>
+</script><div id="bar-tooltip" style="left: 1579px; top: 64px; display: none;"></div>
 
 
 </body></html>
