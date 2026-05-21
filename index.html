@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0045)file:///C:/Users/User/Downloads/index_26.html -->
+<!-- saved from url=(0045)file:///C:/Users/User/Downloads/index_27.html -->
 <html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -356,21 +356,10 @@ html.dark .s-late{background:#3a1010;color:#f48080}
 </div>
 
 <!-- USERS MODAL -->
-<div id="users-modal-overlay" style="display: none;" onclick="if(event.target===this)closeUsersModal()">
+<div id="users-modal-overlay" style="display:none" onclick="if(event.target===this)closeUsersModal()">
   <div class="modal" style="width:480px">
     <h3>Usuários</h3>
-    <div id="u-list" style="min-height:40px">
-      <div class="u-row">
-        <div style="flex:1;min-width:0">
-          <div style="font-size:12px;font-weight:500;color:var(--text)">Thiago</div>
-          <div style="font-size:11px;color:var(--text4);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">thiago@dorini.com.br</div>
-        </div>
-        <span class="u-badge role-admin">Admin</span>
-        
-        <button class="u-btn" onclick="openEditRole(&#39;PhfI6AE40Xb7fTw6rCTtAYSbYfN2&#39;,&#39;Thiago&#39;,&#39;admin&#39;)" title="Editar função">✎</button>
-        <button class="u-btn" onclick="resetPassword(&#39;thiago@dorini.com.br&#39;)" title="Redefinir senha">↺ Senha</button>
-        <button class="u-btn danger" onclick="removeUser(&#39;PhfI6AE40Xb7fTw6rCTtAYSbYfN2&#39;,&#39;Thiago&#39;,&#39;thiago@dorini.com.br&#39;)" title="Remover usuário">✕</button>
-      </div></div>
+    <div id="u-list" style="min-height:40px"></div>
 
     <!-- Edit role inline panel -->
     <div id="u-edit-section" style="display:none;margin-top:12px;padding:12px;background:var(--bg2);border-radius:8px;border:.5px solid var(--border4)">
@@ -392,7 +381,7 @@ html.dark .s-late{background:#3a1010;color:#f48080}
     <div id="u-new-btn-wrap" style="margin-top:14px">
       <button class="btn" style="width:100%;border-style:dashed" onclick="toggleCreateUser()">+ Cadastrar novo usuário</button>
     </div>
-    <div id="u-create-section" style="display: none;">
+    <div id="u-create-section">
       <div style="margin-bottom:10px;font-size:12px;font-weight:600;color:var(--text3)">Novo usuário</div>
       <div class="frow">
         <div class="field">
@@ -468,17 +457,17 @@ window._fbCreateUser = async (email,password,name,role)=>{
     await signOut(authAux);
   }catch(err){
     if(err.code==='auth/email-already-in-use'){
-      // Auth account exists (previously deleted from DB only).
-      // Sign in with the new password to get the uid, then update password.
-      try{
-        const cred2=await signInWithEmailAndPassword(authAux,email,password);
-        uid=cred2.user.uid;
-        await signOut(authAux);
-      }catch(e2){
-        // Wrong password for existing account — send reset and re-add to DB via uid lookup
+      // Look up UID from deletedUsers archive
+      const snap=await get(ref(db,'archiflow/deletedUsers'));
+      const deleted=snap.val()||{};
+      const entry=Object.entries(deleted).find(([,v])=>v.email===email);
+      if(entry){
+        uid=entry[0];
+        await remove(ref(db,'archiflow/deletedUsers/'+uid));
+      } else {
+        // Auth account exists but was never archived — just send reset link
         await sendPasswordResetEmail(auth,email);
-        // We can't get uid without signing in, so surface a clear message
-        throw Object.assign(new Error('exists-reset-sent'),{code:'auth/exists-reset-sent'});
+        throw Object.assign(new Error(''),{code:'auth/exists-reset-sent'});
       }
     } else { throw err; }
   }
@@ -487,8 +476,14 @@ window._fbCreateUser = async (email,password,name,role)=>{
   return uid;
 };
 window._fbSendPasswordReset = email=>sendPasswordResetEmail(auth,email);
-window._fbRemoveUser = uid=>remove(ref(db,'archiflow/users/'+uid));
+window._fbRemoveUser = async uid=>{
+  // Archive uid→email before removing so re-registration can recover it
+  const snap=await get(ref(db,'archiflow/users/'+uid));
+  if(snap.exists()) await set(ref(db,'archiflow/deletedUsers/'+uid),{email:snap.val().email});
+  await remove(ref(db,'archiflow/users/'+uid));
+};
 window._fbUpdateUserRole = (uid,role)=>update(ref(db,'archiflow/users/'+uid),{role});
+window._fbResendInvite = email=>sendPasswordResetEmail(auth,email);
 window._fbListenUsers = cb=>onValue(ref(db,'archiflow/users'),snap=>cb(snap.val()||{}));
 
 const ADMIN_EMAIL='thiago@dorini.com.br';
@@ -1516,7 +1511,7 @@ function renderUsersList(){
         <span class="u-badge role-${u.role||'equipe'}">${RL[u.role||'equipe']}</span>
         ${isAdmin?`
         <button class="u-btn" onclick="openEditRole('${uid}','${(u.name||'').replace(/'/g,"\\'")}','${u.role||'equipe'}')" title="Editar função">✎</button>
-        <button class="u-btn" onclick="resetPassword('${u.email}')" title="Redefinir senha">↺ Senha</button>
+        <button class="u-btn" onclick="resendInvite('${u.email}')" title="Reenviar convite de acesso">↺ Convite</button>
         <button class="u-btn danger" onclick="removeUser('${uid}','${(u.name||u.email).replace(/'/g,"\\'")}','${u.email}')" title="Remover usuário">✕</button>`:''}
       </div>`).join('');
   }
@@ -1558,11 +1553,11 @@ async function saveUserRole(){
     _editUid=null;
   }catch(e){ alert('Erro ao salvar: '+e.message); }
 }
-async function resetPassword(email){
+async function resendInvite(email){
   try{
-    await window._fbSendPasswordReset(email);
-    alert(`E-mail de redefinição enviado para ${email}.`);
-  }catch(e){ alert('Erro ao enviar e-mail: '+e.message); }
+    await window._fbResendInvite(email);
+    alert(`Convite de acesso reenviado para ${email}.`);
+  }catch(e){ alert('Erro ao enviar: '+e.message); }
 }
 async function removeUser(uid,name,email){
   if(!confirm(`Remover o usuário ${name}?\nEle perderá o acesso ao Archiflow.`)) return;
@@ -1591,25 +1586,25 @@ async function createUser(){
     const role=D('u-role').value;
     await window._fbCreateUser(email,pass,name,role);
     msg.style.color='#5A9020';
-    msg.textContent=`✓ Usuário ${name} criado. E-mail de acesso enviado para ${email}.`;
-    D('u-name').value=''; D('u-email').value=''; D('u-pass').value=''; D('u-pass2').value=''; if(D('u-role')) D('u-role').value='equipe'; D('u-role').value='equipe';
+    msg.textContent=`✓ Usuário ${name} criado. Convite de acesso enviado para ${email}.`;
+    D('u-name').value=''; D('u-email').value=''; D('u-pass').value=''; D('u-pass2').value=''; if(D('u-role')) D('u-role').value='equipe';
     btn.textContent='Criar usuário'; btn.disabled=false;
   }catch(err){
     btn.textContent='Criar usuário'; btn.disabled=false;
     const erros={
-      'auth/email-already-in-use':'Este e-mail já está cadastrado.',
-      'auth/exists-reset-sent':'Este e-mail já existia — um link de acesso foi enviado para ele.',
+      'auth/exists-reset-sent':'Usuário reativado. Convite de acesso reenviado para o e-mail.',
       'auth/invalid-email':'E-mail inválido.',
       'auth/weak-password':'Senha fraca — use pelo menos 6 caracteres.'
     };
-    msg.style.color='#E24B4A';
-    msg.textContent=erros[err.code]||'Erro: '+err.message;
+    const known=erros[err.code];
+    if(known){ msg.style.color=err.code==='auth/exists-reset-sent'?'#5A9020':'#E24B4A'; msg.textContent=known; }
+    else{ msg.style.color='#E24B4A'; msg.textContent='Erro: '+err.message; }
   }
 }
 
 // ── RESIZE ────────────────────────────────────────────────
 let rsz; window.addEventListener('resize',()=>{ clearTimeout(rsz); rsz=setTimeout(render,150); });
-</script><div id="bar-tooltip" style="left: 1579px; top: 64px; display: none;"></div>
+</script><div id="bar-tooltip" style="left: 1669px; top: 329px; display: none;"><div class="tt-name">292_MA_Florianópolis</div><div class="tt-info">06 de mai. de 2026 → 03 de ago. de 2026</div><div class="tt-info">90 dias</div><div class="tt-info">Thiago</div><div class="tt-info" style="margin-top:3px"><span class="sb s-prog" style="font-size:10px">Em andamento</span></div></div>
 
 
 </body></html>
