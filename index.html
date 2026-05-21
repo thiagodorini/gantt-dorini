@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<!-- saved from url=(0045)file:///C:/Users/User/Downloads/index_11.html -->
-<html lang="pt-BR" class=""><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<!-- saved from url=(0045)file:///C:/Users/User/Downloads/index_15.html -->
+<html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Archiflow — Dorini Arquitetura</title>
@@ -158,6 +158,17 @@ html.dark .s-late{background:#3a1010;color:#f48080}
 .tpl-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;padding:7px 10px;background:var(--bg2);border-radius:8px;border:.5px solid var(--border4)}
 .tpl-row input[type=number]{width:50px;padding:5px 8px;font-size:12px;border:.5px solid var(--border3);border-radius:6px;text-align:center;flex-shrink:0;background:var(--bg);color:var(--text)}
 .tpl-dates{font-size:11px;color:var(--text4);white-space:nowrap;flex-shrink:0}
+
+/* USERS LIST */
+.u-row{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:.5px solid var(--border4)}
+.u-row:last-child{border-bottom:none}
+.u-email{flex:1;font-size:12px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.u-badge{font-size:10px;padding:2px 6px;border-radius:20px;background:var(--bg3);color:var(--text3);flex-shrink:0}
+.u-btn{font-size:11px;padding:3px 8px;border:.5px solid var(--border3);border-radius:6px;background:transparent;color:var(--text3);cursor:pointer;flex-shrink:0;white-space:nowrap}
+.u-btn:hover{background:var(--bg3);color:var(--text)}
+.u-btn.danger{border-color:#F7C1C1;color:#A32D2D}
+.u-btn.danger:hover{background:#FCEBEB}
+#u-create-section{margin-top:14px;padding-top:14px;border-top:.5px solid var(--border4);display:none}
 </style>
 </head>
 <body>
@@ -308,7 +319,12 @@ html.dark .s-late{background:#3a1010;color:#f48080}
           <option value="late">Atrasado</option>
         </select>
       </div>
-      <div class="field" id="f-owner-wrap"><label>Responsável</label><input id="f-owner" type="text" onkeydown="if(event.key===&#39;Enter&#39;)saveItem()"></div>
+      <div class="field" id="f-owner-wrap"><label>Responsável</label>
+        <select id="f-owner"><option value="">— Nenhum —</option></select>
+      </div>
+      <div class="field" id="f-sub-owner-wrap"><label>Responsável</label>
+        <select id="f-sub-owner"><option value="">— Nenhum —</option></select>
+      </div>
       <div class="field" id="f-prog-wrap">
         <label>Progresso</label>
         <div style="display:flex;gap:10px;align-items:center;margin-top:2px">
@@ -321,7 +337,7 @@ html.dark .s-late{background:#3a1010;color:#f48080}
     <div id="f-template" style="display:none">
       <div class="field"><label>Nome do Projeto</label><input id="t-name" type="text" onkeydown="if(event.key===&#39;Enter&#39;)saveItem()"></div>
       <div class="frow">
-        <div class="field"><label>Responsável</label><input id="t-owner" type="text" onkeydown="if(event.key===&#39;Enter&#39;)saveItem()"></div>
+        <div class="field"><label>Responsável</label><input id="t-owner" type="text" list="users-datalist" onkeydown="if(event.key===&#39;Enter&#39;)saveItem()"></div><datalist id="users-datalist"></datalist>
         <div class="field"><label>Início</label><input id="t-start" type="date" oninput="calcTemplate()" onkeydown="if(event.key===&#39;Enter&#39;)saveItem()"></div>
       </div>
       <div style="margin:12px 0 6px;font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.08em">Subtarefas</div>
@@ -337,25 +353,40 @@ html.dark .s-late{background:#3a1010;color:#f48080}
 </div>
 
 <!-- USERS MODAL -->
-<div id="users-modal-overlay" style="display: none;" onclick="if(event.target===this)closeUsersModal()">
-  <div class="modal">
-    <h3>Novo usuário</h3>
-    <div class="field">
-      <label>E-mail</label>
-      <input id="u-email" type="email" placeholder="nome@exemplo.com" onkeydown="if(event.key===&#39;Enter&#39;)D(&#39;u-pass&#39;).focus()">
+<div id="users-modal-overlay" style="display:none" onclick="if(event.target===this)closeUsersModal()">
+  <div class="modal" style="width:480px">
+    <h3>Usuários</h3>
+    <div id="u-list" style="min-height:40px"></div>
+    <div style="margin-top:14px">
+      <button class="btn" style="width:100%;border-style:dashed" onclick="toggleCreateUser()">+ Cadastrar novo usuário</button>
     </div>
-    <div class="field">
-      <label>Senha</label>
-      <input id="u-pass" type="password" placeholder="Mínimo 6 caracteres" onkeydown="if(event.key===&#39;Enter&#39;)D(&#39;u-pass2&#39;).focus()">
+    <div id="u-create-section">
+      <div style="margin-bottom:10px;font-size:12px;font-weight:600;color:var(--text3)">Novo usuário</div>
+      <div class="frow">
+        <div class="field">
+          <label>Nome</label>
+          <input id="u-name" type="text" placeholder="Nome completo" onkeydown="if(event.key===&#39;Enter&#39;)D(&#39;u-email&#39;).focus()">
+        </div>
+        <div class="field">
+          <label>E-mail</label>
+          <input id="u-email" type="email" placeholder="nome@exemplo.com" onkeydown="if(event.key===&#39;Enter&#39;)D(&#39;u-pass&#39;).focus()">
+        </div>
+      </div>
+      <div class="frow">
+        <div class="field">
+          <label>Senha</label>
+          <input id="u-pass" type="password" placeholder="Mín. 6 caracteres" onkeydown="if(event.key===&#39;Enter&#39;)D(&#39;u-pass2&#39;).focus()">
+        </div>
+        <div class="field">
+          <label>Confirmar senha</label>
+          <input id="u-pass2" type="password" placeholder="Repita" onkeydown="if(event.key===&#39;Enter&#39;)createUser()">
+        </div>
+      </div>
+      <div id="u-msg" style="font-size:12px;min-height:16px;margin-bottom:6px"></div>
+      <button class="btn btn-primary" id="u-save-btn" onclick="createUser()" style="width:100%">Criar usuário</button>
     </div>
-    <div class="field">
-      <label>Confirmar senha</label>
-      <input id="u-pass2" type="password" placeholder="Repita a senha" onkeydown="if(event.key===&#39;Enter&#39;)createUser()">
-    </div>
-    <div id="u-msg" style="font-size: 12px; min-height: 16px; margin-bottom: 4px; color: rgb(90, 144, 32);">✓ Usuário viviane.goulart@gmail.com criado com sucesso.</div>
-    <div class="mact">
-      <button class="btn" onclick="closeUsersModal()">Cancelar</button>
-      <button class="btn btn-primary" id="u-save-btn" onclick="createUser()">Criar usuário</button>
+    <div class="mact" style="margin-top:14px">
+      <button class="btn" onclick="closeUsersModal()">Fechar</button>
     </div>
   </div>
 </div>
@@ -363,8 +394,8 @@ html.dark .s-late{background:#3a1010;color:#f48080}
 <!-- FIREBASE -->
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import { getDatabase, ref, onValue, set } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword, sendPasswordResetEmail } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { getDatabase, ref, onValue, set, update, remove } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 
 const FIREBASE_CFG={
   apiKey:"AIzaSyCGOAmZzXmlERj6bFhzQxQE0csmdF0Zy5M",
@@ -385,13 +416,17 @@ const authAux = getAuth(appAux);
 
 window._fbSignIn  = (e,p)=>signInWithEmailAndPassword(auth,e,p);
 window._fbSignOut = ()=>signOut(auth);
-window._fbSave    = data=>{ setSyncStatus('syncing'); set(dbRef,data).then(()=>setSyncStatus('synced')).catch(()=>setSyncStatus('error')); };
+window._fbSave    = data=>{ setSyncStatus('syncing'); update(dbRef,data).then(()=>setSyncStatus('synced')).catch(()=>setSyncStatus('error')); };
 window._fbListen  = cb=>onValue(dbRef,snap=>cb(snap.val()));
-window._fbCreateUser = async (email,password)=>{
+window._fbCreateUser = async (email,password,name)=>{
   const cred=await createUserWithEmailAndPassword(authAux,email,password);
-  await signOut(authAux); // desconecta da instância auxiliar imediatamente
+  await set(ref(db,'archiflow/users/'+cred.user.uid),{email,name:name||'',createdAt:Date.now()});
+  await signOut(authAux);
   return cred.user;
 };
+window._fbSendPasswordReset = email=>sendPasswordResetEmail(auth,email);
+window._fbRemoveUser = uid=>remove(ref(db,'archiflow/users/'+uid));
+window._fbListenUsers = cb=>onValue(ref(db,'archiflow/users'),snap=>cb(snap.val()||{}));
 
 const ADMIN_EMAIL='thiago@dorini.com.br';
 onAuthStateChanged(auth,user=>{
@@ -425,7 +460,8 @@ const TPL_DEFAULTS=[
 let projects=[], collapsed={}, viewStart=null, scale='week';
 let _mode=null, _pid=null, _sid=null, _tipo='blank', tplSubs=[];
 let _saving=false;
-let _nameColW=0; // 0 = auto (use colWidths defaults)
+let _nameColW=0;
+let _users={}; // uid → {email, createdAt} // 0 = auto (use colWidths defaults)
 
 // ── UNDO HISTORY ──────────────────────────────────────────
 const _history=[];
@@ -446,7 +482,7 @@ const D=id=>document.getElementById(id);
 const EL={};
 ['fh','fhr','sh','ht','gh','fb','fbt','fbr','sbw','sb','sbt','sbr','arrow-svg',
  'range-label','modal-overlay','modal-title','btn-del','f-name','f-start','f-end',
- 'f-dur','f-status','f-owner','f-owner-wrap','f-pred','f-prog','f-prog-wrap',
+ 'f-dur','f-status','f-owner','f-owner-wrap','f-sub-owner','f-sub-owner-wrap','f-pred','f-prog','f-prog-wrap',
  'app','li-email','li-pass','lerr',
  'sc-day','sc-week','sc-month','sync-dot','sync-label'].forEach(id=>EL[id]=D(id));
 
@@ -475,6 +511,11 @@ function doLogout(){ window._fbSignOut(); }
 
 // ── APP START ─────────────────────────────────────────────
 window._startApp=function(){
+  window._fbListenUsers(data=>{
+    _users=data;
+    populateOwnerSelects();
+    if(D('users-modal-overlay').style.display!=='none') renderUsersList();
+  });
   window._fbListen(data=>{
     if(_saving) return;
     if(data){ projects=data.projects||[]; collapsed=data.collapsed||{}; scale=data.scale||'week'; }
@@ -757,6 +798,7 @@ function render(){
       const subLocked=!!s.locked;
       nc=`<div class="sub-cell">
         <span class="sn" onclick="openModal('sub',${p.id},${s.id})" title="${s.name}">${s.name}</span>
+        ${s.owner?`<span class="ow">${s.owner}</span>`:''}
         <button class="lock-btn${subLocked?' locked':''}" onclick="toggleLock(${p.id},${s.id})" title="${subLocked?'Travada — clique para destravar':'Travar data de início'}">${lockIcon(subLocked)}</button>
       </div>`;
             stc=`<span class="sb ${SC[s.status]}" onclick="cycleStatus('sub',${p.id},${s.id})" title="Clique para alterar">${SL[s.status]}</span>`;
@@ -1202,6 +1244,7 @@ function openModal(mode,pid,sid){
   EL['modal-title'].textContent=isEdit?(mode==='project'?'Editar projeto':'Editar subtarefa'):(mode==='project'?'Novo projeto':'Nova subtarefa');
   EL['btn-del'].style.display=isEdit?'inline-block':'none';
   EL['f-owner-wrap'].style.display=mode==='project'?'block':'none';
+  EL['f-sub-owner-wrap'].style.display=mode==='sub'?'block':'none';
   EL['f-prog-wrap'].style.display=mode==='project'?'block':'none';
   D('f-tipo-wrap').style.display=isNew?'block':'none';
   D('f-standard').style.display='block'; D('f-template').style.display='none';
@@ -1215,6 +1258,7 @@ function openModal(mode,pid,sid){
   EL['f-dur'].value=item?daysDiff(item.start,item.end)+1:'';
   EL['f-status'].value=item?.status||'wait';
   EL['f-owner'].value=item?.owner||'';
+  EL['f-sub-owner'].value=item?.owner||'';
   const prog=item?.progress||0;
   EL['f-prog'].value=prog; D('f-prog-val').textContent=prog+'%';
   const exKey=mode==='project'?'p_'+pid:(pid&&sid?'s_'+pid+'_'+sid:null);
@@ -1252,8 +1296,9 @@ function saveItem(){
   }else{
     const p=projects.find(x=>x.id===_pid); if(!p) return;
     if(!p.subs) p.subs=[];
-    if(_sid) Object.assign(p.subs.find(s=>s.id===_sid),data);
-    else{ data.id=Date.now(); p.subs.push(data); }
+    const subOwner=EL['f-sub-owner'].value||'';
+    if(_sid) Object.assign(p.subs.find(s=>s.id===_sid),data,{owner:subOwner});
+    else{ data.id=Date.now(); data.owner=subOwner; p.subs.push(data); }
     syncProjectDates(_pid); cascadeProjectSuccessors('p_'+_pid);
   }
   pushHistory(); save(); closeModal(); render();
@@ -1344,46 +1389,91 @@ function _doExport(btn){
 }
 
 // ── USER MANAGEMENT (admin only) ──────────────────────────
+function populateOwnerSelects(){
+  const opts='<option value="">— Nenhum —</option>'+
+    Object.values(_users).map(u=>`<option value="${u.name||u.email}">${u.name||u.email}</option>`).join('');
+  EL['f-owner'].innerHTML=opts;
+  EL['f-sub-owner'].innerHTML=opts;
+  const dl=D('users-datalist');
+  if(dl) dl.innerHTML=Object.values(_users).map(u=>`<option value="${u.name||u.email}">`).join('');
+}
+function renderUsersList(){
+  const entries=Object.entries(_users);
+  if(!entries.length){
+    D('u-list').innerHTML='<p style="font-size:12px;color:var(--text4);padding:8px 0">Nenhum usuário cadastrado ainda.</p>';
+    return;
+  }
+  D('u-list').innerHTML=entries.map(([uid,u])=>`
+    <div class="u-row">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12px;font-weight:500;color:var(--text)">${u.name||'—'}</div>
+        <div style="font-size:11px;color:var(--text4);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${u.email}</div>
+      </div>
+      <button class="u-btn" onclick="resetPassword('${u.email}')" title="Redefinir senha">↺ Senha</button>
+      <button class="u-btn danger" onclick="removeUser('${uid}','${u.name||u.email}')" title="Remover usuário">✕</button>
+    </div>`).join('');
+}
 function openUsersModal(){
-  D('u-email').value=''; D('u-pass').value=''; D('u-pass2').value='';
+  D('u-name').value=''; D('u-email').value=''; D('u-pass').value=''; D('u-pass2').value='';
   D('u-msg').textContent=''; D('u-msg').style.color='';
+  D('u-create-section').style.display='none';
   D('u-save-btn').disabled=false;
+  renderUsersList();
   D('users-modal-overlay').style.display='flex';
-  setTimeout(()=>D('u-email').focus(),50);
 }
 function closeUsersModal(){ D('users-modal-overlay').style.display='none'; }
+function toggleCreateUser(){
+  const s=D('u-create-section');
+  s.style.display=s.style.display==='none'?'block':'none';
+  if(s.style.display==='block') setTimeout(()=>D('u-email').focus(),50);
+}
+async function resetPassword(email){
+  try{
+    await window._fbSendPasswordReset(email);
+    alert(`E-mail de redefinição enviado para ${email}.`);
+  }catch(e){ alert('Erro ao enviar e-mail: '+e.message); }
+}
+async function removeUser(uid,email){
+  if(!confirm(`Remover o usuário ${email}?\nEle perderá o acesso ao Archiflow.`)) return;
+  try{
+    await window._fbRemoveUser(uid);
+    renderUsersList();
+  }catch(e){ alert('Erro ao remover: '+e.message); }
+}
 async function createUser(){
+  const name=D('u-name').value.trim();
   const email=D('u-email').value.trim();
   const pass=D('u-pass').value;
   const pass2=D('u-pass2').value;
   const msg=D('u-msg');
   msg.style.color='#E24B4A';
+  if(!name){ msg.textContent='Informe o nome do usuário.'; return; }
   if(!email){ msg.textContent='Informe o e-mail.'; return; }
   if(pass.length<6){ msg.textContent='A senha deve ter pelo menos 6 caracteres.'; return; }
   if(pass!==pass2){ msg.textContent='As senhas não coincidem.'; return; }
   const btn=D('u-save-btn'); btn.disabled=true; btn.textContent='Criando…';
   msg.textContent=''; msg.style.color='';
   try{
-    await window._fbCreateUser(email,pass);
+    await window._fbCreateUser(email,pass,name);
     msg.style.color='#5A9020';
-    msg.textContent=`✓ Usuário ${email} criado com sucesso.`;
-    D('u-email').value=''; D('u-pass').value=''; D('u-pass2').value='';
+    msg.textContent=`✓ Usuário ${name} criado com sucesso.`;
+    D('u-name').value=''; D('u-email').value=''; D('u-pass').value=''; D('u-pass2').value='';
     btn.textContent='Criar usuário'; btn.disabled=false;
   }catch(err){
     btn.textContent='Criar usuário'; btn.disabled=false;
     const erros={
       'auth/email-already-in-use':'Este e-mail já está cadastrado.',
       'auth/invalid-email':'E-mail inválido.',
-      'auth/weak-password':'Senha muito fraca — use pelo menos 6 caracteres.'
+      'auth/weak-password':'Senha fraca — use pelo menos 6 caracteres.'
     };
     msg.style.color='#E24B4A';
-    msg.textContent=erros[err.code]||'Erro ao criar usuário: '+err.message;
+    msg.textContent=erros[err.code]||'Erro: '+err.message;
   }
 }
 
 // ── RESIZE ────────────────────────────────────────────────
 let rsz; window.addEventListener('resize',()=>{ clearTimeout(rsz); rsz=setTimeout(render,150); });
-</script><div id="bar-tooltip" style="left: 536px; top: 244px; display: none;"><div class="tt-name">289_SD_Florianópolis</div><div class="tt-info">25 de fev. de 2026 → 20 de mai. de 2026</div><div class="tt-info">85 dias</div><div class="tt-info">Thiago</div><div class="tt-info" style="margin-top:3px"><span class="sb s-prog" style="font-size:10px">Em andamento</span></div><div class="tt-prog"><div class="tt-prog-fill" style="width:50%"></div></div><div class="tt-info" style="margin-top:3px">50% concluído</div></div>
+</script><div id="bar-tooltip" style="left: 1361px; top: 213px; display: block;"><div class="tt-name">288_TR_Reserva da Pedra</div><div class="tt-info">21 de mai. de 2026 → 16 de jun. de 2026</div><div class="tt-info">27 dias</div><div class="tt-info">Thiago</div><div class="tt-info" style="margin-top:3px"><span class="sb s-prog" style="font-size:10px">Em andamento</span></div></div>
 
 
 </body></html>
