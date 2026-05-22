@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0045)file:///C:/Users/User/Downloads/index_34.html -->
+<!-- saved from url=(0045)file:///C:/Users/User/Downloads/index_35.html -->
 <html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -403,14 +403,18 @@ window._fbCreateUser = async (email,password,name,role)=>{
         uid=entry[0];
         await remove(ref(db,'archiflow/deletedUsers/'+uid));
       } else {
-        await window._ejsSendInvite(name,email);
+        // Conta existe mas não está arquivada — tenta enviar convite mesmo assim
+        try{ await window._ejsSendInvite(name,email); }catch(_){}
         throw Object.assign(new Error(''),{code:'auth/exists-reset-sent'});
       }
     } else { throw err; }
   }
   await set(ref(db,'archiflow/users/'+uid),{email,name:name||'',role:role||'equipe',createdAt:Date.now()});
-  await window._ejsSendInvite(name,email);
-  return uid;
+  // EmailJS — falha não impede o cadastro
+  let emailSent=true;
+  try{ await window._ejsSendInvite(name,email); }
+  catch(e){ emailSent=false; console.warn('Convite não enviado:',e?.text||e?.message||e); }
+  return {uid,emailSent};
 };
 window._fbForgotPassword = email=>sendPasswordResetEmail(auth,email);
 window._fbSendPasswordReset = email=>sendPasswordResetEmail(auth,email);
@@ -1522,22 +1526,25 @@ async function createUser(){
   msg.textContent=''; msg.style.color='';
   try{
     const role=D('u-role').value;
-    await window._fbCreateUser(email,pass,name,role);
+    const {emailSent}=await window._fbCreateUser(email,pass,name,role);
     msg.style.color='#5A9020';
-    msg.textContent=`✓ Usuário ${name} criado. Convite de acesso enviado para ${email}.`;
-    D('u-name').value=''; D('u-email').value=''; D('u-pass').value=''; D('u-pass2').value=''; if(D('u-role')) D('u-role').value='equipe';
+    msg.textContent=emailSent
+      ?`✓ Usuário ${name} criado. Convite enviado para ${email}.`
+      :`✓ Usuário ${name} criado. Convite não pôde ser enviado — verifique as configurações do EmailJS.`;
+    if(!emailSent) msg.style.color='#F5A623';
+    D('u-name').value=''; D('u-email').value=''; D('u-pass').value=''; D('u-pass2').value='';
+    if(D('u-role')) D('u-role').value='equipe';
     btn.textContent='Criar usuário'; btn.disabled=false;
   }catch(err){
     btn.textContent='Criar usuário'; btn.disabled=false;
     const erros={
-      'auth/exists-reset-sent':'Usuário reativado. Convite de acesso reenviado para o e-mail.',
+      'auth/exists-reset-sent':'Usuário reativado. Convite reenviado para o e-mail.',
       'auth/invalid-email':'E-mail inválido.',
-      'auth/weak-password':'Senha fraca — use pelo menos 6 caracteres.'
+      'auth/weak-password':'Senha fraca — use pelo menos 6 caracteres.',
+      'auth/email-already-in-use':'Este e-mail já está cadastrado.',
     };
-    const known=erros[err.code];
-    if(known){ msg.style.color=err.code==='auth/exists-reset-sent'?'#5A9020':'#E24B4A'; msg.textContent=known; }
-    else if(err.message&&(err.message.includes('EmailJS'))){ msg.style.color='#F5A623'; msg.textContent=`✓ Usuário ${name} criado, mas o convite não pôde ser enviado. Verifique a conexão.`; }
-    else{ msg.style.color='#E24B4A'; msg.textContent='Erro: '+err.message; }
+    msg.style.color=err.code==='auth/exists-reset-sent'?'#5A9020':'#E24B4A';
+    msg.textContent=erros[err.code]||'Erro: '+(err.message||err.code||JSON.stringify(err));
   }
 }
 
