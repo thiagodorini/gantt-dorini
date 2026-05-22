@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0045)file:///C:/Users/User/Downloads/index_42.html -->
+<!-- saved from url=(0045)file:///C:/Users/User/Downloads/index_44.html -->
 <html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -389,38 +389,34 @@ window._fbSignOut = ()=>signOut(auth);
 window._fbSave    = (data,cb)=>{ setSyncStatus('syncing'); update(dbRef,data).then(()=>{ setSyncStatus('synced'); cb&&cb(); }).catch(()=>setSyncStatus('error')); };
 window._fbListen  = cb=>onValue(dbRef,snap=>cb(snap.val()));
 window._fbCreateUser = async (email,password,name,role)=>{
-  // Garante que a instância auxiliar está desconectada antes de criar
+  // 1. Verificar duplicidade no DB primeiro
+  const usersSnap=await get(ref(db,'archiflow/users'));
+  const existing=Object.values(usersSnap.val()||{});
+  if(existing.find(u=>u.email===email))
+    throw Object.assign(new Error(''),{code:'auth/email-already-in-use'});
+
+  // 2. Garantir que authAux está desconectado
   try{ await signOut(authAux); }catch(_){}
 
-  // Verifica duplicidade no DB antes de tentar criar na Auth
-  const usersSnap=await get(ref(db,'archiflow/users'));
-  const existingUsers=usersSnap.val()||{};
-  const duplicate=Object.values(existingUsers).find(u=>u.email===email);
-  if(duplicate) throw Object.assign(new Error(''),{code:'auth/email-already-in-use'});
-
-  // Cria na Auth via instância auxiliar
+  // 3. Criar na Firebase Auth
   const cred=await createUserWithEmailAndPassword(authAux,email,password);
   const uid=cred.user.uid;
   await signOut(authAux);
 
-  // Salva no DB
+  // 4. Salvar no DB
   await set(ref(db,'archiflow/users/'+uid),{
     email, name:name||'', role:role||'equipe', createdAt:Date.now()
   });
 
-  // Envia convite — erro não impede o cadastro
-  try{ await sendPasswordResetEmail(authAux,email); }
+  // 5. Enviar convite via instância principal (admin está logado nela)
+  try{ await sendPasswordResetEmail(auth,email); }
   catch(e){ console.warn('Convite não enviado:',e.code,e.message); }
 
   return uid;
 };
 window._fbForgotPassword = email=>sendPasswordResetEmail(auth,email);
 window._fbSendPasswordReset = email=>sendPasswordResetEmail(auth,email);
-window._fbRemoveUser = async uid=>{
-  const snap=await get(ref(db,'archiflow/users/'+uid));
-  if(snap.exists()) await set(ref(db,'archiflow/deletedUsers/'+uid),{email:snap.val().email});
-  await remove(ref(db,'archiflow/users/'+uid));
-};
+window._fbRemoveUser = uid=>remove(ref(db,'archiflow/users/'+uid));
 window._fbUpdateUserRole = (uid,role)=>update(ref(db,'archiflow/users/'+uid),{role});
 window._fbListenUsers = cb=>onValue(ref(db,'archiflow/users'),snap=>cb(snap.val()||{}));
 
@@ -542,7 +538,6 @@ function doLogout(){ window._fbSignOut(); }
 window._startApp=function(){
   window._fbListenUsers(data=>{
     _users=data;
-    // Refina o papel pelo DB, mas nunca rebaixa o admin identificado pelo e-mail
     const myEntry=Object.values(_users).find(u=>u.email===window._myEmail);
     if(myEntry?.role) _myRole=myEntry.role;
     else if(window._myEmail!==window._adminEmail) _myRole='equipe';
@@ -550,25 +545,26 @@ window._startApp=function(){
     populateOwnerSelects();
     if(D('users-modal-overlay').style.display!=='none') renderUsersList();
   });
+  let _firstLoad=true;
   window._fbListen(data=>{
     if(_saving) return;
     if(data){ projects=data.projects||[]; collapsed=data.collapsed||{}; scale=data.scale||'week'; }
     else { projects=[]; collapsed={}; scale='week'; }
     updateScaleBtns(); render(); setSyncStatus('synced');
-    // Centraliza hoje após render (offsetWidth disponível)
-    setTimeout(()=>{
-      const cfg=scaleCfg()['week'];
-      const vpx=EL['sbw'].offsetWidth||window.innerWidth||800;
-      const today=new Date(); today.setHours(0,0,0,0);
-      // Quantos dias cabem na metade esquerda da tela
-      const halfDays=Math.floor(vpx/2/(cfg.px/cfg.ud));
-      viewStart=new Date(today); viewStart.setDate(viewStart.getDate()-halfDays);
-      viewStart=startOfWeek(viewStart);
-      render();
-      // Zera scroll — hoje já está centrado via viewStart
-      EL['sbw'].scrollLeft=0;
-      EL['sh'].scrollLeft=0;
-    },80);
+    // Centraliza hoje apenas no primeiro carregamento
+    if(_firstLoad){
+      _firstLoad=false;
+      setTimeout(()=>{
+        const cfg=scaleCfg()[scale];
+        const vpx=EL['sbw'].offsetWidth||window.innerWidth||800;
+        const today=new Date(); today.setHours(0,0,0,0);
+        const halfDays=Math.floor(vpx/2/(cfg.px/cfg.ud));
+        viewStart=new Date(today); viewStart.setDate(viewStart.getDate()-halfDays);
+        if(scale==='week') viewStart=startOfWeek(viewStart);
+        render();
+        EL['sbw'].scrollLeft=0; EL['sh'].scrollLeft=0;
+      },80);
+    }
   });
 };
 
