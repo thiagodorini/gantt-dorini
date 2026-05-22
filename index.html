@@ -1,10 +1,9 @@
 <!DOCTYPE html>
-<!-- saved from url=(0045)file:///C:/Users/User/Downloads/index_32.html -->
+<!-- saved from url=(0045)file:///C:/Users/User/Downloads/index_33.html -->
 <html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Archiflow — Dorini Arquitetura</title>
-<script src="./index_files/email.min.js.download"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--text)}
@@ -173,7 +172,7 @@ html.dark .s-late{background:#3a1010;color:#f48080}
 .role-equipe{background:#F1EFE8;color:#5F5E5A}
 #u-create-section{margin-top:14px;padding-top:14px;border-top:.5px solid var(--border4);display:none}
 </style>
-</head>
+<script src="./index_files/email.min.js.download"></script></head>
 <body>
 
 <!-- LOGIN -->
@@ -449,17 +448,34 @@ onAuthStateChanged(auth,user=>{
 
 <script>
 // ── EMAILJS ───────────────────────────────────────────────
-try{
-  emailjs.init('rg-3craTGC5x32ZFf');
-  window._ejsSendInvite=(name,email)=>emailjs.send('service_o96meeb','template_1nvj0g4',{
-    to_name: name||email,
-    to_email: email,
-    reset_link: 'https://thiagodorini.github.io/gantt-dorini/'
-  });
-}catch(e){
-  console.warn('EmailJS não carregou:',e);
-  window._ejsSendInvite=()=>Promise.resolve(); // fallback silencioso
-}
+(function(){
+  const EJS_KEY='rg-3craTGC5x32ZFf';
+  const EJS_SVC='service_o96meeb';
+  const EJS_TPL='template_1nvj0g4';
+  const EJS_URL='https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js';
+
+  function init(){
+    try{
+      emailjs.init(EJS_KEY);
+      window._ejsSendInvite=(name,email)=>emailjs.send(EJS_SVC,EJS_TPL,{
+        to_name:name||email, to_email:email,
+        reset_link:'https://thiagodorini.github.io/gantt-dorini/'
+      });
+    }catch(e){
+      console.warn('EmailJS init falhou:',e);
+      window._ejsSendInvite=()=>Promise.reject(new Error('EmailJS indisponível'));
+    }
+  }
+
+  if(typeof emailjs!=='undefined'){
+    init();
+  }else{
+    const s=document.createElement('script');
+    s.src=EJS_URL; s.onload=init;
+    s.onerror=()=>{ window._ejsSendInvite=()=>Promise.reject(new Error('EmailJS não carregou')); };
+    document.head.appendChild(s);
+  }
+})();
 </script>
 // ── CONSTANTS ─────────────────────────────────────────────
 const COLORS={prog:['#B5D4F4','#042C53'],ok:['#C0DD97','#173404'],wait:['#D3D1C7','#2C2C2A'],late:['#F7C1C1','#501313']};
@@ -1447,6 +1463,7 @@ async function createUser(){
     };
     const known=erros[err.code];
     if(known){ msg.style.color=err.code==='auth/exists-reset-sent'?'#5A9020':'#E24B4A'; msg.textContent=known; }
+    else if(err.message&amp;&amp;(err.message.includes('EmailJS'))){ msg.style.color='#F5A623'; msg.textContent=`✓ Usuário ${name} criado, mas o convite não pôde ser enviado. Verifique a conexão.`; }
     else{ msg.style.color='#E24B4A'; msg.textContent='Erro: '+err.message; }
   }
 }
