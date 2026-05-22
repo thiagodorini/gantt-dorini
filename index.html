@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0045)file:///C:/Users/User/Downloads/index_45.html -->
+<!-- saved from url=(0045)file:///C:/Users/User/Downloads/index_46.html -->
 <html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -302,9 +302,13 @@ html.dark .s-late{background:#3a1010;color:#f48080}
 
     <!-- Edit role inline panel -->
     <div id="u-edit-section" style="display:none;margin-top:12px;padding:12px;background:var(--bg2);border-radius:8px;border:.5px solid var(--border4)">
-      <div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:8px">Editar função — <span id="u-edit-name" style="color:var(--text)"></span></div>
-      <div class="frow" style="align-items:flex-end;gap:8px">
-        <div class="field" style="flex:1;margin-bottom:0">
+      <div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:10px">Editar usuário</div>
+      <div class="frow">
+        <div class="field">
+          <label>Nome</label>
+          <input id="u-edit-name-input" type="text" placeholder="Nome do usuário" onkeydown="if(event.key===&#39;Enter&#39;)saveUserRole()">
+        </div>
+        <div class="field">
           <label>Função</label>
           <select id="u-edit-role">
             <option value="equipe">Equipe — somente visualização</option>
@@ -312,8 +316,10 @@ html.dark .s-late{background:#3a1010;color:#f48080}
             <option value="admin">Admin — acesso total</option>
           </select>
         </div>
-        <button class="btn btn-primary" onclick="saveUserRole()" style="flex-shrink:0;height:36px">Salvar</button>
-        <button class="btn" onclick="D(&#39;u-edit-section&#39;).style.display=&#39;none&#39;" style="flex-shrink:0;height:36px">✕</button>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn" onclick="D(&#39;u-edit-section&#39;).style.display=&#39;none&#39;">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveUserRole()">Salvar</button>
       </div>
     </div>
 
@@ -426,7 +432,7 @@ window._fbCreateUser = async (email,password,name,role)=>{
 window._fbForgotPassword = email=>sendPasswordResetEmail(auth,email);
 window._fbSendPasswordReset = email=>sendPasswordResetEmail(auth,email);
 window._fbRemoveUser = uid=>remove(ref(db,'archiflow/users/'+uid));
-window._fbUpdateUserRole = (uid,role)=>update(ref(db,'archiflow/users/'+uid),{role});
+window._fbUpdateUserRole = (uid,role,name)=>update(ref(db,'archiflow/users/'+uid),{role,...(name?{name}:{})});
 window._fbListenUsers = cb=>onValue(ref(db,'archiflow/users'),snap=>cb(snap.val()||{}));
 
 const ADMIN_EMAIL='thiago@dorini.com.br';
@@ -1458,17 +1464,20 @@ function toggleCreateUser(){
 let _editUid=null;
 function openEditRole(uid,name,currentRole){
   _editUid=uid;
-  D('u-edit-name').textContent=name;
+  D('u-edit-name-input').value=name;
   D('u-edit-role').value=currentRole;
   D('u-edit-section').style.display='block';
-  D('u-create-section').style.display='none'; // close create if open
+  D('u-create-section').style.display='none';
   D('u-edit-section').scrollIntoView({behavior:'smooth',block:'nearest'});
+  setTimeout(()=>D('u-edit-name-input').focus(),80);
 }
 async function saveUserRole(){
   if(!_editUid) return;
+  const newName=D('u-edit-name-input').value.trim();
   const newRole=D('u-edit-role').value;
+  if(!newName){ alert('O nome não pode ficar em branco.'); return; }
   try{
-    await window._fbUpdateUserRole(_editUid,newRole);
+    await window._fbUpdateUserRole(_editUid,newRole,newName);
     D('u-edit-section').style.display='none';
     _editUid=null;
   }catch(e){ alert('Erro ao salvar: '+e.message); }
