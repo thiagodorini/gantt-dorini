@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0045)file:///C:/Users/User/Downloads/index_36.html -->
+<!-- saved from url=(0045)file:///C:/Users/User/Downloads/index_37.html -->
 <html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -455,12 +455,11 @@ onAuthStateChanged(auth,user=>{
 // ── EMAILJS ───────────────────────────────────────────────
 window._ejsSendInvite=(name,email)=>{
   try{
-    emailjs.init('rg-3craTGC5x32ZFf');
     return emailjs.send('service_o96meeb','template_1nvj0g4',{
       to_name:name||email,
       to_email:email,
       reset_link:'https://thiagodorini.github.io/gantt-dorini/'
-    });
+    },{publicKey:'rg-3craTGC5x32ZFf'});
   }catch(e){
     return Promise.reject(e);
   }
